@@ -124,11 +124,11 @@ function CreateSchool() {
                         <h4>Select Courses Requested</h4>
 
 
-                        <label>  FrontEnd </label>
+                        <label>  Web Development </label>
                         <input
                             type="checkbox"
                             name="course1"
-                            value="FrontEnd"
+                            value="Web Development"
                             onChange={(event) => setCourse1(event.target.value)}
                         />
 

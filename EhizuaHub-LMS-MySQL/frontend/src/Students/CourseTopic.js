@@ -67,7 +67,9 @@ function CourseTopic() {
             <p>{subContent.subTopic}</p>
           </a>
         </div>
+        
       ))}
+     
   </div>
 ))}
 

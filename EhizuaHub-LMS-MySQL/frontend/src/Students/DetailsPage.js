@@ -21,6 +21,7 @@ const DetailsPage = () => {
   const [showDetails, setShowDetails] = useState(true);
   const [score, setScore] = useState('');
   const [scoreSubTopic, setScoreSubTopic] = useState('');
+  const [review, setReview] = useState(true);
 
 
 
@@ -185,6 +186,13 @@ const DetailsPage = () => {
     event.preventDefault();
     setRetake(''); // Hide the form when "No" is clicked
   };
+  const handleReview = () =>{
+    console.log('yryryr')
+    setReview(false)
+  }
+  const hello = (e)=>{
+    e.preventDefault()
+  }
 
   return (
     <div>
@@ -208,7 +216,15 @@ const DetailsPage = () => {
                     'View Score'
                   )}
             </button>
-            <button>hide</button>
+            {score &&(
+            <button
+              type='submit' 
+              value=''
+              onClick={(event) => setScore(event.target.value)}> hide
+              
+            </button>
+
+            )}
 
 
             </form>
@@ -232,14 +248,32 @@ const DetailsPage = () => {
               )}
           <div>
 
+          {!review ?(
+            <div>
+              <h6>Kindly Review the course before taking the test</h6>
+              <form onSubmit={hello}>
+                <input type='text' placeholder='fill in'/>
+                <input type='submit'/>
+              </form>
             {showDetails && (
-               <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit}>
 
-               <button type='submit' value={contentItem.subTopic}
-                 onClick={(event) => setSubTopic(event.target.value)}>Take Test</button>
- 
-             </form>
+              <button type='submit' value={contentItem.subTopic}
+                onClick={(event) => setSubTopic(event.target.value)}>Continue</button>
+
+            </form>
             )}
+          </div>
+          ):(
+
+            <form onSubmit={handleReview}>
+
+            <button type='submit'> Take Test couse </button>
+
+          </form>
+
+          )}
+          
            
 
             <form onSubmit={submitQuestion}>

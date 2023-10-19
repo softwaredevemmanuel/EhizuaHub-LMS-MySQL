@@ -1,13 +1,102 @@
+/* @tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+
+
+.l1::before {
+  content: "";
+  position: absolute;
+  left: -700px;
+  top: -60px;
+  width: 450px;
+  height: 400px;
+  
+   background: linear-gradient(
+    to bottom,
+    #134574 0%,
+    #134574 50%,
+    white 100%
+  );
+  opacity: 0.2;
+  z-index: -1; 
+  filter: blur(30px);
+ 
+}
+.l2::after {
+  content: "";
+  position: absolute;
+  right: -700px;
+  top: -50px;
+  width: 450px;
+  height: 300px;
+  
+   background: linear-gradient(
+    to bottom,
+    #EF2689 0%,
+    #EF2689 50%,
+    white 100%
+  );
+  opacity: 0.2;
+  z-index: -1; 
+  filter: blur(60px);
+ 
+}
+.l3::after {
+  content: "";
+  position: absolute;
+  right: -250px;
+  bottom: -300px;
+  width: 450px;
+  height: 400px;
+  
+   background: linear-gradient(
+    to bottom,
+    #FF7A00 0%,
+    #FF7A00 50%,
+    white 100%
+  );
+  opacity: 0.2;
+  z-index: -1; 
+  filter: blur(60px);
+ 
+}
+.l4::before {
+  content: "";
+  position: absolute;
+  left: -200px;
+  bottom: -350px;
+  width: 450px;
+  height: 400px;
+  
+   background: linear-gradient(
+    to bottom,
+    #EF2689 0%,
+    #EF2689 50%,
+    white 100%
+  );
+  opacity: 0.2;
+  z-index: -1; 
+  filter: blur(60px);
+ 
+}
+.b2{
+  background: linear-gradient(180deg, #FF7A00 0%, #EF2689 100%);
+} */

@@ -38,6 +38,13 @@ import LeaveRequest from './Admin/LeaveRequest';
 import ApprovedLeaveRequest from './Admin/ApprovedLeaveRequest';
 import RejectedLeaveRequest from './Admin/RejectedLeaveRequest';
 import PendingLeaveRequest from './Admin/PendingLeaveRequest';
+import OfficeDetails from './Admin/OfficeDetails';
+import PupilsDashboard from './SchoolPupils/PupilsDashboard';
+import InstructorDashboard from './Admin/partnerSchools/Instructor/InstructorDashboard';
+import CreateInstructor from './Admin/CreateInstructor';
+import InstructorDetails from './Admin/partnerSchools/Instructor/InstructorDetails';
+import InstructorCreateCurriculum from './Admin/partnerSchools/Instructor/InstructorCreateCurriculum';
+import InstructorCreateContent from './Admin/partnerSchools/Instructor/InstructorCreateContent';
 
 
 
@@ -68,6 +75,7 @@ function App() {
           <Route path='/details/:id' element={<DetailsPage />} />
           <Route path='/timer' element={<Timer/>} />
           <Route path='/create_curriculum' element={<CreateCurriculum/>} />
+          <Route path='/instructor_create_curriculum' element={<InstructorCreateCurriculum/>} />
           <Route path='/create_school' element={<CreateSchool/>} />
           <Route path='/register_school_students' element={<RegisterStudent/>} />
           <Route path='/single_student_details_page/:_id' element={<SingleStudentDetailsPage/>} />
@@ -78,15 +86,22 @@ function App() {
           <Route path='/school_details/:id' element={<SchoolDetails/>} />
           <Route path='/leave' element={<LeaveDashboard/>} />
           <Route path='/create_content' element={<CreateContent/>} />
+          <Route path='/instructor_create_content' element={<InstructorCreateContent/>} />
           <Route path='/test' element={<Test/>} />
           <Route path='/create_tutor' element={<CreateTutor/>} />
           <Route path='/create_location' element={<CreateLocation/>} />
           <Route path='/all_offices' element={<AllOfices/>} />
           <Route path='/tutor_details_page/:email' element={<TutorDetails/>} />
+          <Route path='/instructor_details_page/:email' element={<InstructorDetails/>} />
+          <Route path='/offices_details/:_id' element={<OfficeDetails/>} />
           <Route path='/all_leave_request' element={<LeaveRequest/>} />
           <Route path='/approved_leave_request' element={<ApprovedLeaveRequest/>} />
           <Route path='/rejected_leave_request' element={<RejectedLeaveRequest/>} />
           <Route path='/pending_leave_request' element={<PendingLeaveRequest/>} />
+          <Route path='/school-student-dashboard' element={<PupilsDashboard/>} />
+          <Route path='/instructor-dashboard' element={<InstructorDashboard/>} />
+          <Route path='/create_instructor' element={<CreateInstructor/>} />
+
 
       </Routes>
       

@@ -18,6 +18,12 @@ function RegisterStudent() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [course1, setCourse1] = useState('');
+  const [course2, setCourse2] = useState('');
+  const [course3, setCourse3] = useState('');
+  const [course4, setCourse4] = useState('');
+  const [course5, setCourse5] = useState('');
+ 
 
   useEffect(() => {
     const loginData = JSON.parse(localStorage.getItem('Adminlogin'));
@@ -31,36 +37,40 @@ function RegisterStudent() {
   useEffect(() => {
     async function fetchSchools() {
 
-        try {
+      try {
 
-          const response = await axios.get('http://localhost:5000/api/auth/partner-schools', {
-          
-          });
-          setSchools(response.data.message)
-       
-        } catch (error) {
-          setError('Error fetching schools data');
-        }
+        const response = await axios.get('http://localhost:5000/api/auth/partner-schools', {
+
+        });
+        setSchools(response.data.message)
+
+      } catch (error) {
+        setError('Error fetching schools data');
       }
+    }
 
-      fetchSchools();
-      
+    fetchSchools();
+
   }, []);
 
   const createStudent = () => {
-    if (selectSchool && firstName && lastName && course && level && year && term ) {
+    if (selectSchool && firstName && lastName && (course1 || course2 || course3 || course4 || course5 ) && level && year && term) {
       setLoading(true);
 
       axios
         .post('http://localhost:5000/api/auth/register-school-student', {
-            selectSchool,
-            firstName,
-            lastName,
-            level,
-            course,
-            year,
-            term,
-            guardiansPhone,
+          selectSchool,
+          firstName,
+          lastName,
+          level,
+          course1,
+          course2,
+          course3,
+          course4,
+          course5,
+          year,
+          term,
+          guardiansPhone,
         })
         .then((response) => {
           setSuccess(response.data.message);
@@ -101,21 +111,21 @@ function RegisterStudent() {
 
             <label htmlFor='selectSchool'>Select School</label>
 
-                <select
-                    id='selectSchool'
-                    value={selectSchool}
-                    onChange={(event) => setSelectSchool(event.target.value)}
-                  >
-                    <option value=''>Choose a School</option>
-                    {schools.map((schools, index) => (
-                      <option key={index} value={schools.schoolName}>
-                        {schools.schoolName}
-                      </option>
-                    ))}
-                </select>
+            <select
+              id='selectSchool'
+              value={selectSchool}
+              onChange={(event) => setSelectSchool(event.target.value)}
+            >
+              <option value=''>Choose a School</option>
+              {schools.map((schools, index) => (
+                <option key={index} value={schools.schoolName}>
+                  {schools.schoolName}
+                </option>
+              ))}
+            </select>
 
-                <br/>
-                <br/>
+            <br />
+            <br />
 
 
             <label htmlFor='firstName'>First Name</label>
@@ -158,7 +168,7 @@ function RegisterStudent() {
             <br /><br />
 
 
-            <label htmlFor='course'>Course</label>
+            {/* <label htmlFor='course'>Course</label>
             <select
               id='course'
               value={course}
@@ -170,6 +180,49 @@ function RegisterStudent() {
               <option value='Photography'>Photography</option>
               <option value='Python Programming'>Python Programming</option>
             </select>
+            <br /><br /> */}
+            <h4>Select Courses Requested</h4>
+
+
+            <label>  Web Development </label>
+            <input
+              type="checkbox"
+              name="course1"
+              value="Web Development"
+              onChange={(event) => setCourse1(event.target.value)}
+            />
+<br />
+
+            <label>   Animation </label>
+            <input
+              type="checkbox"
+              name="course2"
+              value="Animation"
+              onChange={(event) => setCourse2(event.target.value)}
+            />
+<br />
+
+            <label>  Python Programming </label>
+            <input
+              type="checkbox"
+              name="course3"
+              value="Python Programming"
+              onChange={(event) => setCourse3(event.target.value)} />
+<br />
+            <label>  Robotics </label>
+            <input
+              type="checkbox"
+              name="course4"
+              value="Robotics"
+              onChange={(event) => setCourse4(event.target.value)} />
+<br />
+            <label>  Scratch and Lego Programming </label>
+            <input
+              type="checkbox"
+              name="course5"
+              value="Scratch and Lego Programming"
+              onChange={(event) => setCourse5(event.target.value)} />
+
             <br /><br />
 
             <label htmlFor='year'>Session</label>
@@ -205,7 +258,7 @@ function RegisterStudent() {
               onChange={(event) => setGuardianPhone(event.target.value)}
             />
             <br /><br />
-        
+
 
             <button type='submit'>Create Student</button>
           </form>
