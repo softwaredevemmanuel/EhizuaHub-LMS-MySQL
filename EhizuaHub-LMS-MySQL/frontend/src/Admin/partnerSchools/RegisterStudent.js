@@ -167,20 +167,6 @@ function RegisterStudent() {
             </select>
             <br /><br />
 
-
-            {/* <label htmlFor='course'>Course</label>
-            <select
-              id='course'
-              value={course}
-              onChange={(event) => setCourse(event.target.value)}
-            >
-              <option value='FullStack'>Web Development</option>
-              <option value='Animation'>Animation</option>
-              <option value='Robotics'>Robotics </option>
-              <option value='Photography'>Photography</option>
-              <option value='Python Programming'>Python Programming</option>
-            </select>
-            <br /><br /> */}
             <h4>Select Courses Requested</h4>
 
 
@@ -224,6 +210,8 @@ function RegisterStudent() {
               onChange={(event) => setCourse5(event.target.value)} />
 
             <br /><br />
+
+            
 
             <label htmlFor='year'>Session</label>
             <select

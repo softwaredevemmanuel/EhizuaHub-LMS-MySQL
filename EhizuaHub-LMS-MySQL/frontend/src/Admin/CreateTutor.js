@@ -11,7 +11,8 @@ function CreateTutor() {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
-    const [course, setCourse] = useState('FullStack');
+    const [course, setCourse] = useState('');
+    const [allCourses, setAllCourse] = useState([]);
     const [phone, setPhone] = useState('');
     const [offices, setOffices] = useState([]);
     const [selectedOffice, setSelectedOffice] = useState('');
@@ -46,6 +47,19 @@ function CreateTutor() {
         fetchOffices();
     }, []);
 
+    // Fetch Courses
+    useEffect(() => {
+        async function fetchCourses() {
+            try {
+                const response = await axios.get('http://localhost:5000/api/auth/all_upskill_courses');
+                setAllCourse(response.data.message);
+            } catch (error) {
+                setError('Error retrieving Courses');
+            }
+        }
+
+        fetchCourses();
+    }, []);
 
 
 
@@ -154,11 +168,12 @@ function CreateTutor() {
                             value={course}
                             onChange={(event) => setCourse(event.target.value)}
                         >
-                            <option value='FullStack'>FullStack</option>
-                            <option value='Animation'>Animation</option>
-                            <option value='Data Analysis'>Data Analysis</option>
-                            <option value='Photography'>Photography</option>
-                            <option value='Desktop Publishing'>Desktop Publishing</option>
+                            <option value=''>Select a Course</option>
+                            {allCourses.map((course, index) => (
+                                <option key={index} value={`${course.course}`}>
+                                    {course.course}
+                                </option>
+                            ))}
                         </select>
                         <br /><br />
 

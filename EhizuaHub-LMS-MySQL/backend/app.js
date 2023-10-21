@@ -170,6 +170,7 @@ const createToken = (payload) => {
 //   })
 // })
 
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<ADMIN>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 // ...............................  ADMIN LOGIN .......................................
 app.post('/api/auth/login', async (req, res) => {
@@ -594,6 +595,125 @@ app.post('/api/auth/create-tutor', async (req, res) => {
 
 });
 
+// ............................ADMIN CREATE A NEW UPSKILL COURSE ............................
+
+app.post('/api/auth/create-course', async (req, res) => {
+  const { course } = req.body;
+
+  const createTableQuery = `
+  CREATE TABLE IF NOT EXISTS Courses (
+    _id INT AUTO_INCREMENT PRIMARY KEY,
+    course VARCHAR(255) NOT NULL
+  );
+`;
+
+  db.query(createTableQuery, (err) => {
+    if (err) {
+      console.error(err);
+      throw new Error('Error creating table');
+    }
+  });
+
+  // Check if the Course with the same name already exists
+
+  db.query('SELECT * FROM Courses WHERE course = ?', [course], async (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    if (result.length !== 0) {
+      return res.status(400).json({ message: 'Course with name already exists' });
+    }
+
+
+    const sql = `
+        INSERT INTO Courses (course)
+        VALUES (?)
+      `;
+
+
+    db.query(sql, [course], async (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send('Internal Server Error');
+      }
+
+      return res.json({ message: `${course} created successfully`});
+    });
+  });
+
+});
+
+// ............................ADMIN CREATE A NEW SCHOOL COURSE ............................
+
+app.post('/api/auth/create-subject', async (req, res) => {
+  const { course } = req.body;
+
+  const createTableQuery = `
+  CREATE TABLE IF NOT EXISTS Courses (
+    _id INT AUTO_INCREMENT PRIMARY KEY,
+    course VARCHAR(255) NOT NULL
+  );
+`;
+
+  sch.query(createTableQuery, (err) => {
+    if (err) {
+      console.error(err);
+      throw new Error('Error creating table');
+    }
+  });
+
+  // Check if the Course with the same name already exists
+
+  sch.query('SELECT * FROM Courses WHERE course = ?', [course], async (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    if (result.length !== 0) {
+      return res.status(400).json({ message: 'Course with name already exists' });
+    }
+
+
+    const sql = `
+        INSERT INTO Courses (course)
+        VALUES (?)
+      `;
+
+
+    sch.query(sql, [course], async (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send('Internal Server Error');
+      }
+
+      return res.json({ message: `${course} created successfully`});
+    });
+  });
+
+});
+
+// ............................. ADMIN GET LIST OF UPSKILL COURSES ................................
+app.get('/api/auth/all_upskill_courses', async (req, res) => {
+
+  db.query('SELECT * FROM Courses', async (err, result) => {
+    return res.json({ message: result });
+
+  })
+})
+
+// ............................. ADMIN GET LIST OF SCHOOL SUBJECTS ................................
+app.get('/api/auth/all_school_subject', async (req, res) => {
+
+  sch.query('SELECT * FROM Courses', async (err, result) => {
+
+    return res.json({ message: result });
+
+  })
+})
+
 // .............................. ADMIN GET ALL TUTOR DETAILS ..........................................
 app.get('/api/auth/tutors', (req, res) => {
   try {
@@ -871,6 +991,8 @@ app.put('/api/auth/approve-leave-request/:id', async (req, res) => {
 
 });
 
+
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<STUDENT>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 // .......................... STUDENT VERIFICATION EMAIL ..................................
 app.post('/api/auth/verify-student-email', async (req, res) => {
@@ -1385,6 +1507,7 @@ app.get('/api/students/student-score', async (req, res) => {
   })
 })
 
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TUTOR>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 // ..........................TUTOR  VERIFICATION EMAIL ..................................
 app.post('/api/auth/verify-tutor-email', async (req, res) => {
@@ -1971,7 +2094,9 @@ app.get('/api/tutor/leave-request', (req, res) => {
   }
 });
 
-// =================================================================================================================
+
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< SCHOOL PUPILS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
 
 // .................................SCHOOL PUPIL LOGIN ...........................................
 app.post('/api/students/pupil-login', async (req, res) => {
@@ -2046,9 +2171,6 @@ app.get('/api/students/pupils-course-content', async (req, res) => {
       let course3;
       let course4;
       let course5;
-
-
-
 
       if (response[0].course1) {
         course1 = response[0].course1;
@@ -2363,7 +2485,7 @@ app.get('/api/instructor/subtopic', (req, res) => {
 });
 
 // ............................. INSTRUCTOR CREATE CONTENT .................................
-app.post('/api/tutor/create-content', async (req, res) => {
+app.post('/api/instructor/create-content', async (req, res) => {
   const createTableQuery = `
   CREATE TABLE IF NOT EXISTS Contents (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -2375,6 +2497,7 @@ app.post('/api/tutor/create-content', async (req, res) => {
     course3 VARCHAR(255) NOT NULL DEFAULT '',
     course4 VARCHAR(255) NOT NULL DEFAULT '',
     course5 VARCHAR(255) NOT NULL DEFAULT '',
+    course6 VARCHAR(255) NOT NULL DEFAULT '',
     createdAt TIMESTAMP NOT NULL
   );
 `;
@@ -2385,9 +2508,47 @@ app.post('/api/tutor/create-content', async (req, res) => {
       throw new Error('Error creating table');
     }
   });
+
   const { authHeader, main_topic, content, course, sub_topic } = req.body;
 
-  try {
+  let course1 = '';
+  let course2 = '';
+  let course3 = '';
+  let course4 = '';
+  let course5 = '';
+  let course6 = '';
+
+  // get all the course created by the admin
+  sch.query('SELECT * FROM Courses', async (err, courses) => {
+    if (err) {
+      return res.status(500).json({ message: 'Error retrieving Courses' });
+    }
+
+    if (course == courses[0].course) {
+      course1 = course;
+    }
+
+    if (course == courses[1].course) {
+      course2 = course;
+    }
+  
+    if (course == courses[2].course) {
+      course3 = course;
+    }
+  
+    if (course == courses[3].course) {
+      course4 = course;
+    }
+  
+    if (course == courses[4].course) {
+      course5 = course;
+    }
+  
+    if (course == courses[5].course) {
+      course6 = course;
+    }
+
+    try {
     sch.query('SELECT * FROM Instructor WHERE id = ?', [authHeader], async (err, result) => {
       if (err) {
         console.error(err);
@@ -2420,11 +2581,11 @@ app.post('/api/tutor/create-content', async (req, res) => {
 
 
         const sql = `
-        INSERT INTO Contents (mainTopic, content, course1, course2, course3, course4, course5, subTopic)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO Contents (mainTopic, content, course1, course2, course3, course4, course5, course6, subTopic)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
-        sch.query(sql, [main_topic, content, , sub_topic], async (err, result) => {
+        sch.query(sql, [main_topic, content, course1, course2, course3, course4, course5, course6, sub_topic], async (err, result) => {
           if (err) {
             console.error(err);
             return res.status(500).send('Internal Server Error');
@@ -2439,6 +2600,16 @@ app.post('/api/tutor/create-content', async (req, res) => {
   } catch (error) {
     return res.status(500).json({ message: 'Error creating content' });
   }
+
+   
+  });
+
+
+
+
+
+
+  
 
 
 });

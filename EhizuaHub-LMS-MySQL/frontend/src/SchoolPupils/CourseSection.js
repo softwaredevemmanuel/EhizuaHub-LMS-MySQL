@@ -72,16 +72,18 @@ function CourseSection() {
       ) : (
 
         <div>
-          <h2>hhhhhhh</h2>
+          <h2>Course Dashboard</h2>
 
           <div>
             {content1 ? (
               <div>
-                <h3>Animation</h3>
 
                 {uniqueMainTopics1.map((mainTopic, mainIndex) => (
                   <div key={mainIndex}>
+                    <h3>Animation</h3>
+
                     <p>{mainTopic}</p>
+
                     {content1
                       .filter((item) => item.mainTopic === mainTopic)
                       .map((subContent, subIndex) => (
@@ -190,9 +192,10 @@ function CourseSection() {
           <div>
             {content5 ? (
               <div>
-                <h3>Web Development</h3>
                 {uniqueMainTopics5.map((mainTopic, mainIndex) => (
                   <div key={mainIndex}>
+                  <h3>Web Development</h3>
+
                     <p>{mainTopic}</p>
                     {content5
                       .filter((item) => item.mainTopic === mainTopic)

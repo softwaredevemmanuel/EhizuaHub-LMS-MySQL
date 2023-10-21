@@ -9,7 +9,8 @@ function CreateStudents() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
-  const [course, setCourse] = useState('FullStack');
+  const [course, setCourse] = useState('');
+  const [allCourses, setAllCourse] = useState([]);
   const [phone, setPhone] = useState('');
   const [guardiansPhone, setGuardianPhone] = useState('');
   const [duration, setDuration] = useState('1 Month');
@@ -28,6 +29,20 @@ function CreateStudents() {
       setAdmin(true);
     }
   }, []);
+
+  // Fetch Courses
+  useEffect(() => {
+    async function fetchCourses() {
+        try {
+            const response = await axios.get('http://localhost:5000/api/auth/all_upskill_courses');
+            setAllCourse(response.data.message);
+        } catch (error) {
+            setError('Error retrieving Courses');
+        }
+    }
+
+      fetchCourses();
+    }, []);
 
   const createStudent = () => {
     if (firstName && lastName && email && course && phone) {
@@ -60,6 +75,7 @@ function CreateStudents() {
       setError('Please fill in all required fields.');
     }
   };
+
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -116,15 +132,16 @@ function CreateStudents() {
 
             <label htmlFor='course'>Course</label>
             <select
-              id='course'
-              value={course}
-              onChange={(event) => setCourse(event.target.value)}
-            >
-              <option value='FullStack'>FullStack</option>
-              <option value='Animation'>Animation</option>
-              <option value='Data Analysis'>Data Analysis</option>
-              <option value='Photography'>Photography</option>
-              <option value='Desktop Publishing'>Desktop Publishing</option>
+                  id='course'
+                  value={course}
+                  onChange={(event) => setCourse(event.target.value)}
+              >
+                  <option value=''>Select a Course</option>
+                  {allCourses.map((course, index) => (
+                      <option key={index} value={`${course.course}`}>
+                          {course.course}
+                      </option>
+                  ))}
             </select>
             <br /><br />
 

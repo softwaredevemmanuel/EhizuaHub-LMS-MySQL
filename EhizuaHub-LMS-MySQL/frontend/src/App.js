@@ -45,6 +45,8 @@ import CreateInstructor from './Admin/CreateInstructor';
 import InstructorDetails from './Admin/partnerSchools/Instructor/InstructorDetails';
 import InstructorCreateCurriculum from './Admin/partnerSchools/Instructor/InstructorCreateCurriculum';
 import InstructorCreateContent from './Admin/partnerSchools/Instructor/InstructorCreateContent';
+import CreateCourse from './Admin/CreateCourse';
+import CreateSubjects from './Admin/partnerSchools/CreateSubjects';
 
 
 
@@ -101,8 +103,8 @@ function App() {
           <Route path='/school-student-dashboard' element={<PupilsDashboard/>} />
           <Route path='/instructor-dashboard' element={<InstructorDashboard/>} />
           <Route path='/create_instructor' element={<CreateInstructor/>} />
-
-
+          <Route path='/create_courses' element={<CreateCourse/>} />
+          <Route path='/create_subject' element={<CreateSubjects/>} />
       </Routes>
       
       

@@ -11,7 +11,8 @@ function CreateInstructor() {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
-    const [course, setCourse] = useState('FullStack');
+    const [courses, setCourse] = useState('');
+    const [allCourses, setAllCourse] = useState([]);
     const [phone, setPhone] = useState('');
     const [offices, setOffices] = useState([]);
     const [selectedOffice, setSelectedOffice] = useState('');
@@ -47,17 +48,32 @@ function CreateInstructor() {
     }, []);
 
 
+    useEffect(() => {
+        // Fetch tutors when the component mounts
+        async function fetchCourses() {
+            try {
+                const response = await axios.get('http://localhost:5000/api/auth/all_school_subject');
+                setAllCourse(response.data.message);
+            } catch (error) {
+                setError('Error retrieving Area Offices');
+            }
+        }
+
+        fetchCourses();
+    }, []);
+
+
 
 
     const CreateInstructor = () => {
-        if (firstName && lastName && email && course && phone) {
+        if (firstName && lastName && email && courses && phone) {
             setLoading(true); // Start loading indicator
 
             axios.post("http://localhost:5000/api/auth/create-instructor", {
                 first_name: firstName,
                 last_name: lastName,
                 email: email,
-                course: course,
+                course: courses,
                 phone: phone,
                 office: selectedOffice,
                 sick_leave: sickLeave
@@ -135,7 +151,7 @@ function CreateInstructor() {
                         <label htmlFor='course'>Office</label>
                         <select
                             id='offices'
-                            value={selectedOffice} // Assuming you have a state variable named selectedOffice
+                            value={selectedOffice}
                             onChange={(event) => setSelectedOffice(event.target.value)}
                         >
                             <option value=''>Choose Area Office</option>
@@ -151,14 +167,15 @@ function CreateInstructor() {
                         <label htmlFor='course'>Course</label>
                         <select
                             id='course'
-                            value={course}
+                            value={courses}
                             onChange={(event) => setCourse(event.target.value)}
                         >
-                            <option value='FullStack'>FullStack</option>
-                            <option value='Animation'>Animation</option>
-                            <option value='Data Analysis'>Data Analysis</option>
-                            <option value='Photography'>Photography</option>
-                            <option value='Desktop Publishing'>Desktop Publishing</option>
+                            <option value=''>Select a Course</option>
+                            {allCourses.map((course, index) => (
+                                <option key={index}>
+                                    {course.course}
+                                </option>
+                            ))}
                         </select>
                         <br /><br />
 

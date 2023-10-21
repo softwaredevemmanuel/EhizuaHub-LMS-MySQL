@@ -105,7 +105,12 @@ const zeroApprovalCount = leaveRequest.filter(item => item.isApproved === 0).len
             <br/>
             <br/>
             <Link to="/create_instructor">Create New Instructor</Link>
-            
+            <br/>
+            <br/>
+            <Link to="/create_courses">Register a New Upskill Course</Link>
+            <br/>
+            <br/>
+            <Link to="/create_subject">Register a New School Course</Link>
       </div>
       
       )}
