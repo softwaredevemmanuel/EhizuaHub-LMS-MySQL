@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { BrowserRouter as Router, Route, Switch, Link } from 'react-router-dom';
 import LoginForm from './LoginForm';
-import CreateTutor from './CreateTutor';
+import CreateTutor from './CreateStaff';
 
 
 
@@ -65,31 +65,38 @@ const zeroApprovalCount = leaveRequest.filter(item => item.isApproved === 0).len
 
         <CreateTutor/>  
 
-        <Link to="/tutor_details">View Tutor Details</Link>
+            <Link to="/all_staff">View All Staff DONE</Link>
             <br/>
             <br/>
-            <Link to="/all_student_details">View Student Details</Link>
+            <Link to="/hub_instructors">View Hub Instructors</Link>
             <br/>
             <br/>
-            <Link to="/create_student">Register A new Student</Link>
+            <Link to="/school_instructors">View School Instructors</Link>
             <br/>
             <br/>
-            <Link to="/create_school">Register A new School</Link>
+            
+            <Link to="/all_student_details">View Student Details DONE</Link>
             <br/>
             <br/>
-            <Link to="/register_school_students">Register School Student</Link>
+            <Link to="/create_student">Register A new Student DONE</Link>
             <br/>
             <br/>
-            <Link to="/all_schools">View Partner Schools</Link>
+            <Link to="/create_school">Register A new School DONE</Link>
             <br/>
             <br/>
-            <Link to="/create_location">Create Location</Link>
+            <Link to="/register_school_students">Register School Student DONE</Link>
             <br/>
             <br/>
-            <Link to="/create_tutor">Create Tutor</Link>
+            <Link to="/all_schools">View Partner Schools DONE</Link>
             <br/>
             <br/>
-            <Link to="/all_offices">View All Offices</Link>
+            <Link to="/create_location">Create Location DONE</Link>
+            <br/>
+            <br/>
+            <Link to="/create_staff">Create Staff DONE</Link>
+            <br/>
+            <br/>
+            <Link to="/all_offices">View All Offices DONE</Link>
             <br/>
             <br/>
             <Link to="/all_leave_request">View All Leave Request</Link>
@@ -107,10 +114,10 @@ const zeroApprovalCount = leaveRequest.filter(item => item.isApproved === 0).len
             <Link to="/create_instructor">Create New Instructor</Link>
             <br/>
             <br/>
-            <Link to="/create_courses">Register a New Upskill Course</Link>
+            <Link to="/create_courses">Register a New Upskill Course DONE</Link>
             <br/>
             <br/>
-            <Link to="/create_subject">Register a New School Course</Link>
+            <Link to="/create_subject">Register a New School Course DONE</Link>
       </div>
       
       )}

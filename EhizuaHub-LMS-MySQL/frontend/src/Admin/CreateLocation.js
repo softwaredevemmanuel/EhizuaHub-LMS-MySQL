@@ -72,7 +72,7 @@ function CreateLocation() {
                 <div className='App'>
                     <h1>Register Office Location</h1>
                     <form onSubmit={handleSubmit}>
-                        <label htmlFor='officeName'> Name of Office</label>
+                        <label> Name of Office</label>
                         <input
                             type='text'
                             id='officeName'
@@ -81,7 +81,8 @@ function CreateLocation() {
                             onChange={(event) => setOfficeName(event.target.value)}
                         />
                         <br /><br />
-                        <label htmlFor='officePhoneNumber'>Office Phone Number</label>
+                        <label>Office Phone Number</label>
+                        <br />
                         <input
                             type='text'
                             id='officePhoneNumber'
@@ -89,7 +90,8 @@ function CreateLocation() {
                             onChange={(event) => setOfficePhoneNumber(event.target.value)}
                         />
                         <br /><br />
-                        <label htmlFor='officeEmail'>Office Email</label>
+                        <label>Office Email</label>
+                        <br />
                         <input
                             type='email'
                             id='officeEmail'
@@ -101,7 +103,8 @@ function CreateLocation() {
 
 
 
-                        <label for="states">Select a State:</label>
+                        <label>Select a State:</label>
+                        <br />
                         <select
                             id='state'
                             value={state}
@@ -149,6 +152,7 @@ function CreateLocation() {
                         <br /><br />
                     
                         <label>Office Address</label>
+                        <br />
                         <textarea value={officeAddress} onChange={(event) => setOfficeAddress(event.target.value)} />
                         <br /><br />
 

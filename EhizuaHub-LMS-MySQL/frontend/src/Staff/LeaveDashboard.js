@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import secureLocalStorage from 'react-secure-storage';
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
-import TutorDashboard from './TutorDashboard';
+import TutorDashboard from '../Tutor/TutorDashboard';
 
 function LeaveDashboard() {
   const [loginData, setLoginData] = useState(false);
@@ -32,17 +32,16 @@ function LeaveDashboard() {
 
   // ..................useEffect for checking localStorage and Verifying Login ..............
   useEffect(() => {
-    const storedLoginData = JSON.parse(localStorage.getItem('Tutorlogin'));
+    const storedLoginData = JSON.parse(localStorage.getItem('Stafflogin'));
     if (
       storedLoginData &&
       storedLoginData.login &&
       storedLoginData.token &&
-      storedLoginData.tutor_authorization
+      storedLoginData.staff_authorization
     ) {
       setLoginData(true);
-      setTutor(storedLoginData.tutor);
+      setTutor(storedLoginData.staff);
       setOffice(storedLoginData.office)
-      setCourse(storedLoginData.course)
       setEmail(storedLoginData.email)
     }
   }, []);
@@ -51,7 +50,7 @@ function LeaveDashboard() {
     // Fetch tutors when the component mounts
     async function fetchLeave() {
       try {
-        const response = await axios.get('http://localhost:5000/api/tutor/leave-request');
+        const response = await axios.get('http://localhost:5000/api/auth/tutor-leave-request');
         setLeaveRequest(response.data.leave);
       } catch (error) {
         setError('Error retrieving tutors');
@@ -151,9 +150,7 @@ function LeaveDashboard() {
 
   return (
     <div className="App">
-      {!loginData ? (
-        <TutorDashboard />
-      ) : (
+    
         <div>
 
           <h4> Leave Dashboard</h4>
@@ -304,7 +301,6 @@ function LeaveDashboard() {
 
         </div>
 
-      )}
     </div>
   );
 }

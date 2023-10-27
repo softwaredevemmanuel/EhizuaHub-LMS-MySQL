@@ -16,6 +16,8 @@ function UpdateStudent() {
   const [courseFee, setCourseFee] = useState('');
   const [amountPaid, setAmountPaid] = useState('');
   const [homeAddress, setHomeAddress] = useState('');
+  const [certificate, setCertificate] = useState('');
+  const [isVerified, setIsverified] = useState('');
   const [id, setId] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -53,16 +55,18 @@ function UpdateStudent() {
   useEffect(() => {
     if (contentItem) {
         setId(contentItem._id)
-      setFirstName(contentItem.firstName || '');
-      setLastName(contentItem.lastName || '');
-      setEmail(contentItem.email || '');
-      setCourse(contentItem.course || 'FullStack');
-      setPhone(contentItem.phone || '');
-      setGuardianPhone(contentItem.guardiansPhone || '');
-      setDuration(contentItem.duration || '1 Month');
-      setCourseFee(contentItem.courseFee || '');
-      setAmountPaid(contentItem.amountPaid || '');
-      setHomeAddress(contentItem.homeAddress || '');
+        setFirstName(contentItem.firstName || '');
+        setLastName(contentItem.lastName || '');
+        setEmail(contentItem.email || '');
+        setCourse(contentItem.course || '');
+        setPhone(contentItem.phone || '');
+        setGuardianPhone(contentItem.guardiansPhone || '');
+        setDuration(contentItem.duration || '1 Month');
+        setCourseFee(contentItem.courseFee || '');
+        setAmountPaid(contentItem.amountPaid || '');
+        setHomeAddress(contentItem.homeAddress || '');
+        setCertificate(contentItem.certificateApproved || '0');
+        setIsverified(contentItem.isVerified || '0');
     }
   }, [contentItem]);
 
@@ -80,6 +84,8 @@ function UpdateStudent() {
         courseFee,
         amountPaid,
         homeAddress,
+        certificate,
+        isVerified,
       })
       .then((response) => {
         setSuccess(response.data.message);
@@ -206,6 +212,25 @@ function UpdateStudent() {
               onChange={(event) => setHomeAddress(event.target.value)}
             />
             <br />
+            <br />
+            <label htmlFor='duration'>Approve Certificate</label>
+            <select
+              value={certificate}
+              onChange={(event) => setCertificate(event.target.value)}
+            >
+              <option value={0}>Not Completed</option>
+              <option value={1}>Completed</option>
+            </select>
+            <br /><br />
+            <label htmlFor='duration'>Is Student Verified?</label>
+            <select
+              value={isVerified}
+              onChange={(event) => setIsverified(event.target.value)}
+            >
+              <option value={0}>NO</option>
+              <option value={1}>YES</option>
+            </select>
+            <br/>
 
             <button type='submit'>Update</button>
           </form>

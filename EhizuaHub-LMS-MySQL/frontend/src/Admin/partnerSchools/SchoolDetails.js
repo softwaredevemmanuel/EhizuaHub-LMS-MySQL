@@ -62,11 +62,7 @@ const SchoolDetails = () => {
                 <p>{contentItem.schoolName} {contentItem.lastName}</p>
 
                 <h3>Courses Enrolled For</h3>
-                <p>{contentItem.course1 == 0 ? '' : `${contentItem.course1}`}</p>
-                <p>{contentItem.course2 == 0 ? '' : `${contentItem.course2}`}</p>
-                <p>{contentItem.course3 == 0 ? '' : `${contentItem.course3}`}</p>
-                <p>{contentItem.course4 == 0 ? '' : `${contentItem.course4}`}</p>
-                <p>{contentItem.course5 == 0 ? '' : `${contentItem.course5}`}</p>
+                <p>{`${contentItem.courses}`}</p>
                 
                 <h3>Days of the week</h3>
                 <p>{contentItem.monday == 0 ? '' : `${contentItem.monday}`}</p>

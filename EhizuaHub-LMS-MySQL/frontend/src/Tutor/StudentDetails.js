@@ -24,7 +24,7 @@ function StudentDetails() {
 
           let storedData = JSON.parse(localStorage.getItem('Tutorlogin'));
 
-          const response = await axios.get('http://localhost:5000/api/tutor-students', {
+          const response = await axios.get('http://localhost:5000/api/tutor/students', {
             headers: {
               authHeader: storedData.tutor_authorization,
               course : storedData.course

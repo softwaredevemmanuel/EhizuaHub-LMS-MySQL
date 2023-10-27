@@ -3,46 +3,55 @@ import axios from 'axios';
 import secureLocalStorage from "react-secure-storage";
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import TutorDashboard from './TutorDashboard';
+import { useParams } from 'react-router-dom';
 
 
 
-function CreateCurriculum() {
+
+function CreateSchoolCourseCurriculum() {
     const [loginData, setLoginData] = useState(false);
     const [error, setError] = useState(null);
-    const [tutor, setTutor] = useState(null);
+    const [staff, setStaff] = useState(null);
     const [course, setCourse] = useState('');
     const [mainTopic, setMainTopic] = useState('');
     const [subTopic, setSubTopic] = useState('');
     const [loading, setLoading] = useState(false); // New state for loading indicator
     const [success, setSuccess] = useState('');
     const [authHeader, setAuthHeader] = useState('');
+    const [instructor, setInstructor] = useState('');
+    const { course: contentParam } = useParams();
+
 
 
 
     // ..................useEffect for checking localStorage and Verifying Login ..............
     useEffect(() => {
-        const storedLoginData = JSON.parse(localStorage.getItem('Tutorlogin'));
-        if (storedLoginData && storedLoginData.login && storedLoginData.token && storedLoginData.tutor_authorization) {
+        const storedLoginData = JSON.parse(localStorage.getItem('Stafflogin'));
+        if (storedLoginData && storedLoginData.login && storedLoginData.token && storedLoginData.staff_authorization) {
             setLoginData(true);
-            setTutor(storedLoginData.tutor);
-            setCourse(storedLoginData.course);
-            setAuthHeader(storedLoginData.tutor_authorization)
+            setStaff(storedLoginData.staff);
+            setCourse(storedLoginData.schoolCourse);
+            setAuthHeader(storedLoginData.staff_authorization)
+            setInstructor(storedLoginData.instructor)
+
         }
     }, []);
 
+    const coursesArray = course.split(', ');
 
-
+     // Locate the Curriculum based on the course parameter
+     const curriculumCourse = coursesArray.find((curriculumCourse) => curriculumCourse === contentParam);
 
 
     // ....................... Create Question API ...................
 
-    const createQuestion = () => {
+    const CreateCurriculum = () => {
         if (course && mainTopic && subTopic) {
             setLoading(true); // Start loading indicator
 
-            axios.post("http://localhost:5000/api/tutor/create-curriculum", {
+            axios.post("http://localhost:5000/api/school-tutor/create-curriculum", {
                 authHeader: authHeader,
-                course: course,
+                course: curriculumCourse,
                 mainTopic: mainTopic,
                 subTopic: subTopic,
                
@@ -55,9 +64,9 @@ function CreateCurriculum() {
                     setSubTopic('');
                 })
                 .catch(error => {
-                    setError(error.response.data.error);
+                    setError(error.response.data.message);
                     if(error.response.data.error == "Your account has been suspended. Please contact Ehizua Hub Admin." ){
-                        localStorage.setItem('Tutorlogin', JSON.stringify({
+                        localStorage.setItem('Stafflogin', JSON.stringify({
                             login: false,
                           }));    
                     }
@@ -73,8 +82,9 @@ function CreateCurriculum() {
 
     const handleSubmit = event => {
         event.preventDefault();
-        createQuestion();
+        CreateCurriculum();
     };
+
 
     return (
         <div className='App'>
@@ -93,11 +103,11 @@ function CreateCurriculum() {
                             <input
                                 type='text'
                                 id='course'
-                                value={course}
-                                onChange={(event) => setCourse(event.target.value)}
+                                value={curriculumCourse}
                                 readOnly
                             />
                             <br /><br />
+
 
                             <label htmlFor='topic'>Main Topic</label>
                             <input 
@@ -150,4 +160,4 @@ function CreateCurriculum() {
     );
 }
 
-export default CreateCurriculum;
+export default CreateSchoolCourseCurriculum;

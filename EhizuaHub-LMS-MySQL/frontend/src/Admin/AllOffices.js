@@ -55,7 +55,7 @@ function AllOfices() {
                 <td>{office.state}</td>
                 <td>{office.officeAddress}</td>
                 <td>
-                    <a href={`/offices_details/${office._id}`}>
+                    <a href={`/offices_details/${office.officeName}`}>
                         <p>View More</p>
                     </a>
               </td>

@@ -31,7 +31,7 @@ function CourseSection() {
       try {
         let login = JSON.parse(localStorage.getItem('Pupilslogin'));
 
-        const response = await axios.get('http://localhost:5000/api/students/pupils-course-content', {
+        const response = await axios.get('http://localhost:5000/api/school_pupils/course-content', {
           headers: {
             email: login.email,
             school: login.school,

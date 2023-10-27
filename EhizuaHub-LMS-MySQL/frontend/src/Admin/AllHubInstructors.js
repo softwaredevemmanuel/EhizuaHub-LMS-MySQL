@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import LoginForm from './LoginForm';
 
-function AllTutorDetails() {
+function AllHubInstructors() {
   const [tutors, setTutors] = useState([]);
   const [error, setError] = useState(null);
   const [login, setLogin] = useState(null);
@@ -25,7 +25,7 @@ function AllTutorDetails() {
     // Fetch tutors when the component mounts
     async function fetchTutors() {
       try {
-        const response = await axios.get('http://localhost:5000/api/auth/staff'); // Make sure the URL matches your API endpoint
+        const response = await axios.get('http://localhost:5000/api/auth/hub_instructor');
         setTutors(response.data.staff);
       } catch (error) {
         setError('Error retrieving tutors');
@@ -46,8 +46,11 @@ function AllTutorDetails() {
             <tr>
               <th>First Name</th>
               <th>Last Name</th>
+              <th>Courses</th>
               <th>Email</th>
               <th>Phone</th>
+              <th>Office</th>
+              <th>School</th>
               <th>Verified</th>
               <th>Action</th>
             </tr>
@@ -57,8 +60,11 @@ function AllTutorDetails() {
               <tr key={index}>
                 <td>{tutor.first_name}</td>
                 <td>{tutor.last_name}</td>
+                <td>{tutor.courses}</td>
                 <td>{tutor.email}</td>
                 <td>{tutor.phone}</td>
+                <td>{tutor.office}</td>
+                <td>{tutor.school}</td>
                 <td>{tutor.isVerified === 1 ? 'True' : 'False'}</td>
                 <td>{ <a href={`/personal_staff_details/${tutor._id}`}>
                         <p>View More</p>
@@ -77,4 +83,4 @@ function AllTutorDetails() {
   );
 }
 
-export default AllTutorDetails;
+export default AllHubInstructors;

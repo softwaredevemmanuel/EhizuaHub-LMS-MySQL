@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import  secureLocalStorage  from  "react-secure-storage";
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import TutorDashboard from './TutorDashboard';
+import { useParams } from 'react-router-dom';
 
 
 
-function CreateContent() {
+function CreateHubCourseContent() {
   const [loginData, setLoginData] = useState(false);
   const [error, setError] = useState(null);
-  const [tutor, setTutor] = useState('');
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false); // New state for loading indicator
   const [success, setSuccess] = useState('');
@@ -18,35 +16,39 @@ function CreateContent() {
   const [sub_topic, set_SubTopic] = useState('');
   const [mainTopic, setMainTopic] = useState([]);
   const [subTopic, setSubTopic] = useState([]);
-  const [tutor_authorization, setTutorAuthorization] = useState('');
+  const [staff_authorization, setStaffAuthorization] = useState('');
+  const { course: contentParam } = useParams();
+
 
 
 
 // ..................useEffect for checking localStorage and Verifying Login ..............
 useEffect(() => {
-  const storedLoginData = JSON.parse(localStorage.getItem('Tutorlogin'));
-  if (storedLoginData && storedLoginData.login && storedLoginData.token && storedLoginData.tutor_authorization) {
+  const storedLoginData = JSON.parse(localStorage.getItem('Stafflogin'));
+  if (storedLoginData && storedLoginData.login && storedLoginData.token && storedLoginData.staff_authorization) {
     setLoginData(true);
-    setTutor(storedLoginData.tutor);
-    setCourse(storedLoginData.course);
-    setTutorAuthorization(storedLoginData.tutor_authorization)
+    setCourse(storedLoginData.hubCourse);
+    setStaffAuthorization(storedLoginData.staff_authorization)
 
   }
 }, []);
 
+const coursesArray = course.split(', ');
+
+// Locate the Content based on the course parameter
+const contentCourse = coursesArray.find((curriculumCourse) => curriculumCourse === contentParam);
 
 
   useEffect(() => {
     async function fetchMainTopic() {
 
         try {
-          let login = JSON.parse(localStorage.getItem('Tutorlogin'));
-
-          const response = await axios.get('http://localhost:5000/api/tutor/maintopic', {
+          const response = await axios.get('http://localhost:5000/api/tutor/hub-maintopic', {
             headers: {
-              course: login.course,
+              course: contentCourse,
             },
           });
+          console.log(response.data.message)
           setMainTopic(response.data.message)
 
        
@@ -57,7 +59,7 @@ useEffect(() => {
 
       fetchMainTopic();
       
-  }, []);
+  }, [contentCourse]);
 
 
 
@@ -65,11 +67,10 @@ useEffect(() => {
     async function fetchSubTopic() {
       try {
         if (main_topic !== '') { // Check if a topic is selected
-          let login = JSON.parse(localStorage.getItem('Tutorlogin'));
 
-          const response = await axios.get('http://localhost:5000/api/tutor/subtopic', {
+          const response = await axios.get('http://localhost:5000/api/tutor/hub-subtopic', {
             headers: {
-              course: login.course,
+              course: contentCourse,
               main_topic: main_topic
             },
           });
@@ -92,11 +93,11 @@ useEffect(() => {
     if (main_topic && content) {
       setLoading(true); // Start loading indicator
 
-      axios.post("http://localhost:5000/api/tutor/create-content", {
-        authHeader: tutor_authorization,
+      axios.post("http://localhost:5000/api/tutor/create-hub-content", {
+        authHeader: staff_authorization,
         main_topic: main_topic,
         content: content,
-        course : course,
+        course : contentCourse,
         sub_topic : sub_topic
       })
       .then(response => {
@@ -148,7 +149,7 @@ useEffect(() => {
                   type='text'
                   id='course'
                   autoComplete='course'
-                  value={course}
+                  value={contentCourse}
                   onChange={(event) => setCourse(event.target.value)}
                   readOnly
 
@@ -223,4 +224,4 @@ useEffect(() => {
   );
 }
 
-export default CreateContent;
+export default CreateHubCourseContent;

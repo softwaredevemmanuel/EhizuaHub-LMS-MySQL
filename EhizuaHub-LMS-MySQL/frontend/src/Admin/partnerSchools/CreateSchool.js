@@ -7,11 +7,6 @@ function CreateSchool() {
     const [login, setLogin] = useState(false);
     const [admin, setAdmin] = useState(false);
     const [schoolName, setSchoolName] = useState('');
-    const [course1, setCourse1] = useState(false);
-    const [course2, setCourse2] = useState(false);
-    const [course3, setCourse3] = useState(false);
-    const [course4, setCourse4] = useState(false);
-    const [course5, setCourse5] = useState(false);
     const [monday, setMonday] = useState(false);
     const [tuesday, setTuesday] = useState(false);
     const [wednesday, setWednesday] = useState(false);
@@ -24,9 +19,14 @@ function CreateSchool() {
     const [amountPaid, setAmountPaid] = useState('');
     const [courseFee, setCourseFee] = useState('');
     const [schoolAddress, setSchoolAddress] = useState('');
+    const [allCourses, setAllCourse] = useState([]);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
+
+    const [checkedCourses, setCheckedCourses] = useState([]);
+
+
 
     useEffect(() => {
         const loginData = JSON.parse(localStorage.getItem('Adminlogin'));
@@ -37,18 +37,43 @@ function CreateSchool() {
         }
     }, []);
 
+      // Fetch Courses
+  useEffect(() => {
+    async function fetchCourses() {
+        try {
+            const response = await axios.get('http://localhost:5000/api/auth/all_school_subject');
+            setAllCourse(response.data.message);
+        } catch (error) {
+            setError('Error retrieving Courses');
+        }
+    }
+
+      fetchCourses();
+    }, []);
+    
+
+    const handleCheckboxChange = (event) => {
+        const { value, checked } = event.target;
+    
+        if (checked) {
+          setCheckedCourses((prevCheckedCourses) => [...prevCheckedCourses, value]);
+        } else {
+          setCheckedCourses((prevCheckedCourses) =>
+            prevCheckedCourses.filter((course) => course !== value)
+          );
+        }
+      };
+ 
+
     const createSchool = () => {
         if (schoolName) {
             setLoading(true);
 
             axios
                 .post('http://localhost:5000/api/auth/create-school', {
+                    
                     schoolName,
-                    course1,
-                    course2,
-                    course3,
-                    course4,
-                    course5,
+                    checkedCourses,
                     monday,
                     tuesday,
                     wednesday,
@@ -84,11 +109,6 @@ function CreateSchool() {
 
     const clearForm = () => {
         setSchoolName('');
-        setCourse1(false);
-        setCourse2(false);
-        setCourse3(false);
-        setCourse4(false);
-        setCourse5(false);
         setMonday(false);
         setTuesday(false);
         setWednesday(false);
@@ -121,49 +141,30 @@ function CreateSchool() {
                         <br /><br />
 
 
+
                         <h4>Select Courses Requested</h4>
 
+                        <div>
+                            {allCourses.map((course, index) => (
+                                <div key={index}>
+                                <label>
+                                    {course.course}
+                                    <input
+                                    type="checkbox"
+                                    value={course.course}
+                                    checked={checkedCourses.includes(course.course)}
+                                    onChange={handleCheckboxChange}
+                                    />
+                                </label>
+                                </div>
+                            ))}
+                            <p>Checked Courses: {checkedCourses.join(', ')}</p>
+                        </div>
+                      
 
-                        <label>  Web Development </label>
-                        <input
-                            type="checkbox"
-                            name="course1"
-                            value="Web Development"
-                            onChange={(event) => setCourse1(event.target.value)}
-                        />
 
 
-                        <label>   Animation </label>
-                        <input
-                            type="checkbox"
-                            name="course2"
-                            value="Animation"
-                            onChange={(event) => setCourse2(event.target.value)}
-                        />
-
-
-                        <label>  Python Programming </label>
-                        <input
-                            type="checkbox"
-                            name="course3"
-                            value="Python Programming"
-                            onChange={(event) => setCourse3(event.target.value)} />
-
-                        <label>  Robotics </label>
-                        <input
-                            type="checkbox"
-                            name="course4"
-                            value="Robotics"
-                            onChange={(event) => setCourse4(event.target.value)} />
-
-                        <label>  Scratch and Lego Programming </label>
-                        <input
-                            type="checkbox"
-                            name="course5"
-                            value="Scratch and Lego Programming"
-                            onChange={(event) => setCourse5(event.target.value)} />
-
-                        <br /><br />
+                        <br/><br />
 
 
                         <h4>Select Day/Days of Activity</h4>

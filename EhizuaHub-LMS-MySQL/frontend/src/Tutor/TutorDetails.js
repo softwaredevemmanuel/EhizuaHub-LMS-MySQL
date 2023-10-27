@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
-import LeaveDashboard from './LeaveDashboard';
+import LeaveDashboard from '../Staff/LeaveDashboard';
 
 const TutorDetails = () => {
     const [tutors, setTutors] = useState([]);

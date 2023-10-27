@@ -95,6 +95,8 @@ function CreateStudents() {
     setHomeAddress('');
   };
 
+
+
   return (
     <div className='App'>
       {!login && !admin ? (
@@ -173,6 +175,7 @@ function CreateStudents() {
               <option value='3 Months'>3 Months</option>
               <option value='4 Months'>4 Months</option>
               <option value='5 Months'>5 Months</option>
+              <option value='6 Months'>6 Months</option>
             </select>
             <br /><br />
             <label htmlFor='courseFee'>Course Fee</label>
@@ -193,6 +196,15 @@ function CreateStudents() {
             <br /><br />
             <label>Home Address</label>
             <textarea value={homeAddress} onChange={(event) => setHomeAddress(event.target.value)} />
+            <br/>
+            <br/>
+            <div>
+                  <label>Upload Document if any</label>
+                  <br />
+                  <input type="file" />
+                </div>
+                <br/>
+
 
             <button type='submit'>Create Student</button>
           </form>
@@ -203,10 +215,6 @@ function CreateStudents() {
             {success && <p style={{ color: 'green' }}>{success}</p>}
           </div>
 
-          <Link to='/tutor_details'>View Tutor Details</Link>
-          <br />
-          <br />
-          <Link to='/all_student_details'>View Student Details</Link>
         </div>
       )}
     </div>

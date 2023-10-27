@@ -19,7 +19,7 @@ const TutorForgotPassword = () => {
         if (email) {
           setLoading(true);
     
-          axios.post("http://localhost:5000/api/auth/tutor_forgot_password", {
+          axios.post("http://localhost:5000/api/tutor/tutor_forgot_password", {
             email: email,
            
           })

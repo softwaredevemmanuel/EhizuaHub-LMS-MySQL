@@ -21,7 +21,7 @@ function VerifyStudentEmail() {
             const email = searchParams.get('email');
 
             try {
-                axios.post('http://localhost:5000/api/auth/verify-student-email', {
+                axios.post('http://localhost:5000/api/students/verify-student-email', {
                     emailToken: emailToken,
                     email: email,
             })

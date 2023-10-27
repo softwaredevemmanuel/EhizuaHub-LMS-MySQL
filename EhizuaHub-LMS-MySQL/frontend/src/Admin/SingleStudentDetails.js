@@ -46,9 +46,7 @@ const SingleStudentDetailsPage = () => {
   useEffect(() => {
     async function fetchStudents() {
       try {
-        const response = await axios.get('http://localhost:5000/api/auth/students', {
-
-        });
+        const response = await axios.get('http://localhost:5000/api/auth/students');
         setContent(response.data.students);
         setLoading(false);
       } catch (error) {

@@ -21,7 +21,7 @@ function VerifyTutorEmail() {
             const email = searchParams.get('email');
 
             try {
-                axios.post('http://localhost:5000/api/auth/verify-tutor-email', {
+                axios.post('http://localhost:5000/api/tutor/verify-tutor-email', {
                     emailToken: emailToken,
                     email: email,
             })
