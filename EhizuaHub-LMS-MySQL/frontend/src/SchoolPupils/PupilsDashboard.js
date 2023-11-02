@@ -46,7 +46,7 @@ function PupilsDashboard() {
   }, []);
 
   function login() {
-    if (email && id) {
+    if (email && id && selectSchool) {
       axios.post('http://localhost:5000/api/school_pupils/login', {
         email: email,
         id: id,

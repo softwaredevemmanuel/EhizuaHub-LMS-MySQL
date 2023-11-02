@@ -17,9 +17,10 @@ function LeaveDashboard() {
   const [leaveRequest, setLeaveRequest] = useState([]);
   const [error, setError] = useState('');
   const [email, setEmail] = useState('');
+  const [staffDetails, setStaffDetails] = useState('');
+  const [pendingLeave, setPendingLeave] = useState(1);
 
   const minSelectableDate = new Date(); // Get the current date
-
 
   // Create a state variable to store form data
   const [formData, setFormData] = useState({
@@ -47,30 +48,75 @@ function LeaveDashboard() {
   }, []);
 
   useEffect(() => {
-    // Fetch tutors when the component mounts
     async function fetchLeave() {
       try {
-        const response = await axios.get('http://localhost:5000/api/auth/tutor-leave-request');
-        setLeaveRequest(response.data.leave);
+        let storedData = JSON.parse(localStorage.getItem('Stafflogin'));
+        const response = await axios.get('http://localhost:5000/api/staff/leave-request',{
+          headers: {
+            email : storedData.email
+
+          },
+        });
+        const leaveData = response.data.leave;
+  
+        if (leaveData.length > 0) {
+          // Access the latest leave request
+          const latestLeave = leaveData[leaveData.length - 1];
+          
+          // Update state with the latest leave data
+          setLeaveRequest(leaveData);
+          console.log(latestLeave.isApproved);
+          setPendingLeave(latestLeave.isApproved);
+        } else {
+          // Handle the case when there are no leave requests
+
+          setLeaveRequest([]);
+          setPendingLeave(1); // or setPendingLeave(false) depending on your logic
+        }
+  
+      } catch (error) {
+        setError('Error retrieving leave requests');
+      }
+    }
+  
+    fetchLeave();
+  }, []);
+  
+  
+
+// Fetch staff details (number of leave left)
+  useEffect(() => {
+    async function fetchStaffDetails() {
+      try {
+        let storedData = JSON.parse(localStorage.getItem('Stafflogin'));
+
+        const response = await axios.get('http://localhost:5000/api/staff/details',{
+          headers: {
+            email : storedData.email
+
+          },
+        
+        });
+        
+        setStaffDetails(response.data.leaveLeft);
       } catch (error) {
         setError('Error retrieving tutors');
       }
     }
 
-    fetchLeave();
+    fetchStaffDetails();
   }, []);
 
 
 
   function sendLeaveRequest() {
     axios
-      .post('http://localhost:5000/api/tutor/leave-application',
+      .post('http://localhost:5000/api/staff/leave-application',
 
         {
           formData: formData,
           name: tutor,
           office: office,
-          course: course,
           email: email
 
         })
@@ -152,13 +198,14 @@ function LeaveDashboard() {
     <div className="App">
     
         <div>
+          <hr/>
 
           <h4> Leave Dashboard</h4>
           <p>
             {' '}
             Annual Leave <strong>19 Dec 2023 - 12 Jan 2024</strong>
           </p>
-          <h4>You have 10 sick leave days left</h4>
+          <h4>You have {staffDetails} sick leave days left</h4>
        
           <hr />
           <h3>My Leave Request</h3>
@@ -170,7 +217,6 @@ function LeaveDashboard() {
                 <th>To</th>
                 <th>Purpose Of Leave</th>
                 <th>Uploaded Ducument</th>
-                <th>Days remaining</th>
                 <th>HR Confirmation</th>
 
               </tr>
@@ -184,7 +230,6 @@ function LeaveDashboard() {
                   <td>{tutor.leaveEndDate}</td>
                   <td>{tutor.purposeOfLeave}</td>
                   <td>{tutor.uploadedDocument}</td>
-                  <td>{tutor.allocatedLeave - tutor.daysRemaining} {tutor.allocatedLeave - tutor.daysRemaining < 2 ? 'Day': 'Days'} </td>
                   <td style={{ color: tutor.isApproved === 1 ? 'green' : tutor.isApproved === 0 ? 'gray' : 'red' }}>
                     {tutor.isApproved === 1 && 'Approved'}
                     {tutor.isApproved === 2 && 'Rejected'}
@@ -200,30 +245,35 @@ function LeaveDashboard() {
           </table>
           <hr />
 
-        
+          {pendingLeave === 1 || pendingLeave === 2 ? (
             <div>
-            <label>Apply for sick leave</label>
-
-            {!dateShow  ? (
-              <div>
-                <input
-                  type="submit"
-                  value="here"
-                  onClick={handleClick}
-                />
-                <br />
-              </div>
-            ) : (
-              <div>
-                <input
-                  type="submit"
-                  value="cancel"
-                  onClick={handleCancel}
-                />
-                <br />
-              </div>
-            )}
+              <label>Apply for sick leave</label>
+              {!dateShow ? (
+                <div>
+                  <input
+                    type="submit"
+                    value="here"
+                    onClick={handleClick}
+                  />
+                  <br />
+                </div>
+              ) : (
+                <div>
+                  <input
+                    type="submit"
+                    value="cancel"
+                    onClick={handleCancel}
+                  />
+                  <br />
+                </div>
+              )}
             </div>
+          ) :(
+            <div>
+              <p>Wait For leave approval....</p>
+            </div>
+          )}
+
         
          
 
@@ -297,6 +347,7 @@ function LeaveDashboard() {
             )}
 
           </form>
+          
           {success && <p style={{ color: 'green' }}>{success}</p>}
 
         </div>

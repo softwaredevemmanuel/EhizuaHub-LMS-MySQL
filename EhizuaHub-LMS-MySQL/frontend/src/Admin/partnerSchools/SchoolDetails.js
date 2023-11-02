@@ -7,8 +7,10 @@ import LoginForm from '../LoginForm';
 
 const SchoolDetails = () => {
   const [content, setContent] = useState([]);
+  const [schools, setSchools] = useState([]);
   const [loading, setLoading] = useState(true);
   const [login, setLogin] = useState(null);
+  const [formattedDate, setFormattedDate] = useState('');
 
 
 
@@ -18,8 +20,17 @@ const SchoolDetails = () => {
 
     if ((admin && admin.login && admin.admin && admin.admin_authorization)) {
       setLogin(true);
+
+
+
+      const currentDate = new Date();
+      const options = { month: 'numeric', day: '2-digit', year: 'numeric' };
+      const formattedString = currentDate.toLocaleDateString('en-US', options).replace(/\//g, '');
+      setFormattedDate(formattedString);
+
     }
   }, []);
+  console.log(formattedDate)
  
 
   useEffect(() => {
@@ -39,10 +50,32 @@ const SchoolDetails = () => {
 
   }, []);
 
+  useEffect(() => {
+    // Fetch tutors when the component mounts
+    async function fetchStudents() {
+      try {
+        const response = await axios.get('http://localhost:5000/api/auth/partner-school-students',{
+          headers:{
+            schoolName : contentParam
+
+          }
+        });
+        setSchools(response.data.message);
+      } catch (error) {
+        // setError('Error retrieving Partner schools');
+      }
+    }
+
+
+    fetchStudents();
+  }, []);
+
+  console.log(schools)
+
 
     // Get the content parameter from the URL using useParams
-    const { id: contentParam } = useParams();
-    const contentItem = content.find((item) => item.id == contentParam);
+    const { schoolName: contentParam } = useParams();
+    const contentItem = content.find((item) => item.schoolName == contentParam);
 
 
 
@@ -54,15 +87,17 @@ const SchoolDetails = () => {
 
         <div>
           <h1>Details Page</h1>
+          <div>
+      <p>Formatted Date: {formattedDate}</p>
+    </div>
 
           {loading && <p>Loading...</p>}
           {contentItem && (
             <div>
               <div>
-                <p>{contentItem.schoolName} {contentItem.lastName}</p>
+                <p>SCHOOL NAME: {contentItem.schoolName} {contentItem.lastName}</p>
 
-                <h3>Courses Enrolled For</h3>
-                <p>{`${contentItem.courses}`}</p>
+                <p>COURSES ENROLLED FOR: {`${contentItem.courses}`}</p>
                 
                 <h3>Days of the week</h3>
                 <p>{contentItem.monday == 0 ? '' : `${contentItem.monday}`}</p>
@@ -72,26 +107,19 @@ const SchoolDetails = () => {
                 <p>{contentItem.friday == 0 ? '' : `${contentItem.friday}`}</p>
                 <p>{contentItem.saturday == 0 ? '' : `${contentItem.saturday}`}</p>
                 
-                <h3>School Admin Phone Number</h3>
-                <p>{contentItem.phone}</p>
+                <p>SCHOOL PHONE NUMBER: {contentItem.phone}</p>
 
-                <h3>School Admin Email</h3>
-                <p>{contentItem.email}</p>
+                <p>ADMIN EMAIL: {contentItem.email}</p>
 
-                <h3>Duration</h3>
-                <p>{contentItem.duration}</p>
+                <p>DURATION: {contentItem.duration}</p>
 
-                <h3>Fee per child</h3>
-                <p>N{contentItem.courseFee}</p>
+                <p>FEE PER CHILD: N{contentItem.courseFee}</p>
 
-                <h3>Amount Paid</h3>
-                <p>{contentItem.amountPAid == '' ? '' : 'N0.00'}</p>
+                <p>AMOUNT PAID: {contentItem.amountPAid === '' ? '' : 'N0.00'}</p>
 
-                <h3>School Address</h3>
-                <p>{contentItem.schoolAddress}</p>
+                <p>SCHOOL ADDRESS: {contentItem.schoolAddress}</p>
 
-                <h3>School verified</h3>
-                <p>{contentItem.isVerified === 1 ? 'True' : 'False'}</p>
+                <p>IS SCHOOL VERIFIED?{contentItem.isVerified === 1 ? 'True' : 'False'}</p>
               </div>
               <div>
 
@@ -101,7 +129,40 @@ const SchoolDetails = () => {
           )}
         </div>
       )}
-  </div>
+
+<table>
+              <thead>
+                <tr>
+                  <th>School Name</th>
+                  <th>School Address</th>
+                  <th>Class</th>
+                  <th>Course</th>
+                  <th>Email</th>
+                  <th>Term</th>
+                  <th>Year</th>
+                  <th>Guardians Phone Number</th>
+                  <th>Password</th>
+                  <th>IsVerified? </th>
+                
+                </tr>
+              </thead>
+              <tbody>
+                {schools.map((school, index) => (
+                  <tr key={index}>
+                    <td>{school.firstName}</td>
+                    <td>{school.lastName}</td>
+                    <td>{school.level}</td>
+                    <td>{school.courses}</td>
+                    <td>{school.email}</td>
+                    <td>{school.term}</td>
+                    <td>{school.year}</td>
+                    <td>{school.guardiansPhone}</td>
+                    <td>{school.password}</td>
+                    <td>{school.isVerified}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>  </div>
 
   );
 

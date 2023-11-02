@@ -4,7 +4,7 @@ import LoginForm from '../LoginForm';
 import { Link } from 'react-router-dom';
 
 
-function AllSchools() {
+function SchoolStudents() {
   const [schools, setSchools] = useState([]);
   const [error, setError] = useState('');
   const [login, setLogin] = useState(null);
@@ -21,17 +21,22 @@ function AllSchools() {
 
   useEffect(() => {
     // Fetch tutors when the component mounts
-    async function fetchTutors() {
+    async function fetchStudents() {
       try {
-        const response = await axios.get('http://localhost:5000/api/auth/partner-schools');
+        const response = await axios.get('http://localhost:5000/api/auth/partner-school-students',{
+          headers:{
+            schoolName : "hehehe"
+          }
+        });
         setSchools(response.data.message);
       } catch (error) {
         setError('Error retrieving Partner schools');
       }
     }
 
-    fetchTutors();
+    fetchStudents();
   }, []);
+
 
   return (
     <div>
@@ -63,7 +68,7 @@ function AllSchools() {
                     <td>{school.schoolName}</td>
                     <td>{school.schoolAddress}</td>
                     <td>
-                        <a href={`/school_details/${school.schoolName}`}>
+                        <a href={`/school_details/${school.id}`}>
                             <p>View More</p>
                         </a>
                   </td>
@@ -80,4 +85,4 @@ function AllSchools() {
   );
 }
 
-export default AllSchools;
+export default SchoolStudents;

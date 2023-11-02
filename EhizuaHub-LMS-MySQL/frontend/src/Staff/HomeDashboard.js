@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import secureLocalStorage from "react-secure-storage";
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
-import HubTutorSection from '../Tutor/HubTutorSection';
-import SchoolTutorSection from '../Tutor/SchoolTutorSection';
+import HubTutorSection from '../Tutor/HubInstructors/HubTutorSection';
+import SchoolTutorSection from '../Tutor/SchoolInstructors/SchoolTutorSection';
 import StaffDashboard from './StaffDashboard';
 import StaffLogin from './StaffLogin';
 

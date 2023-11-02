@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import PupilsDashboard from './PupilsDashboard';
 import { Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 
-function CourseSection() {
+
+function CourseCurriculum() {
   const [loginStudent, setLoginStudent] = useState(false); // Initialize with false
   const [error, setError] = useState(null);
   const [courses, setCourse] = useState([]);
+  const { course: contentParam } = useParams();
 
 
 
@@ -28,10 +31,11 @@ function CourseSection() {
       try {
         let login = JSON.parse(localStorage.getItem('Pupilslogin'));
 
-        const response = await axios.get('http://localhost:5000/api/school_pupils/course-section', {
+        const response = await axios.get('http://localhost:5000/api/school_pupils/course-curriculum', {
           headers: {
+            course : contentParam,
             email: login.email,
-            school: login.school,
+            school: login.school
           },
         });
         setCourse(response.data.message)
@@ -46,6 +50,9 @@ function CourseSection() {
 
   }, []);
 
+  const uniqueMainTopics = [...new Set(courses.map((item) => item.mainTopic))];
+
+
 
   return (
     <div>
@@ -56,16 +63,25 @@ function CourseSection() {
       ) : (
 
         <div>
-          <h2>Course Dashboard</h2>
+          <h2>Course Curriculum</h2>
 
           <div>
-             Course Section
-            {courses.map((course, index)=>(
-              <div key={index}>
-                
-                <Link to={`${course}/curriculum`}>{course}</Link>
-              
-             </div>
+
+            {uniqueMainTopics.map((mainTopic, mainIndex) => (
+                <div key={mainIndex}>
+                <p>{mainTopic}</p>
+                {courses
+                    .filter((item) => item.mainTopic === mainTopic)
+                    .map((subContent, subIndex) => (
+                    <div key={subIndex}>
+                        {subContent.subTopic.split(', ').map((topic, topicIndex) => (
+                        <p key={topicIndex}><Link to={`/school-student-dashboard/${topic}/${mainTopic}`}> {topic}</Link>
+                        </p>
+                        
+                        ))}
+                    </div>
+                    ))}
+                </div>
             ))}
     
           </div>
@@ -78,4 +94,4 @@ function CourseSection() {
   );
 }
 
-export default CourseSection;
+export default CourseCurriculum;

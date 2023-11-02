@@ -278,10 +278,6 @@ function CreateSchool() {
                         {success && <p style={{ color: 'green' }}>{success}</p>}
                     </div>
 
-                    <Link to='/tutor_details'>View Tutor Details</Link>
-                    <br />
-                    <br />
-                    <Link to='/all_student_details'>View Student Details</Link>
                 </div>
             )}
         </div>

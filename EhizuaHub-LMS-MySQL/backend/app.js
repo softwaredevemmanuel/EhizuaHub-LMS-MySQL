@@ -245,6 +245,7 @@ app.post('/api/auth/create-school', async (req, res) => {
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
+
     // Convert checkedCourses array to a string
     const coursesString = checkedCourses.join(', ');
 
@@ -261,6 +262,17 @@ app.post('/api/auth/create-school', async (req, res) => {
   });
 });
 
+
+// ............................. ADMIN GET LIST OF SCHOOLS ................................
+app.get('/api/auth/partner-schools', async (req, res) => {
+
+  sch.query('SELECT * FROM PartnerSchools', async (err, result) => {
+    return res.json({ message: result });
+
+  })
+})
+
+
 // ............................. ADMIN GET PARTNER SCHOOLS REGISTERED COURSES................................
 app.get('/api/auth/partner-schools-course', async (req, res) => {
   const school = req.headers.school;
@@ -275,16 +287,6 @@ app.get('/api/auth/partner-schools-course', async (req, res) => {
   });
 });
 
-
-
-// ............................. ADMIN GET LIST OF SCHOOLS ................................
-app.get('/api/auth/partner-schools', async (req, res) => {
-
-  sch.query('SELECT * FROM PartnerSchools', async (err, result) => {
-    return res.json({ message: result });
-
-  })
-})
 
 // ............................. ADMIN REGISTER SCHOOL STUDENT ................................
 app.post('/api/auth/register-school-student', async (req, res) => {
@@ -378,6 +380,23 @@ app.post('/api/auth/register-school-student', async (req, res) => {
 
   });
 });
+
+
+// ............................. ADMIN GET LIST OF SCHOOL STUDENT ................................
+app.get('/api/auth/partner-school-students', async (req, res) => {
+
+  const schoolName = req.headers.schoolname
+
+  const school = schoolName.replace(/\s/g, '')
+
+
+  sch.query(`SELECT * FROM ${school}`, async (err, result) => {
+    // console.log(result)
+    return res.json({ message: result });
+
+  })
+})
+
 
 
 // ............................. ADMIN REGISTER EHIZUA STUDENT ................................
@@ -573,7 +592,7 @@ app.put('/api/auth/update-student/:id', async (req, res) => {
 });
 
 
-// ............................ADMIN CREATE STAFF ............................
+// ..........done..................ADMIN CREATE STAFF ............................
 app.post('/api/auth/create-staff', async (req, res) => {
 
   const createTableQuery = `
@@ -775,7 +794,7 @@ CREATE TABLE IF NOT EXISTS SchoolInstructors (
   })
 });
 
-// .............................. ADMIN GET ALL STAFF DETAILS ..........................................
+// ..........done.................... ADMIN GET ALL STAFF DETAILS ..........................................
 
 app.get('/api/auth/staff', (req, res) => {
 
@@ -794,6 +813,7 @@ app.get('/api/auth/staff', (req, res) => {
     accountNumber VARCHAR(255) NOT NULL,
     bank VARCHAR(255) NOT NULL,
     sickLeave VARCHAR(255) NOT NULL,
+    sickLeaveTaken INT(100) DEFAULT 0,
     id VARCHAR(255) NOT NULL,
     emailToken VARCHAR(255) NOT NULL,
     HMO VARCHAR(255) NOT NULL DEFAULT 10,
@@ -907,7 +927,7 @@ app.get('/api/auth/school_instructor', (req, res) => {
 // ............................. ADMIN EDIT STAFF ................................
 app.put('/api/auth/update-staff/:id', async (req, res) => {
   const tutorId = req.params.id; // Get the student's ID from the route parameter
-  const {firstName, lastName, email,  dateOfBirth, office, position, hubInstructor, schoolInstructor, phone, accountNumber, bank, sickLeave, HMO, homeAddress, isVerified, } = req.body;
+  const { firstName, lastName, email, dateOfBirth, office, position, hubInstructor, schoolInstructor, phone, accountNumber, bank, sickLeave, HMO, homeAddress, isVerified, } = req.body;
 
   // Update the Staff's information in the database
   const sql = `
@@ -1012,7 +1032,9 @@ app.post('/api/auth/create-subject', async (req, res) => {
   const createTableQuery = `
   CREATE TABLE IF NOT EXISTS Courses (
     _id INT AUTO_INCREMENT PRIMARY KEY,
-    course VARCHAR(255) NOT NULL
+    course VARCHAR(255) NOT NULL,
+    courseCode VARCHAR(255) NOT NULL
+    
   );
 `;
 
@@ -1035,14 +1057,26 @@ app.post('/api/auth/create-subject', async (req, res) => {
       return res.status(400).json({ message: 'Course with name already exists' });
     }
 
+    const resultArray = [];
+
+    for (let i = 1; i <= 10; i++) {
+      const paddedNumber = i.toString().padStart(3, '0');
+      const result = course.slice(0, 3) + paddedNumber;
+      resultArray.push(result);
+    }
+
+    const resultString = resultArray.join(', ');
+
+
+
 
     const sql = `
-        INSERT INTO Courses (course)
-        VALUES (?)
+        INSERT INTO Courses (course, courseCode)
+        VALUES (?, ?)
       `;
 
 
-    sch.query(sql, [course], async (err, result) => {
+    sch.query(sql, [course, resultString], async (err, result) => {
       if (err) {
         console.error(err);
         return res.status(500).send('Internal Server Error');
@@ -1054,7 +1088,7 @@ app.post('/api/auth/create-subject', async (req, res) => {
 
 });
 
-// ............................. ADMIN GET LIST OF UPSKILL COURSES ................................
+// ............................. ADMIN GET UPSKILL COURSES ................................
 app.get('/api/auth/all_upskill_courses', async (req, res) => {
 
   const createTableQuery = `
@@ -1072,12 +1106,31 @@ app.get('/api/auth/all_upskill_courses', async (req, res) => {
   });
 
   db.query('SELECT * FROM Courses', async (err, result) => {
+
     return res.json({ message: result });
 
   })
 })
 
-// ............................. ADMIN GET LIST OF SCHOOL SUBJECTS ................................
+
+// .......................... ADMIN GET UPSKILL CURRICULUM ..........................................
+app.get('/api/auth/upskill-course-curriculum', async (req, res) => {
+
+  const course = req.headers.course;
+
+  db.query('SELECT * FROM Curriculum WHERE course = ?', [course], async (err, content) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Error fetching course content' });
+    }
+    return res.json({ content });
+  });
+
+
+});
+
+
+// ............................. ADMIN GET LIST OF SCHOOL COURSE ................................
 app.get('/api/auth/all_school_subject', async (req, res) => {
 
   sch.query('SELECT * FROM Courses', async (err, result) => {
@@ -1087,6 +1140,48 @@ app.get('/api/auth/all_school_subject', async (req, res) => {
   })
 })
 
+
+// ........work on it.................. ADMIN GET SCHOOL COURSE CURRICULUM ..........................................
+// app.get('/api/auth/school-course-curriculum', async (req, res) => {
+//   const authHeader = req.headers.authheader;
+//   const course = req.headers.course;
+
+
+
+//   try {
+//     db.query('SELECT * FROM Staff WHERE id = ?', [authHeader], async (err, result) => {
+//       if (err) {
+//         console.error(err);
+//         return res.status(500).json({ error: 'Internal Server Error' });
+//       }
+
+//       if (result.length === 0) {
+//         return res.status(401).json({ error: 'Unauthorised to view this page. Please Login' });
+//       }
+
+//       if (result[0].isVerified === 0) {
+//         return res.status(400).json({ error: 'Please verify your account or contact Ehizua Hub Admin for assistance' });
+//       }
+
+//       if (result[0].emailToken === null && result[0].isVerified === 0) {
+//         return res.status(404).json({ error: 'Your account has been suspended. Please contact Ehizua Hub Admin.' });
+//       }
+
+//       sch.query('SELECT * FROM Curriculum WHERE course = ?', [course], async (err, content) => {
+//         if (err) {
+//           console.error(err);
+//           return res.status(500).json({ error: 'Error fetching course content' });
+//         }
+//         return res.json({ content });
+//       });
+
+//     });
+
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({ error: 'Unauthorized!! Please login to view courses' });
+//   }
+// });
 
 
 
@@ -1227,7 +1322,7 @@ app.get('/api/auth/all_offices', async (req, res) => {
 })
 
 
-// ............................. ADMIN REJECT LEAVE REQUEST ................................
+// .............done................ ADMIN REJECT LEAVE REQUEST ................................
 app.put('/api/auth/reject-leave-request/:id', async (req, res) => {
   const id = req.params.id;
 
@@ -1259,16 +1354,16 @@ app.put('/api/auth/reject-leave-request/:id', async (req, res) => {
 });
 
 
-// ............................. ADMIN APPROVE LEAVE REQUEST ................................
+// ..............done............... ADMIN APPROVE LEAVE REQUEST ................................
 app.put('/api/auth/approve-leave-request/:id', async (req, res) => {
   const id = req.params.id;
 
-  db.query('SELECT * FROM LeaveApplication WHERE _id = ?', [id], async (err, tutor) => {
-    const numberOfDays = parseInt(tutor[0].numberOfDays)
-    const email = tutor[0].email
-    db.query('SELECT * FROM Tutors WHERE email = ?', [email], async (err, tutor) => {
-      const leaveAllocated = parseInt(tutor[0].sickLeave)
-      const leaveTaken = tutor[0].sickLeaveTaken
+  db.query('SELECT * FROM LeaveApplication WHERE _id = ?', [id], async (err, leave) => {
+    const numberOfDays = parseInt(leave[0].numberOfDays)
+    const email = leave[0].email
+    db.query('SELECT * FROM Staff WHERE email = ?', [email], async (err, staff) => {
+      const leaveAllocated = parseInt(staff[0].sickLeave)
+      const leaveTaken = staff[0].sickLeaveTaken
       const totalDays = parseInt(leaveTaken) + parseInt(numberOfDays)
       if (leaveAllocated < totalDays) {
         return res.status(404).json({
@@ -1280,7 +1375,7 @@ app.put('/api/auth/approve-leave-request/:id', async (req, res) => {
       } else {
         // Update the Tutors's information in the database
         const sql = `
-                  UPDATE Tutors
+                  UPDATE Staff
                   SET
                   sickLeaveTaken = ?
                   WHERE email = ?
@@ -1331,8 +1426,9 @@ app.put('/api/auth/approve-leave-request/:id', async (req, res) => {
 
 });
 
-// ..............................ADMIN GET ALL LEAVE REQUEST ..........................................
-app.get('/api/auth/tutor-leave-request', (req, res) => {
+// ...............done............... ADMIN GET ALL LEAVE REQUEST ..........................................
+app.get('/api/auth/staff-leave-request', (req, res) => {
+
 
   const createTableQuery = `
   CREATE TABLE IF NOT EXISTS LeaveApplication (
@@ -1340,35 +1436,36 @@ app.get('/api/auth/tutor-leave-request', (req, res) => {
     fullName VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
     location VARCHAR(255) NOT NULL,
-    department VARCHAR(255) NOT NULL,
+    position VARCHAR(255) NOT NULL,
     numberOfDays VARCHAR(255) NOT NULL,
     leaveStartDate VARCHAR(255) NOT NULL,
     leaveEndDate VARCHAR(255) NOT NULL,
     purposeOfLeave VARCHAR(255) NOT NULL,
     allocatedLeave VARCHAR(255) NOT NULL,
-    daysRemaining VARCHAR(255) NOT NULL
+    daysRemaining VARCHAR(255) NOT NULL,
+    isApproved BOOLEAN DEFAULT 0
   );
 `;
 
   db.query(createTableQuery, (err) => {
     if (err) {
       console.error(err);
-      throw new Error('Error creating table');
+      throw new Error('Error creating Leave Applications table');
     }
   });
 
   try {
     db.query('SELECT * FROM LeaveApplication', async (err, leave) => {
       if (err) {
-        console.error('Error retrieving tutors:', err); // Log the error
-        return res.status(500).json({ message: 'Error retrieving tutors' });
+        console.error('Error retrieving Leave Applications:', err); // Log the error
+        return res.status(500).json({ message: 'Error retrieving Leave Applications' });
       }
 
       return res.json({ leave });
     });
   } catch (error) {
-    console.error('Error retrieving tutors:', error); // Log the error
-    return res.status(500).json({ message: 'Error retrieving tutors' });
+    console.error('Error retrieving Leave Applications:', error); // Log the error
+    return res.status(500).json({ message: 'Error retrieving Leave Applications' });
   }
 });
 
@@ -1378,9 +1475,8 @@ app.get('/api/auth/tutor-leave-request', (req, res) => {
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< STAFF >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 // .................................STAFF APPLY FOR LEAVE ...................................
-app.post('/api/tutor/leave-application', async (req, res) => {
+app.post('/api/staff/leave-application', async (req, res) => {
   const leaveRequest = req.body
-  console.log(leaveRequest)
 
 
   const createTableQuery = `
@@ -1389,13 +1485,14 @@ app.post('/api/tutor/leave-application', async (req, res) => {
     fullName VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
     location VARCHAR(255) NOT NULL,
-    department VARCHAR(255) NOT NULL DEFAULT 0,
+    position VARCHAR(255) NOT NULL,
     numberOfDays VARCHAR(255) NOT NULL,
     leaveStartDate VARCHAR(255) NOT NULL,
     leaveEndDate VARCHAR(255) NOT NULL,
     purposeOfLeave VARCHAR(255) NOT NULL,
     allocatedLeave VARCHAR(255) NOT NULL,
-    daysRemaining VARCHAR(255) NOT NULL
+    daysRemaining VARCHAR(255) NOT NULL,
+    isApproved BOOLEAN DEFAULT 0
   );
 `;
 
@@ -1411,9 +1508,9 @@ app.post('/api/tutor/leave-application', async (req, res) => {
   try {
 
     db.query('SELECT * FROM Staff WHERE email = ?', [leaveRequest.email], async (err, result) => {
+      const position = result[0].position
       const allocatedLeave = result[0].sickLeave
-      // const daysRemaining = result[0].sickLeaveTaken
-      const daysRemaining = 0
+      const daysRemaining = result[0].sickLeaveTaken
 
       db.query('SELECT * FROM LeaveApplication', async (err, result) => {
         if (err) {
@@ -1423,12 +1520,12 @@ app.post('/api/tutor/leave-application', async (req, res) => {
 
 
         const sql = `
-              INSERT INTO LeaveApplication (fullName, email, location, numberOfDays, leaveStartDate, leaveEndDate, purposeOfLeave, allocatedLeave, daysRemaining)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+              INSERT INTO LeaveApplication (fullName, email, location, position, numberOfDays, leaveStartDate, leaveEndDate, purposeOfLeave, allocatedLeave, daysRemaining)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
 
 
-        db.query(sql, [leaveRequest.name, leaveRequest.email, leaveRequest.office, leaveRequest.formData.selectedDays, leaveRequest.formData.leaveStartDate, leaveRequest.formData.leaveEndDate, leaveRequest.formData.purposeOfLeave, allocatedLeave, daysRemaining], async (err, result) => {
+        db.query(sql, [leaveRequest.name, leaveRequest.email, leaveRequest.office, position, leaveRequest.formData.selectedDays, leaveRequest.formData.leaveStartDate, leaveRequest.formData.leaveEndDate, leaveRequest.formData.purposeOfLeave, allocatedLeave, daysRemaining], async (err, result) => {
 
           if (err) {
             console.error(err);
@@ -1448,7 +1545,7 @@ app.post('/api/tutor/leave-application', async (req, res) => {
 
 
 // ..........................STAFF  VERIFICATION EMAIL ..................................
-app.post('/api/tutor/verify-tutor-email', async (req, res) => {
+app.post('/api/staff/verify-tutor-email', async (req, res) => {
   try {
     const { emailToken, email } = req.body;
 
@@ -1456,14 +1553,14 @@ app.post('/api/tutor/verify-tutor-email', async (req, res) => {
       return res.status(404).json("EmailToken not found...");
     }
 
-    db.query('SELECT * FROM Tutors WHERE email = ?', [email], async (err, result) => {
+    db.query('SELECT * FROM Staff WHERE email = ?', [email], async (err, result) => {
       if (err) {
         console.error(err);
         return res.status(500).send('Internal Server Error');
       }
 
       if (result.length === 0) {
-        return res.status(404).json("Tutor not found.");
+        return res.status(404).json("Staff not found.");
       }
 
 
@@ -1479,7 +1576,7 @@ app.post('/api/tutor/verify-tutor-email', async (req, res) => {
       const updatedEmailToken = null;
       const isVerified = 1;
       const updateSql = `
-          UPDATE Tutors
+          UPDATE Staff
           SET emailToken = ?, isVerified = ?
           WHERE email = ?
         `;
@@ -1536,39 +1633,39 @@ app.post('/api/staff/login', async (req, res) => {
     const payload = { id: result[0]._id };
     const token = createToken(payload);
 
-    if(result[0].hubInstructor == '1' && result[0].schoolInstructor == '1'){
+    if (result[0].hubInstructor == '1' && result[0].schoolInstructor == '1') {
       db.query('SELECT * FROM HubInstructors WHERE email = ?', [email], async (err, course1) => {
         db.query('SELECT * FROM SchoolInstructors WHERE email = ?', [email], async (err, course2) => {
 
           const courses1 = course1[0].courses
           const courses2 = course2[0].courses
-   
-  
-          res.json({ token: token, staff: name, staff_authorization: result[0].id, hubCourse: courses1, schoolCourse: courses2, office: result[0].office, email: email, instructor: 'hub_SchoolInstructor'});
+
+
+          res.json({ token: token, staff: name, staff_authorization: result[0].id, hubCourse: courses1, schoolCourse: courses2, office: result[0].office, email: email, instructor: 'hub_SchoolInstructor' });
         })
-       
+
 
       })
 
     }
-    else if(result[0].hubInstructor == "1"){
+    else if (result[0].hubInstructor == "1") {
 
       db.query('SELECT * FROM HubInstructors WHERE email = ?', [email], async (err, courses) => {
 
         const AllCourses = courses[0].courses
-        res.json({ token: token, staff: name, staff_authorization: result[0].id, hubCourse: AllCourses, office: result[0].office, email: email, instructor: 'hubInstructor'});
+        res.json({ token: token, staff: name, staff_authorization: result[0].id, hubCourse: AllCourses, office: result[0].office, email: email, instructor: 'hubInstructor' });
 
       })
 
     }
-    else if(result[0].schoolInstructor == "1"){
+    else if (result[0].schoolInstructor == "1") {
       db.query('SELECT * FROM SchoolInstructors WHERE email = ?', [email], async (err, courses) => {
         const AllCourses = courses[0].courses
-        res.json({ token: token, staff: name, staff_authorization: result[0].id, schoolCourse: AllCourses, office: result[0].office, email: email, instructor: 'schoolInstructor'});
+        res.json({ token: token, staff: name, staff_authorization: result[0].id, schoolCourse: AllCourses, office: result[0].office, email: email, instructor: 'schoolInstructor' });
 
       })
-    }else{
-      res.json({ token: token, staff: name, staff_authorization: result[0].id, course: course, office: result[0].office, email: email, instructor: false});
+    } else {
+      res.json({ token: token, staff: name, staff_authorization: result[0].id, course: course, office: result[0].office, email: email, instructor: false });
 
     }
 
@@ -1577,17 +1674,17 @@ app.post('/api/staff/login', async (req, res) => {
 
 
 // ...........................STAFF FORGET PASSWORD ..........................
-app.post('/api/tutor/tutor_forgot_password', async (req, res) => {
+app.post('/api/staff/forgot_password', async (req, res) => {
   const { email } = req.body;
   try {
-    db.query('SELECT * FROM Tutors WHERE email = ?', [email], async (err, result) => {
+    db.query('SELECT * FROM Staff WHERE email = ?', [email], async (err, result) => {
       if (err) {
         return res.status(500).send('Internal Server Error');
       }
       // If there are no users with that email address in our database then we have to tell the client they don't exist!
 
       if (result.length === 0) {
-        return res.status(401).json({ error: 'No Tutor with Email found' });
+        return res.status(401).json({ error: 'No Staff with Email found' });
       }
       if (result[0].emailToken === null && result[0].isVerified === 0) {
         return res.status(404).json({ error: 'Your account has been suspended. Please contact Ehizua Hub Admin.' });
@@ -1605,7 +1702,7 @@ app.post('/api/tutor/tutor_forgot_password', async (req, res) => {
       // Update the emailToken and isVerified fields
       const updatedId = hashedPass;
       const updateSql = `
-         UPDATE Tutors
+         UPDATE Staff
          SET id = ?
          WHERE email = ?
        `;
@@ -1662,7 +1759,71 @@ app.post('/api/tutor/tutor_forgot_password', async (req, res) => {
 
 })
 
+// ........................... STAFF DETAILS ..........................................
 
+app.get('/api/staff/details', (req, res) => {
+
+  const { email } = req.headers
+
+  try {
+    db.query('SELECT * FROM Staff WHERE email = ?', [email], async (err, staff) => {
+      if (err) {
+        console.error('Error retrieving Staff:', err); // Log the error
+        return res.status(500).json({ message: 'Error retrieving Staff' });
+      }
+
+      const sickLeaveRemaining = parseInt(staff[0].sickLeave) - parseInt(staff[0].sickLeaveTaken)
+      return res.json({ staff, leaveLeft: sickLeaveRemaining });
+    });
+  } catch (error) {
+    console.error('Error retrieving Staff:', error); // Log the error
+    return res.status(500).json({ message: 'Error retrieving Staff' });
+  }
+});
+
+
+// ........................... STAFF FILTER ALL LEAVE REQUEST ..........................................
+app.get('/api/staff/leave-request', (req, res) => {
+
+
+  const createTableQuery = `
+  CREATE TABLE IF NOT EXISTS LeaveApplication (
+    _id INT AUTO_INCREMENT PRIMARY KEY,
+    fullName VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    position VARCHAR(255) NOT NULL,
+    numberOfDays VARCHAR(255) NOT NULL,
+    leaveStartDate VARCHAR(255) NOT NULL,
+    leaveEndDate VARCHAR(255) NOT NULL,
+    purposeOfLeave VARCHAR(255) NOT NULL,
+    allocatedLeave VARCHAR(255) NOT NULL,
+    daysRemaining VARCHAR(255) NOT NULL,
+    isApproved BOOLEAN DEFAULT 0
+  );
+`;
+
+  db.query(createTableQuery, (err) => {
+    if (err) {
+      console.error(err);
+      throw new Error('Error creating table');
+    }
+  });
+
+  const { email } = req.headers
+  try {
+    db.query('SELECT * FROM LeaveApplication WHERE email = ?', [email], async (err, leave) => {
+      if (err) {
+        console.error('Error retrieving leav application:', err); // Log the error
+        return res.status(500).json({ message: 'Error retrieving leav application' });
+      }
+      return res.json({ leave });
+    });
+  } catch (error) {
+    console.error('Error retrieving leave application:', error); // Log the error
+    return res.status(500).json({ message: 'Error retrieving tutors' });
+  }
+});
 
 
 
@@ -2235,11 +2396,11 @@ app.post('/api/hub-tutor/create-curriculum', (req, res) => {
 
         // Now, you can insert data into the Curriculum table
         const insertDataQuery = `
-              INSERT INTO Curriculum (course, mainTopic, subTopic)
-              VALUES (?, ?, ?);
+              INSERT INTO Curriculum (course, mainTopic, subTopic, courseCode)
+              VALUES (?, ?, ?, ?);
             `;
 
-        const values = [course, mainTopic, subTopic];
+        const values = [course, mainTopic, subTopic, courseCode];
 
         db.query(insertDataQuery, values, (err) => {
           if (err) {
@@ -2263,6 +2424,7 @@ app.post('/api/school-tutor/create-curriculum', (req, res) => {
       course VARCHAR(255) NOT NULL,
       mainTopic VARCHAR(255) NOT NULL,
       subTopic VARCHAR(255) NOT NULL,
+      courseCode VARCHAR(255) NOT NULL,
       createdAt TIMESTAMP NOT NULL
     );
   `;
@@ -2274,7 +2436,7 @@ app.post('/api/school-tutor/create-curriculum', (req, res) => {
     }
   });
 
-  const { authHeader, course, mainTopic, subTopic } = req.body;
+  const { authHeader, course, mainTopic, subTopic, courseCode } = req.body;
 
   db.query('SELECT * FROM Staff WHERE id = ?', [authHeader], async (err, result) => {
     if (err) {
@@ -2304,11 +2466,11 @@ app.post('/api/school-tutor/create-curriculum', (req, res) => {
 
         // Now, you can insert data into the Curriculum table
         const insertDataQuery = `
-              INSERT INTO Curriculum (course, mainTopic, subTopic)
-              VALUES (?, ?, ?);
+              INSERT INTO Curriculum (course, mainTopic, subTopic, courseCode)
+              VALUES (?, ?, ?, ?);
             `;
 
-        const values = [course, mainTopic, subTopic];
+        const values = [course, mainTopic, subTopic, courseCode];
 
         sch.query(insertDataQuery, values, (err) => {
           if (err) {
@@ -2320,6 +2482,84 @@ app.post('/api/school-tutor/create-curriculum', (req, res) => {
       }
     })
   })
+
+
+});
+
+
+// ........................ TUTOR CREATE SCHOOL COURSE CONTENT .................................
+app.post('/api/tutor/create-school-content', async (req, res) => {
+  const createTableQuery = `
+  CREATE TABLE IF NOT EXISTS Contents (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    mainTopic VARCHAR(255) NOT NULL,
+    subTopic VARCHAR(255) NOT NULL,
+    content VARCHAR(255) NOT NULL,
+    course VARCHAR(255) NOT NULL,
+    createdAt TIMESTAMP NOT NULL
+  );
+`;
+
+  sch.query(createTableQuery, (err) => {
+    if (err) {
+      console.error(err);
+      throw new Error('Error creating table');
+    }
+  });
+  const { authHeader, main_topic, content, course, sub_topic } = req.body;
+
+  try {
+    db.query('SELECT * FROM Staff WHERE id = ?', [authHeader], async (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Internal Server Error' });
+      }
+      if (result.length == 0) {
+        return res.status(401).json({ error: 'Unauthorised to view this page. Please Login' });
+      }
+
+      if (result[0].emailToken === null && result[0].isVerified === 0) {
+        return res.status(404).json({ error: 'Your account has been suspended. Please contact Ehizua Hub Admin.' });
+      }
+
+      if (result[0].isVerified == 0) {
+        return res.status(400).json({ error: 'Please verify your account or contact Ehizua Hub Admin for assistance' });
+      }
+
+
+
+      // Check if the Content with the same Main Topic and Sub Topic already exists
+      sch.query('SELECT * FROM Contents WHERE mainTopic = ? AND subTopic = ?', [main_topic, sub_topic], async (err, result) => {
+        if (err) {
+          console.error(err);
+          return res.status(500).send('Internal Server Error');
+        }
+
+        if (result.length !== 0) {
+          return res.status(400).json({ error: 'Topic already exists' });
+        }
+
+
+        const sql = `
+        INSERT INTO Contents (mainTopic, content, course, subTopic)
+        VALUES (?, ?, ?, ?)
+      `;
+
+        sch.query(sql, [main_topic, content, course, sub_topic], async (err, result) => {
+          if (err) {
+            console.error(err);
+            return res.status(500).send('Internal Server Error');
+          }
+
+          return res.json({ message: 'Content created successfully', content: result });
+        });
+      });
+
+    })
+
+  } catch (error) {
+    return res.status(500).json({ message: 'Error creating content' });
+  }
 
 
 });
@@ -2480,83 +2720,6 @@ app.post('/api/tutor/create-hub-content', async (req, res) => {
 
 });
 
-// ........................ TUTOR CREATE SCHOOL COURSE CONTENT .................................
-app.post('/api/tutor/create-school-content', async (req, res) => {
-  const createTableQuery = `
-  CREATE TABLE IF NOT EXISTS Contents (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    mainTopic VARCHAR(255) NOT NULL,
-    subTopic VARCHAR(255) NOT NULL,
-    content VARCHAR(255) NOT NULL,
-    course VARCHAR(255) NOT NULL,
-    createdAt TIMESTAMP NOT NULL
-  );
-`;
-
-  sch.query(createTableQuery, (err) => {
-    if (err) {
-      console.error(err);
-      throw new Error('Error creating table');
-    }
-  });
-  const { authHeader, main_topic, content, course, sub_topic } = req.body;
-
-  try {
-    db.query('SELECT * FROM Staff WHERE id = ?', [authHeader], async (err, result) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ error: 'Internal Server Error' });
-      }
-      if (result.length == 0) {
-        return res.status(401).json({ error: 'Unauthorised to view this page. Please Login' });
-      }
-
-      if (result[0].emailToken === null && result[0].isVerified === 0) {
-        return res.status(404).json({ error: 'Your account has been suspended. Please contact Ehizua Hub Admin.' });
-      }
-
-      if (result[0].isVerified == 0) {
-        return res.status(400).json({ error: 'Please verify your account or contact Ehizua Hub Admin for assistance' });
-      }
-
-
-
-      // Check if the Content with the same Main Topic and Sub Topic already exists
-      sch.query('SELECT * FROM Contents WHERE mainTopic = ? AND subTopic = ?', [main_topic, sub_topic], async (err, result) => {
-        if (err) {
-          console.error(err);
-          return res.status(500).send('Internal Server Error');
-        }
-
-        if (result.length !== 0) {
-          return res.status(400).json({ error: 'Topic already exists' });
-        }
-
-
-        const sql = `
-        INSERT INTO Contents (mainTopic, content, course, subTopic)
-        VALUES (?, ?, ?, ?)
-      `;
-
-        sch.query(sql, [main_topic, content, course, sub_topic], async (err, result) => {
-          if (err) {
-            console.error(err);
-            return res.status(500).send('Internal Server Error');
-          }
-
-          return res.json({ message: 'Content created successfully', content: result });
-        });
-      });
-
-    })
-
-  } catch (error) {
-    return res.status(500).json({ message: 'Error creating content' });
-  }
-
-
-});
-
 
 // .......................... TUTOR GET HUB COURSE CONTENT ..........................................
 app.get('/api/tutor/hub-course-content', async (req, res) => {
@@ -2599,8 +2762,8 @@ app.get('/api/tutor/hub-course-content', async (req, res) => {
   }
 });
 
-// .......................... TUTOR GET SCHOOL COURSE CONTENT ..........................................
-app.get('/api/tutor/school-course-content', async (req, res) => {
+// .......done............... TUTOR GET SCHOOL COURSE CONTENT LIST ..........................................
+app.get('/api/tutor/school-course-content-list', async (req, res) => {
   const authHeader = req.headers.authheader;
   const course = req.headers.course;
 
@@ -2640,6 +2803,47 @@ app.get('/api/tutor/school-course-content', async (req, res) => {
   }
 });
 
+// .......done............... TUTOR GET SCHOOL COURSE CONTENT  ..........................................
+app.get('/api/tutor/school-course-content', async (req, res) => {
+  const authHeader = req.headers.authheader;
+  const id = req.headers.id;
+  console.log(id)
+
+
+  try {
+    db.query('SELECT * FROM Staff WHERE id = ?', [authHeader], async (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Internal Server Error' });
+      }
+
+      if (result.length === 0) {
+        return res.status(401).json({ error: 'Unauthorised to view this page. Please Login' });
+      }
+
+      if (result[0].isVerified === 0) {
+        return res.status(400).json({ error: 'Please verify your account or contact Ehizua Hub Admin for assistance' });
+      }
+
+      if (result[0].emailToken === null && result[0].isVerified === 0) {
+        return res.status(404).json({ error: 'Your account has been suspended. Please contact Ehizua Hub Admin.' });
+      }
+
+      sch.query('SELECT * FROM Contents WHERE id = ?', [id], async (err, content) => {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ error: 'Error fetching course content' });
+        }
+        return res.json({ content });
+      });
+
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Unauthorized!! Please login to view courses' });
+  }
+});
 
 // .......................... TUTOR GET HUB COURSE CURRICULUM ..........................................
 app.get('/api/tutor/hub-course-curriculum', async (req, res) => {
@@ -2686,6 +2890,7 @@ app.get('/api/tutor/hub-course-curriculum', async (req, res) => {
 app.get('/api/tutor/school-course-curriculum', async (req, res) => {
   const authHeader = req.headers.authheader;
   const course = req.headers.course;
+
 
 
   try {
@@ -2843,6 +3048,17 @@ app.post('/api/tutor/create-questions', async (req, res) => {
 });
 
 
+// ....................... TUTOR GET LIST OF SCHOOL COURSE CODE ................................
+app.get('/api/auth/all-school-subject', async (req, res) => {
+  const course = req.headers.course
+
+  sch.query('SELECT * FROM Courses WHERE course = ?', [course], async (err, result) => {
+
+    return res.json({ message: result });
+
+  })
+})
+
 
 
 
@@ -2872,22 +3088,26 @@ app.post('/api/school_pupils/login', async (req, res) => {
       return res.status(401).json({ message: 'Wrong Email or Password' });
     }
 
-    if (result[0].password !== id) {
+    if (result[(result.length) - 1].password !== id) {
       return res.status(401).json({ message: 'Wrong Email or Password' });
     }
 
 
-    if (result[0].isVerified === 0) {
+    if (result[(result.length) - 1].isVerified === 0) {
       return res.status(400).json({ message: 'Please verify your account.. Or contact Ehizua Hub Admin for assistance' });
     }
 
-    if (result[0].emailToken === null && result[0].isVerified === 0) {
+    if (result[(result.length) - 1].emailToken === null && result[(result.length) - 1].isVerified === 0) {
       return res.status(404).json("Your account has been suspended. Please contact Ehizua Hub Admin.");
     }
-    if (!id === result[0].password) {
+    if (!id === result[(result.length) - 1].password) {
       return res.status(404).json({ message: "Wrong Email or Password." });
 
     }
+
+
+
+
     const name = (`${result[0].firstName} ${result[0].lastName}`);
     const course = (result[0].courses);
     const payload = { id: result[0]._id };
@@ -2898,8 +3118,8 @@ app.post('/api/school_pupils/login', async (req, res) => {
 });
 
 
-// .................................... PUPILS COURSE CONTENT ...............................
-app.get('/api/school_pupils/course-content', async (req, res) => {
+// .................................... PUPILS COURSE SECTION ...............................
+app.get('/api/school_pupils/course-section', async (req, res) => {
 
   const { email, school } = req.headers;
   const words = school.split(' ');
@@ -2912,54 +3132,24 @@ app.get('/api/school_pupils/course-content', async (req, res) => {
         return res.status(500).send('Internal Server Error');
       }
 
-      // if (response[0].emailToken === null && response[0].isVerified === 0) {
-      //   return res.status(404).json("Your account has been suspended. Please contact Ehizua Hub Admin.");
-      // }
-
-
-
-      let course1;
-      let course2;
-      let course3;
-      let course4;
-      let course5;
-
-      if (response[0].course1) {
-        course1 = response[0].course1;
+      if (response[0].emailToken === null && response[0].isVerified === 0) {
+        return res.status(404).json("Your account has been suspended. Please contact Ehizua Hub Admin.");
       }
 
-      if (response[0].course2) {
-        course2 = response[0].course2;
-      }
-
-      if (response[0].course3) {
-        course3 = response[0].course3;
-      }
-
-      if (response[0].course4) {
-        course4 = response[0].course4;
-      }
-
-      if (response[0].course5) {
-        course5 = response[0].course5;
-      }
+      const currentDate = new Date();
+      const options = { month: 'numeric', day: '2-digit', year: 'numeric' };
+      const formattedString = currentDate.toLocaleDateString('en-US', options).replace(/\//g, '');
+      const term = response[(response.length) - 1].term
+      const year = response[(response.length) - 1].year
+      const session = `${term}${year}`
 
 
+      const course = (response[(response.length - 1)].courses)
+      const ArrayCourse = course.split(', ')
+
+      return res.json({ message: ArrayCourse });
 
 
-
-      sch.query('SELECT * FROM Contents WHERE course1 = ?', [course1], async (err, content1) => {
-        sch.query('SELECT * FROM Contents WHERE course2 = ?', [course2], async (err, content2) => {
-          sch.query('SELECT * FROM Contents WHERE course3 = ?', [course3], async (err, content3) => {
-            sch.query('SELECT * FROM Contents WHERE course4 = ?', [course4], async (err, content4) => {
-              sch.query('SELECT * FROM Contents WHERE course5 = ?', [course5], async (err, content5) => {
-
-                return res.status(200).json({ content1, content2, content3, content4, content5 });
-              })
-            })
-          })
-        })
-      })
     })
 
 
@@ -2969,6 +3159,87 @@ app.get('/api/school_pupils/course-content', async (req, res) => {
     return res.status(500).json({ message: 'An error occurred while retrieving course content' });
   }
 });
+
+
+// .................................... PUPILS COURSE CURRICULUM ...............................
+app.get('/api/school_pupils/course-curriculum', async (req, res) => {
+  const { email, school, course } = req.headers;
+  const words = school.split(' ');
+  const schoolSelected = words.map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join('');
+
+  sch.query(`SELECT * FROM ${schoolSelected} WHERE email = ? AND school = ?`, [email, schoolSelected], async (err, pupil) => {
+    const courseList = pupil[(pupil.length - 1)].courseCode
+    const courseCode = courseList.split(', ')
+
+    try {
+      sch.query(`SELECT * FROM Curriculum WHERE course = ?`, [course], async (err, response) => {
+        if (err) {
+          return res.status(500).send('Internal Server Error');
+        }
+
+        let myCourse = [];
+        const queries = [];
+
+        for (let i = 0; i < courseCode.length; i++) {
+          const queryPromise = new Promise((resolve, reject) => {
+            sch.query(`SELECT * FROM Curriculum WHERE course = ? AND courseCode = ?`, [course, courseCode[i]], (err, store) => {
+              if (err) {
+                reject(err);
+              } else {
+                // Only push to myCourse if store has a value
+                if (store.length > 0) {
+                  myCourse.push(store[0]);
+                }
+                resolve(store);
+              }
+            });
+          });
+
+          queries.push(queryPromise);
+        }
+
+        // Wait for all queries to complete
+        Promise.all(queries)
+          .then(results => {
+            // console.log(myCourse);
+            return res.json({ message: myCourse });
+          })
+          .catch(error => {
+            console.error('Error executing queries:', error);
+          });
+
+
+
+
+      })
+    } catch (error) {
+      console.error('Error retrieving course content:', error);
+      return res.status(500).json({ message: 'An error occurred while retrieving course content' });
+    }
+  })
+});
+
+// .................................... PUPILS COURSE CONTENT ...............................
+app.get('/api/school_pupils/course-content', async (req, res) => {
+  const { subtopic, maintopic } = req.headers;
+
+  sch.query(`SELECT * FROM Contents WHERE mainTopic = ? AND subTopic = ?`, [maintopic, subtopic], async (err, pupil) => {
+    if(pupil.length == 0){
+      return res.json({ message: [{
+        mainTopic: maintopic,
+        subTopic: subtopic,
+        content: 'SORRY!! THIS CONTENT IS NOT YET AVAILABLE AT THE MOMENT..... CONTACT YOUR INSTRUCTOR FOR FURTHER INSTRUCTIONS',
+      }] });
+
+    }
+
+    return res.json({ message: pupil });
+
+  })
+});
+
+
+
 
 // =================================================================================================================
 
@@ -3139,6 +3410,7 @@ app.post('/api/instructor/create-curriculum', (req, res) => {
       course VARCHAR(255) NOT NULL,
       mainTopic VARCHAR(255) NOT NULL,
       subTopic VARCHAR(255) NOT NULL,
+      courseCode VARCHAR(255) NOT NULL,
       createdAt TIMESTAMP NOT NULL
     );
   `;

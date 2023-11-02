@@ -4,59 +4,67 @@ import Dashboard from './Admin/Dashboard'
 import Login from './Admin/LoginForm'
 import StudentDashboard from './Students/StudentDashboard';
 import TutorDashboard from './Tutor/TutorDashboard';
-import VerifyTutorEmail from './Tutor/VerifyTutorEmail';
+import VerifyTutorEmail from './Staff/VerifyTutorEmail';
 import VerifyStudentEmail from './Students/VerifyStudentEmail';
 import StudentForgotPassword from './Students/StudentForgetPassword';
-import TutorForgotPassword from './Tutor/TutorForgotPassword';
-import AllTutorDetails from './Admin/AllTutorDetails';
-import AllStudentDetails from './Admin/AllStudentDetails';
+import TutorForgotPassword from './Staff/TutorForgotPassword';
+import AllStaffList from './Admin/StaffSection/AllStaffList';
+import AllStudentDetails from './Admin/Upskill/AllStudentDetails';
 import CourseTopic from './Students/CourseTopic';
 import StudentDetails from './Tutor/StudentDetails';
-import CreateStudents from './Admin/CreateStudents';
+import CreateStudents from './Admin/Upskill/CreateStudents';
 import TutorCreateQuestions from './Tutor/TutorCreateQuestions';
 import TutorCourseContents from './Tutor/TutorCourseContents';
 import Question from './Students/Question';
 import DetailsPage from './Students/DetailsPage';
 import Timer from './Students/Timer';
-import CreateSchool from './Admin/partnerSchools/CreateSchool';
-import RegisterStudent from './Admin/partnerSchools/RegisterStudent';
-import SingleStudentDetailsPage from './Admin/SingleStudentDetails';
-import StudentsProgress from './Admin/StudentsProgress';
-import UpdateStudent from './Admin/UpdateStudent';
-import UpdateStaff from './Admin/UpdateStaff';
-import AllSchools from './Admin/partnerSchools/AllSchools';
-import SchoolDetails from './Admin/partnerSchools/SchoolDetails';
+import CreateSchool from './Admin/PartnerSchools/CreateSchool';
+import RegisterStudent from './Admin/PartnerSchools/RegisterStudent';
+import SingleStudentDetailsPage from './Admin/Upskill/SingleStudentDetails';
+import StudentsProgress from './Admin/Upskill/StudentsProgress';
+import UpdateStudent from './Admin/Upskill/UpdateStudent';
+import UpdateStaff from './Admin/StaffSection/UpdateStaff';
+import AllSchools from './Admin/PartnerSchools/AllSchools';
+import SchoolDetails from './Admin/PartnerSchools/SchoolDetails';
 import LeaveDashboard from './Staff/LeaveDashboard';
-import Test from './Admin/Test';
-import CreateLocation from './Admin/CreateLocation';
-import AllOfices from './Admin/AllOffices';
-import TutorDetails from './Tutor/TutorDetails';
-import LeaveRequest from './Admin/LeaveRequest';
-import ApprovedLeaveRequest from './Admin/ApprovedLeaveRequest';
-import RejectedLeaveRequest from './Admin/RejectedLeaveRequest';
-import PendingLeaveRequest from './Admin/PendingLeaveRequest';
-import OfficeDetails from './Admin/OfficeDetails';
+import CreateLocation from './Admin/Offices/CreateLocation';
+import AllOfices from './Admin/Offices/AllOffices';
+import StaffDetails from './Staff/StaffDetails';
+import LeaveRequest from './Admin/LeavSection/LeaveRequest';
+import ApprovedLeaveRequest from './Admin/LeavSection/ApprovedLeaveRequest';
+import RejectedLeaveRequest from './Admin/LeavSection/RejectedLeaveRequest';
+import PendingLeaveRequest from './Admin/LeavSection/PendingLeaveRequest';
+import OfficeDetails from './Admin/Offices/OfficeDetails';
 import PupilsDashboard from './SchoolPupils/PupilsDashboard';
-import InstructorDashboard from './Admin/partnerSchools/Instructor/InstructorDashboard';
-import CreateInstructor from './Admin/CreateInstructor';
-import InstructorDetails from './Admin/partnerSchools/Instructor/InstructorDetails';
-import InstructorCreateCurriculum from './Admin/partnerSchools/Instructor/InstructorCreateCurriculum';
-import InstructorCreateContent from './Admin/partnerSchools/Instructor/InstructorCreateContent';
-import CreateCourse from './Admin/CreateCourse';
-import CreateSubjects from './Admin/partnerSchools/CreateSubjects';
-import CreateStaff from './Admin/CreateStaff';
-import StaffDetails from './Admin/StaffDetails';
-import AllHubInstructors from './Admin/AllHubInstructors';
-import AllSchoolInstructors from './Admin/AllSchoolInstructors';
+import InstructorDashboard from './Admin/PartnerSchools/Instructor/InstructorDashboard';
+import InstructorDetails from './Admin/PartnerSchools/Instructor/InstructorDetails';
+import InstructorCreateCurriculum from './Admin/PartnerSchools/Instructor/InstructorCreateCurriculum';
+import InstructorCreateContent from './Admin/PartnerSchools/Instructor/InstructorCreateContent';
+import CreateCourse from './Admin/Upskill/CreateCourse';
+import CreateSubjects from './Admin/PartnerSchools/CreateSubjects';
+import CreateStaff from './Admin/StaffSection/CreateStaff';
+import AdminStaffDetails from './Admin/StaffSection/AdminStaffDetails';
+import AllHubInstructors from './Admin/StaffSection/HubTutors/AllHubInstructors';
+import AllSchoolInstructors from './Admin/StaffSection/SchoolTutors/AllSchoolInstructors';
 import HomeDashboard from './Staff/HomeDashboard';
-import CreateHubCourseCurriculum from './Tutor/CreateHubCourseCurriculum';
-import CreateSchoolCourseCurriculum from './Tutor/CreateSchoolCourseCurriculum';
-import CreateHubCourseContent from './Tutor/CreateHubCourseContent';
-import CreateSchoolCourseContent from './Tutor/CreateSchoolCourseContent';
-import ViewSchoolCousreContent from './Tutor/ViewSchoolCousreContent';
-import ViewHubCourseContent from './Tutor/ViewHubCourseContent';
-import ViewHubCurriculum from './Tutor/ViewHubCurriculum';
-import ViewSchoolCurriculum from './Tutor/ViewSchoolCurriculum';
+import CreateHubCourseCurriculum from './Tutor/HubInstructors/CreateHubCourseCurriculum';
+import CreateSchoolCourseCurriculum from './Tutor/SchoolInstructors/CreateSchoolCourseCurriculum';
+import CreateHubCourseContent from './Tutor/HubInstructors/CreateHubCourseContent';
+import CreateSchoolCourseContent from './Tutor/SchoolInstructors/CreateSchoolCourseContent';
+import ViewSchoolCourseList from './Tutor/SchoolInstructors/ViewSchoolCourseList';
+import ViewHubCourseContent from './Tutor/HubInstructors/ViewHubCourseContent';
+import ViewHubCurriculum from './Tutor/HubInstructors/ViewHubCurriculum';
+import ViewSchoolCurriculum from './Tutor/SchoolInstructors/ViewSchoolCurriculum';
+import HubInstructorDetails from './Admin/StaffSection/HubTutors/HubInstructorDetails';
+import SchoolInstructorDetails from './Admin/StaffSection/SchoolTutors/SchoolInstructorDetails';
+import UpdateHubInstructor from './Admin/StaffSection/HubTutors/UpdateHubInstructor';
+import UpdateSchoolInstructor from './Admin/StaffSection/SchoolTutors/UpdateSchoolInstructor';
+import ViewCourses from './Admin/Upskill/ViewCourses';
+import ViewCurriculum from './Admin/Upskill/ViewCurriculum';
+import ViewSchoolCourseContent from './Tutor/SchoolInstructors/ViewSchoolCourseContent';
+import CourseContent from './SchoolPupils/CourseContent';
+import ViewCourseStudent from './Tutor/SchoolInstructors/ViewCourseStudents';
+import CourseCurriculum from './SchoolPupils/CourseCurriculum';
 
 
 
@@ -70,6 +78,26 @@ function App() {
       <Routes>
           <Route path='dashboard' element={<Dashboard />} />
           <Route path='/' element={<Login />} />
+
+          {/* ADMIN VIEW UPSKILL COURSE AND CURRICULUM SECTION */}
+          <Route path='view-courses/curriculum' element={<ViewCourses />} />
+          <Route path='view-courses/curriculum/:course' element={<ViewCurriculum />} />
+
+{/* ----------------------------------------------------------------------------------------------- */}
+
+          <Route path='/school-student-dashboard/:course/curriculum' element={<CourseCurriculum/>} />
+          <Route path='/school-student-dashboard/:subtopic/:maintopic' element={<CourseContent/>} />
+
+
+
+          <Route path='/all_schools' element={<AllSchools/>} />
+          <Route path='/school_details/:schoolName' element={<SchoolDetails/>} />
+
+
+
+
+          {/* ADMIN VIEW PARTNER SCHOOL SECTION */}
+
           <Route path='student_dashboard' element={<StudentDashboard />} />
           <Route path='tutor_dashboard' element={<TutorDashboard />} />
           <Route path='staff_dashboard' element={<HomeDashboard />} />
@@ -77,7 +105,7 @@ function App() {
           <Route path='/verify-student-email' element={<VerifyStudentEmail />} />
           <Route path='/student_forgot_password' element={<StudentForgotPassword />} />
           <Route path='/tutor_forgot_password' element={<TutorForgotPassword />} />
-          <Route path='/all_staff' element={<AllTutorDetails />} />
+          <Route path='/all_staff' element={<AllStaffList />} />
           <Route path='/hub_instructors' element={<AllHubInstructors />} />
           <Route path='/school_instructors' element={<AllSchoolInstructors />} />
           <Route path='/all_student_details' element={<AllStudentDetails />} />
@@ -97,23 +125,20 @@ function App() {
           <Route path='/single_student_details_page/:_id' element={<SingleStudentDetailsPage/>} />
           <Route path='/students_progress/:_id/:course/:email' element={<StudentsProgress/>} />
           <Route path='/update_student/:_id' element={<UpdateStudent/>} />
-          <Route path='/personal_staff_details/:_id' element={<StaffDetails/>} />
+          <Route path='/staff-details/:email' element={<StaffDetails/>} />
           <Route path='/update_staff/:_id' element={<UpdateStaff/>} />
-          <Route path='/all_schools' element={<AllSchools/>} />
-          <Route path='/school_details/:id' element={<SchoolDetails/>} />
-          <Route path='/leave' element={<LeaveDashboard/>} />
+          <Route path='/casual-leave' element={<LeaveDashboard/>} />
           <Route path='/create_hub_course_content/:course' element={<CreateHubCourseContent/>} />
           <Route path='/create_school_course_content/:course' element={<CreateSchoolCourseContent/>} />
-          <Route path='/view_school_course_content/:course' element={<ViewSchoolCousreContent/>} />
+          <Route path='/view_school_course_list/:course' element={<ViewSchoolCourseList/>} />
           <Route path='/view_hub_course_content/:course' element={<ViewHubCourseContent/>} />
           <Route path='/view_school_course_curriculum/:course' element={<ViewSchoolCurriculum/>} />
           <Route path='/view_hub_course_curriculum/:course' element={<ViewHubCurriculum/>} />
           <Route path='/instructor_create_content' element={<InstructorCreateContent/>} />
-          <Route path='/test' element={<Test/>} />
           <Route path='/create_staff' element={<CreateStaff/>} />
           <Route path='/create_location' element={<CreateLocation/>} />
           <Route path='/all_offices' element={<AllOfices/>} />
-          <Route path='/tutor_details_page/:email' element={<TutorDetails/>} />
+          <Route path='/view_staff_details/:_id' element={<AdminStaffDetails/>} />
           <Route path='/instructor_details_page/:email' element={<InstructorDetails/>} />
           <Route path='/offices_details/:officeName' element={<OfficeDetails/>} />
           <Route path='/all_leave_request' element={<LeaveRequest/>} />
@@ -122,9 +147,14 @@ function App() {
           <Route path='/pending_leave_request' element={<PendingLeaveRequest/>} />
           <Route path='/school-student-dashboard' element={<PupilsDashboard/>} />
           <Route path='/instructor-dashboard' element={<InstructorDashboard/>} />
-          <Route path='/create_instructor' element={<CreateInstructor/>} />
           <Route path='/create_courses' element={<CreateCourse/>} />
           <Route path='/create_subject' element={<CreateSubjects/>} />
+          <Route path='/hub-instuctor-details/:_id' element={<HubInstructorDetails/>} />
+          <Route path='/school-instuctor-details/:_id' element={<SchoolInstructorDetails/>} />
+          <Route path='/update-hub-instructor/:_id' element={<UpdateHubInstructor/>} />
+          <Route path='/update-school-instructor/:_id' element={<UpdateSchoolInstructor/>} />
+          <Route path='/school-course-content-details/:id' element={<ViewSchoolCourseContent/>} />
+          <Route path='/view_school_student_by_course/:course' element={<ViewCourseStudent/>} />
 
       </Routes>
       

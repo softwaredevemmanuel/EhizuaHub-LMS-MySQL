@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { BrowserRouter as Router, Route, Switch, Link } from 'react-router-dom';
 import LoginForm from '../LoginForm';
 
 function RegisterStudent() {
@@ -8,10 +7,9 @@ function RegisterStudent() {
   const [admin, setAdmin] = useState(false);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [course, setCourse] = useState('');
   const [guardiansPhone, setGuardianPhone] = useState('');
   const [year, setYear] = useState('2023');
-  const [term, setTerm] = useState('First Term');
+  const [term, setTerm] = useState('');
   const [level, setLevel] = useState('Primary 1');
   const [schools, setSchools] = useState([]);
   const [arrayCourses, setArrayCourses] = useState([]);
@@ -19,9 +17,10 @@ function RegisterStudent() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
-  const [course1, setCourse1] = useState('');
 
   const [checkedCourses, setCheckedCourses] = useState([]);
+  const [formattedDate, setFormattedDate] = useState('');
+
 
   const handleCheckboxChange = (event) => {
     const { value, checked } = event.target;
@@ -38,12 +37,19 @@ function RegisterStudent() {
 
   useEffect(() => {
     const loginData = JSON.parse(localStorage.getItem('Adminlogin'));
+    const currentDate = new Date();
+    const options = {year: 'numeric' };
+    const formattedString = currentDate.toLocaleDateString('en-US', options).replace(/\//g, '');
+    setFormattedDate(formattedString);
 
     if (loginData && loginData.login && loginData.admin && loginData.admin_authorization) {
       setLogin(true);
       setAdmin(true);
+
     }
   }, []);
+  console.log(formattedDate)
+
 
   useEffect(() => {
     async function fetchSchools() {
@@ -127,7 +133,6 @@ function RegisterStudent() {
     setFirstName('');
     setLastName('');
     setLevel('');
-    setCourse('');
     setGuardianPhone('');
   };
 
@@ -227,21 +232,17 @@ function RegisterStudent() {
               value={year}
               onChange={(event) => setYear(event.target.value)}
             >
-              <option value='2023'>2023</option>
-              <option value='2024'>2024</option>
-              <option value='2025'>2025 </option>
-              <option value='2026'>2026</option>
-              <option value='2027'>2027</option>
+              <option value={formattedDate}>{formattedDate}</option>
             </select>
             <select
               id='term'
               value={term}
               onChange={(event) => setTerm(event.target.value)}
             >
-              <option value='First Term'>First Term</option>
-              <option value='Second Term'>Second Term</option>
-              <option value='Third Term'>Third Term </option>
-              <option value='Summer Lesson'>Summer Class </option>
+              <option value=''>Select Term</option>
+              <option value='1230'>First Term</option>
+              <option value='0415'>Second Term</option>
+              <option value='0831'>Third Term </option>
             </select>
             <br /><br />
 
