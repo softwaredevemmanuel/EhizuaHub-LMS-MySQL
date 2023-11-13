@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { BrowserRouter as Router, Route, Switch, Link } from 'react-router-dom';
 import LoginForm from '../LoginForm';
+import { Link, useParams } from 'react-router-dom';
 
 function CreateStudents() {
   const [login, setLogin] = useState(false);
@@ -20,6 +20,12 @@ function CreateStudents() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [selectedValue, setSelectedValue] = useState('');
+
+
+
+  const { location: locationParams } = useParams();
+
 
   useEffect(() => {
     const loginData = JSON.parse(localStorage.getItem('Adminlogin'));
@@ -33,28 +39,31 @@ function CreateStudents() {
   // Fetch Courses
   useEffect(() => {
     async function fetchCourses() {
-        try {
-            const response = await axios.get('http://localhost:5000/api/auth/all_upskill_courses');
-            setAllCourse(response.data.message);
-        } catch (error) {
-            setError('Error retrieving Courses');
-        }
+      try {
+        const response = await axios.get('http://localhost:5000/api/auth/all_upskill_courses');
+        setAllCourse(response.data.message);
+      } catch (error) {
+        setError('Error retrieving Courses');
+      }
     }
 
-      fetchCourses();
-    }, []);
+    fetchCourses();
+  }, []);
+
 
   const createStudent = () => {
-    if (firstName && lastName && email && course && phone) {
+    if (firstName && lastName && email && course && phone && selectedValue) {
       setLoading(true);
 
       axios
         .post('http://localhost:5000/api/auth/create-student', {
+          selectedValue,
           firstName,
           lastName,
           email,
           course,
           phone,
+          location: locationParams,
           guardiansPhone,
           duration,
           courseFee,
@@ -93,9 +102,17 @@ function CreateStudents() {
     setCourseFee('');
     setAmountPaid('');
     setHomeAddress('');
+    setSelectedValue('');
   };
 
 
+
+  const handleRadioChange = (event) => {
+    const value = event.target.value === 'true';
+    setSelectedValue(value);
+  };
+
+  console.log(selectedValue)
 
   return (
     <div className='App'>
@@ -105,6 +122,39 @@ function CreateStudents() {
         <div className='App'>
           <h1>Create Student</h1>
           <form onSubmit={handleSubmit}>
+
+            <input
+              value={locationParams}
+              readOnly />
+            <br />
+            <br />
+            <div>
+              <label>
+                <input
+                  type="radio"
+                  name="gender"
+                  value="true"
+                  checked={selectedValue === true}
+                  onChange={handleRadioChange}
+                />
+                Verified
+              </label>
+
+              <label>
+                <input
+                  type="radio"
+                  name="gender"
+                  value="false"
+                  checked={selectedValue === false}
+                  onChange={handleRadioChange}
+                />
+                Not Verified
+              </label>
+            </div>
+
+
+            <br />
+            <br />
             <label htmlFor='firstName'>First Name</label>
             <input
               type='text'
@@ -134,16 +184,16 @@ function CreateStudents() {
 
             <label htmlFor='course'>Course</label>
             <select
-                  id='course'
-                  value={course}
-                  onChange={(event) => setCourse(event.target.value)}
-              >
-                  <option value=''>Select a Course</option>
-                  {allCourses.map((course, index) => (
-                      <option key={index} value={`${course.course}`}>
-                          {course.course}
-                      </option>
-                  ))}
+              id='course'
+              value={course}
+              onChange={(event) => setCourse(event.target.value)}
+            >
+              <option value=''>Select a Course</option>
+              {allCourses.map((course, index) => (
+                <option key={index} value={`${course.course}`}>
+                  {course.course}
+                </option>
+              ))}
             </select>
             <br /><br />
 
@@ -196,14 +246,14 @@ function CreateStudents() {
             <br /><br />
             <label>Home Address</label>
             <textarea value={homeAddress} onChange={(event) => setHomeAddress(event.target.value)} />
-            <br/>
-            <br/>
+            <br />
+            <br />
             <div>
-                  <label>Upload Document if any</label>
-                  <br />
-                  <input type="file" />
-                </div>
-                <br/>
+              <label>Upload Document if any</label>
+              <br />
+              <input type="file" />
+            </div>
+            <br />
 
 
             <button type='submit'>Create Student</button>

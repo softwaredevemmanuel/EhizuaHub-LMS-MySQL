@@ -44,7 +44,9 @@ function HubTutorDashboard() {
                             <Link to={`/view_hub_course_curriculum/${course}`}>View Curriculum</Link>
                             <br />
                             <br />
-                          
+                            <Link to={`/create_question/${course}`}>Create Question</Link>
+                            <br />
+                            <br />
                         </div>
                     </div>
                 ))}

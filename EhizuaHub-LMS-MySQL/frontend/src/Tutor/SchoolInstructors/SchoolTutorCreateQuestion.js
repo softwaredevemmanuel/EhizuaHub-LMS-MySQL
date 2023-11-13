@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import secureLocalStorage from "react-secure-storage";
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
-import TutorDashboard from './TutorDashboard';
+import StaffLogin from '../../Staff/StaffLogin';
 
 
 
-function TutorCreateQuestions() {
+
+function SchoolTutorCreateQuestions() {
     const [loginData, setLoginData] = useState(false);
     const [error, setError] = useState(null);
     const [tutor, setTutor] = useState(null);
@@ -41,52 +42,52 @@ function TutorCreateQuestions() {
 
     useEffect(() => {
         async function fetchMainTopic() {
-    
+
             try {
-              let login = JSON.parse(localStorage.getItem('Tutorlogin'));
-    
-              const response = await axios.get('http://localhost:5000/api/tutor/maintopic', {
-                headers: {
-                  course: login.course,
-                },
-              });
-              setMainTopic(response.data.message)
-    
-           
+                let login = JSON.parse(localStorage.getItem('Tutorlogin'));
+
+                const response = await axios.get('http://localhost:5000/api/tutor/maintopic', {
+                    headers: {
+                        course: login.course,
+                    },
+                });
+                setMainTopic(response.data.message)
+
+
             } catch (error) {
-              setError('Error fetching curriculum data');
+                setError('Error fetching curriculum data');
             }
-          }
-    
-          fetchMainTopic();
-          
-      }, []);
-    
-    
-    
-      useEffect(() => {
-        async function fetchSubTopic() {
-          try {
-            if (main_topic !== '') { // Check if a topic is selected
-              let login = JSON.parse(localStorage.getItem('Tutorlogin'));
-    
-              const response = await axios.get('http://localhost:5000/api/tutor/subtopic', {
-                headers: {
-                  course: login.course,
-                  main_topic: main_topic
-                },
-              });
-    
-              setSubTopic(response.data.subTopics);
-            }
-          } catch (error) {
-            setError('Error fetching curriculum data');
-          }
         }
-      
+
+        fetchMainTopic();
+
+    }, []);
+
+
+
+    useEffect(() => {
+        async function fetchSubTopic() {
+            try {
+                if (main_topic !== '') { // Check if a topic is selected
+                    let login = JSON.parse(localStorage.getItem('Tutorlogin'));
+
+                    const response = await axios.get('http://localhost:5000/api/tutor/subtopic', {
+                        headers: {
+                            course: login.course,
+                            main_topic: main_topic
+                        },
+                    });
+
+                    setSubTopic(response.data.subTopics);
+                }
+            } catch (error) {
+                setError('Error fetching curriculum data');
+            }
+        }
+
         fetchSubTopic();
-      }, [main_topic]); // Include 'topic' in the dependency array
-    
+    }, [main_topic]); // Include 'topic' in the dependency array
+
 
 
     // ....................... Create Question API ...................
@@ -123,12 +124,12 @@ function TutorCreateQuestions() {
                 .catch(error => {
                     console.log(error.response.data.error)
                     setError(error.response.data.error);
-                    if(error.response.data.error == "Your account has been suspended. Please contact Ehizua Hub Admin." ){
+                    if (error.response.data.error == "Your account has been suspended. Please contact Ehizua Hub Admin.") {
                         localStorage.setItem('Tutorlogin', JSON.stringify({
                             login: false,
-                          }));    
+                        }));
                     }
-                   
+
                 })
                 .finally(() => {
                     setLoading(false); // Stop loading indicator
@@ -146,14 +147,9 @@ function TutorCreateQuestions() {
 
     return (
         <div className='App'>
-            {!loginData ? (
-                <TutorDashboard />
-            ) : (
-
                 <div>
-
                     <div className='App'>
-                        <h1>Create Question</h1>
+                        <h1>Create SUBJECT Question</h1>
 
                         <form onSubmit={handleSubmit}>
 
@@ -168,42 +164,38 @@ function TutorCreateQuestions() {
                             <br /><br />
 
                             <label htmlFor='mainTopic'>Main Topic</label>
-                <br />
-                
+                            <br />
 
-                <select
-                    id='mainTopic'
-                    value={main_topic}
-                    onChange={(event) => set_MainTopic(event.target.value)}
-                  >
-                    <option value=''>Select the Main Topic</option>
-                    {mainTopic.map((mainTopic, index) => (
-                      <option key={index} value={mainTopic.mainTopic}>
-                        {mainTopic.mainTopic}
-                      </option>
-                    ))}
-                </select>
-                <br /><br />
-                <label htmlFor='firstName'>Sub Topic</label>
-                <br />
-                <select
-                    id='sub_topic'
-                    value={sub_topic}
-                    onChange={(event) => set_SubTopic(event.target.value)}
-                >
-                    <option value=''>Select a sub Topic</option>
-                    {subTopic.map((subTopic, index) => (
-                        <option key={index} value={subTopic}>  {/* Set the value attribute */}
-                            {subTopic}
-                        </option>
-                    ))}
-                </select>
 
-              
-                
-                <br /><br />
+                            <select
+                                id='mainTopic'
+                                value={main_topic}
+                                onChange={(event) => set_MainTopic(event.target.value)}
+                            >
+                                <option value=''>Select the Main Topic</option>
+                                {mainTopic.map((mainTopic, index) => (
+                                    <option key={index} value={mainTopic.mainTopic}>
+                                        {mainTopic.mainTopic}
+                                    </option>
+                                ))}
+                            </select>
+                            <br /><br />
+                            <label htmlFor='firstName'>Sub Topic</label>
+                            <br />
+                            <select
+                                id='sub_topic'
+                                value={sub_topic}
+                                onChange={(event) => set_SubTopic(event.target.value)}
+                            >
+                                <option value=''>Select a sub Topic</option>
+                                {subTopic.map((subTopic, index) => (
+                                    <option key={index} value={subTopic}>  {/* Set the value attribute */}
+                                        {subTopic}
+                                    </option>
+                                ))}
+                            </select>
 
-                          
+                            <br /><br />
 
                             <label htmlFor='question'>Question</label>
                             <textarea
@@ -279,9 +271,8 @@ function TutorCreateQuestions() {
 
 
 
-            )}
         </div>
     );
 }
 
-export default TutorCreateQuestions;
+export default SchoolTutorCreateQuestions;

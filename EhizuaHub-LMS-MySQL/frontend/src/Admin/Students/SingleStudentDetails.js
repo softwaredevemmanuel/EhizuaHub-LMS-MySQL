@@ -18,35 +18,37 @@ const SingleStudentDetailsPage = () => {
   const [loading, setLoading] = useState(true);
 
   const [login, setLogin] = useState(null);
-  const [admin, setAdmin] = useState(null);
   const [yes, setYes] = useState('');
   const [id, setId] = useState('');
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
   const [certificate, setCertificate] = useState(false);
+  const { course: courseParam } = useParams();
+  const { email: emailParam } = useParams();
 
 
+    useEffect(() => {
+        let admin = JSON.parse(localStorage.getItem('Adminlogin'));
 
-  useEffect(() => {
-    let login = JSON.parse(localStorage.getItem('Adminlogin'));
-    let admin = login
+        if ((admin && admin.login && admin.admin && admin.admin_authorization)) {
+            setLogin(true);
+        }
+    }, []);
 
-
-    if ((login && admin.login && admin.admin && admin.admin_authorization)) {
-      setLogin(true);
-      setAdmin(true);
-    }
-  }, []);
 
 
 
   // Get the content parameter from the URL using useParams
-  const { _id: contentParam } = useParams();
 
   useEffect(() => {
     async function fetchStudents() {
       try {
-        const response = await axios.get('http://localhost:5000/api/auth/students');
+        const response = await axios.get('http://localhost:5000/api/auth/students/course-email',{
+          headers:{
+            course : courseParam,
+            email : emailParam
+          }
+        });
         setContent(response.data.students);
         setLoading(false);
       } catch (error) {
@@ -56,9 +58,8 @@ const SingleStudentDetailsPage = () => {
 
     fetchStudents();
 
-  }, []);
+  }, [courseParam, emailParam]);
 
-  const contentItem = content.find((item) => item._id == contentParam);
 
   const approveCertificate = () => {
     setLoading(true);
@@ -80,12 +81,11 @@ const SingleStudentDetailsPage = () => {
   };
 
   useEffect(() => {
-    if (contentItem) {
-        setId(contentItem._id || '');
-        setCertificate(contentItem.certificateApproved || '');
+    if (content) {
+        setId(content._id || '');
+        setCertificate(content.certificateApproved || '');
     }
-  }, [contentItem]);
-  console.log(certificate)
+  }, [content]);
 
   const handleYes = event => {
     event.preventDefault();
@@ -109,10 +109,10 @@ const SingleStudentDetailsPage = () => {
 
         <div>
 
-          {contentItem && (
+          {content && (
 
             <div>
-              <a href={`/students_progress/${contentItem._id}/${contentItem.course}/${contentItem.email}`}>
+              <a href={`/students_progress/${content._id}/${content.course}/${content.email}`}>
                 <p>View Progress</p>
 
               </a>
@@ -124,11 +124,11 @@ const SingleStudentDetailsPage = () => {
           {success && <p style={{ color: 'green' }}>{success}</p>}
 
 
-          {contentItem && (
+          {content && (
             <div>
               {certificate != '1' ?(
               <button>
-                <a href={`/update_student/${contentItem._id}`}>
+                <a href={`/update_student/${content._id}`}>
                   <p>Edit</p>
                 </a>
 
@@ -156,7 +156,7 @@ const SingleStudentDetailsPage = () => {
                     ''
                   ) : (
                     <div>
-                      <h4>Are you sure you want to approve Certificate Download for {contentItem.firstName} {contentItem.lastName}?</h4>
+                      <h4>Are you sure you want to approve Certificate Download for {content.firstName} {content.lastName}?</h4>
                       <h3>Are you sure?</h3>
                       <button type='submit' value='yes' onClick={handleCertificate}>
                         Yes
@@ -175,21 +175,21 @@ const SingleStudentDetailsPage = () => {
 
 
           {loading && <p>Loading...</p>}
-          {contentItem && (
+          {content && (
             <div>
               <div>
-                <p>{contentItem.firstName} {contentItem.lastName}</p>
-                <p>{contentItem.email}</p>
-                <p>{contentItem.course}</p>
-                <p>{formatDate(contentItem.createdAt)}</p>
-                <p>{contentItem.phone}</p>
-                <p>{contentItem.guardiansPhone}</p>
-                <p>{contentItem.duration}</p>
-                <p>{contentItem.courseFee}</p>
-                <p>{contentItem.amountPaid}</p>
-                <p>{contentItem.balance}</p>
-                <p>{contentItem.homeAddress}</p>
-                <p>{contentItem.isVerified === 1 ? 'True' : 'False'}</p>
+                <p>{content.firstName} {content.lastName}</p>
+                <p>{content.email}</p>
+                <p>{content.course}</p>
+                <p>{formatDate(content.createdAt)}</p>
+                <p>{content.phone}</p>
+                <p>{content.guardiansPhone}</p>
+                <p>{content.duration}</p>
+                <p>{content.courseFee}</p>
+                <p>{content.amountPaid}</p>
+                <p>{content.balance}</p>
+                <p>{content.homeAddress}</p>
+                <p>{content.isVerified === 1 ? 'True' : 'False'}</p>
               </div>
               <div>
 

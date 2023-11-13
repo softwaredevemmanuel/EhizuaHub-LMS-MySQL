@@ -4,24 +4,22 @@ import Dashboard from './Admin/Dashboard'
 import Login from './Admin/LoginForm'
 import StudentDashboard from './Students/StudentDashboard';
 import TutorDashboard from './Tutor/TutorDashboard';
-import VerifyTutorEmail from './Staff/VerifyTutorEmail';
 import VerifyStudentEmail from './Students/VerifyStudentEmail';
 import StudentForgotPassword from './Students/StudentForgetPassword';
-import TutorForgotPassword from './Staff/TutorForgotPassword';
 import AllStaffList from './Admin/StaffSection/AllStaffList';
 import AllStudentDetails from './Admin/Upskill/AllStudentDetails';
 import CourseTopic from './Students/CourseTopic';
 import StudentDetails from './Tutor/StudentDetails';
-import CreateStudents from './Admin/Upskill/CreateStudents';
-import TutorCreateQuestions from './Tutor/TutorCreateQuestions';
+import CreateStudents from './Admin/Students/CreateStudents';
+import TutorCreateQuestions from './Tutor/HubInstructors/HubTutorCreateQuestions';
 import TutorCourseContents from './Tutor/TutorCourseContents';
 import Question from './Students/Question';
 import DetailsPage from './Students/DetailsPage';
 import Timer from './Students/Timer';
 import CreateSchool from './Admin/PartnerSchools/CreateSchool';
 import RegisterStudent from './Admin/PartnerSchools/RegisterStudent';
-import SingleStudentDetailsPage from './Admin/Upskill/SingleStudentDetails';
-import StudentsProgress from './Admin/Upskill/StudentsProgress';
+import SingleStudentDetailsPage from './Admin/Students/SingleStudentDetails';
+import StudentsProgress from './Admin/Students/StudentsProgress';
 import UpdateStudent from './Admin/Upskill/UpdateStudent';
 import UpdateStaff from './Admin/StaffSection/UpdateStaff';
 import AllSchools from './Admin/PartnerSchools/AllSchools';
@@ -36,10 +34,6 @@ import RejectedLeaveRequest from './Admin/LeavSection/RejectedLeaveRequest';
 import PendingLeaveRequest from './Admin/LeavSection/PendingLeaveRequest';
 import OfficeDetails from './Admin/Offices/OfficeDetails';
 import PupilsDashboard from './SchoolPupils/PupilsDashboard';
-import InstructorDashboard from './Admin/PartnerSchools/Instructor/InstructorDashboard';
-import InstructorDetails from './Admin/PartnerSchools/Instructor/InstructorDetails';
-import InstructorCreateCurriculum from './Admin/PartnerSchools/Instructor/InstructorCreateCurriculum';
-import InstructorCreateContent from './Admin/PartnerSchools/Instructor/InstructorCreateContent';
 import CreateCourse from './Admin/Upskill/CreateCourse';
 import CreateSubjects from './Admin/PartnerSchools/CreateSubjects';
 import CreateStaff from './Admin/StaffSection/CreateStaff';
@@ -65,6 +59,17 @@ import ViewSchoolCourseContent from './Tutor/SchoolInstructors/ViewSchoolCourseC
 import CourseContent from './SchoolPupils/CourseContent';
 import ViewCourseStudent from './Tutor/SchoolInstructors/ViewCourseStudents';
 import CourseCurriculum from './SchoolPupils/CourseCurriculum';
+import Location from './Admin/Students/Location';
+import ListOfStudents from './Admin/Students/ListOfStudents';
+import VerifyStaffEmail from './Staff/VerifyStaffEmail';
+import StaffForgotPassword from './Staff/StaffForgotPassword';
+import HubTutorCreateQuestions from './Tutor/HubInstructors/HubTutorCreateQuestions';
+import SchoolTutorCreateQuestions from './Tutor/SchoolInstructors/SchoolTutorCreateQuestion';
+import HubStudentHomePage from './Students/HubStudentHomePage';
+import CreateCourseDiscount from './Admin/Upskill/CreateCourseDiscount';
+import ViewDiscountCourses from './Admin/Upskill/ViewDiscountCourse';
+import UpdateDiscountCourse from './Admin/Upskill/UpdateDiscountCourse';
+import RegisterDiscountCourse from './Students/RegisterDiscountCourse';
 
 
 
@@ -79,11 +84,8 @@ function App() {
           <Route path='dashboard' element={<Dashboard />} />
           <Route path='/' element={<Login />} />
 
-          {/* ADMIN VIEW UPSKILL COURSE AND CURRICULUM SECTION */}
           <Route path='view-courses/curriculum' element={<ViewCourses />} />
           <Route path='view-courses/curriculum/:course' element={<ViewCurriculum />} />
-
-{/* ----------------------------------------------------------------------------------------------- */}
 
           <Route path='/school-student-dashboard/:course/curriculum' element={<CourseCurriculum/>} />
           <Route path='/school-student-dashboard/:subtopic/:maintopic' element={<CourseContent/>} />
@@ -93,36 +95,32 @@ function App() {
           <Route path='/all_schools' element={<AllSchools/>} />
           <Route path='/school_details/:schoolName' element={<SchoolDetails/>} />
 
-
-
-
-          {/* ADMIN VIEW PARTNER SCHOOL SECTION */}
-
           <Route path='student_dashboard' element={<StudentDashboard />} />
+          <Route path='hub_student_homepage' element={<HubStudentHomePage />} />
           <Route path='tutor_dashboard' element={<TutorDashboard />} />
           <Route path='staff_dashboard' element={<HomeDashboard />} />
-          <Route path='/verify-tutor-email' element={<VerifyTutorEmail />} />
+          <Route path='/verify-staff-email' element={<VerifyStaffEmail />} />
           <Route path='/verify-student-email' element={<VerifyStudentEmail />} />
           <Route path='/student_forgot_password' element={<StudentForgotPassword />} />
-          <Route path='/tutor_forgot_password' element={<TutorForgotPassword />} />
+          <Route path='/staff_forgot_password' element={<StaffForgotPassword />} />
           <Route path='/all_staff' element={<AllStaffList />} />
-          <Route path='/hub_instructors' element={<AllHubInstructors />} />
-          <Route path='/school_instructors' element={<AllSchoolInstructors />} />
+          <Route path='/hub_instructors/:office' element={<AllHubInstructors />} />
+          <Route path='/school_instructors/:office' element={<AllSchoolInstructors />} />
           <Route path='/all_student_details' element={<AllStudentDetails />} />
-          <Route path='/course_topic' element={<CourseTopic />} />
+          <Route path='/student_dashboard/:course' element={<CourseTopic />} />
           <Route path='/tutor_student_details' element={<StudentDetails />} />
-          <Route path='/create_student' element={<CreateStudents />} />
-          <Route path='/create_question' element={<TutorCreateQuestions />} />
+          <Route path='/create_student/:location' element={<CreateStudents />} />
+          <Route path='/create_question/:course' element={<HubTutorCreateQuestions />} />
+          <Route path='/create_subject_question/:course' element={<SchoolTutorCreateQuestions />} />
           <Route path='/tutor_course_contents' element={<TutorCourseContents/>} />
-          <Route path='/questions' element={<Question/>} />
-          <Route path='/details/:id' element={<DetailsPage />} />
+          <Route path='/questions/:course/:id' element={<Question/>} />
+          <Route path='/:course/details/:id' element={<DetailsPage />} />
           <Route path='/timer' element={<Timer/>} />
           <Route path='/create_hub_course_curriculum/:course' element={<CreateHubCourseCurriculum/>} />
           <Route path='/create_school_course_curriculum/:course' element={<CreateSchoolCourseCurriculum/>} />
-          <Route path='/instructor_create_curriculum' element={<InstructorCreateCurriculum/>} />
           <Route path='/create_school' element={<CreateSchool/>} />
           <Route path='/register_school_students' element={<RegisterStudent/>} />
-          <Route path='/single_student_details_page/:_id' element={<SingleStudentDetailsPage/>} />
+          <Route path='/single_student_details_page/:course/:email' element={<SingleStudentDetailsPage/>} />
           <Route path='/students_progress/:_id/:course/:email' element={<StudentsProgress/>} />
           <Route path='/update_student/:_id' element={<UpdateStudent/>} />
           <Route path='/staff-details/:email' element={<StaffDetails/>} />
@@ -134,27 +132,35 @@ function App() {
           <Route path='/view_hub_course_content/:course' element={<ViewHubCourseContent/>} />
           <Route path='/view_school_course_curriculum/:course' element={<ViewSchoolCurriculum/>} />
           <Route path='/view_hub_course_curriculum/:course' element={<ViewHubCurriculum/>} />
-          <Route path='/instructor_create_content' element={<InstructorCreateContent/>} />
           <Route path='/create_staff' element={<CreateStaff/>} />
           <Route path='/create_location' element={<CreateLocation/>} />
           <Route path='/all_offices' element={<AllOfices/>} />
           <Route path='/view_staff_details/:_id' element={<AdminStaffDetails/>} />
-          <Route path='/instructor_details_page/:email' element={<InstructorDetails/>} />
           <Route path='/offices_details/:officeName' element={<OfficeDetails/>} />
           <Route path='/all_leave_request' element={<LeaveRequest/>} />
           <Route path='/approved_leave_request' element={<ApprovedLeaveRequest/>} />
           <Route path='/rejected_leave_request' element={<RejectedLeaveRequest/>} />
           <Route path='/pending_leave_request' element={<PendingLeaveRequest/>} />
           <Route path='/school-student-dashboard' element={<PupilsDashboard/>} />
-          <Route path='/instructor-dashboard' element={<InstructorDashboard/>} />
           <Route path='/create_courses' element={<CreateCourse/>} />
+          <Route path='/create_course_discount' element={<CreateCourseDiscount/>} />
+          <Route path='/view_course_discount' element={<ViewDiscountCourses/>} />
+          <Route path='/view_course_discount/:id' element={<UpdateDiscountCourse/>} />
           <Route path='/create_subject' element={<CreateSubjects/>} />
           <Route path='/hub-instuctor-details/:_id' element={<HubInstructorDetails/>} />
           <Route path='/school-instuctor-details/:_id' element={<SchoolInstructorDetails/>} />
           <Route path='/update-hub-instructor/:_id' element={<UpdateHubInstructor/>} />
           <Route path='/update-school-instructor/:_id' element={<UpdateSchoolInstructor/>} />
           <Route path='/school-course-content-details/:id' element={<ViewSchoolCourseContent/>} />
-          <Route path='/view_school_student_by_course/:course' element={<ViewCourseStudent/>} />
+          <Route path='/select-school-of-student/:email/:course' element={<ViewCourseStudent/>} />
+          <Route path='/register-discount-course/:email/:_id' element={<RegisterDiscountCourse/>} />
+
+        {/* ADMIN STUDENT SECTION */}
+        <Route path='/students-center' element={<Location/>} />
+        <Route path='/hub-students/:location' element={<ListOfStudents/>} />
+
+
+
 
       </Routes>
       

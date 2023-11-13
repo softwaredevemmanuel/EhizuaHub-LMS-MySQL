@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import LoginForm from '../../LoginForm';
+import { useParams } from 'react-router-dom';
 
 function AllHubInstructors() {
   const [tutors, setTutors] = useState([]);
   const [error, setError] = useState(null);
   const [login, setLogin] = useState(null);
   const [admin, setAdmin] = useState(null);
+
+  const {office: officeParams} = useParams();
 
 
   useEffect(() => {
@@ -25,7 +28,11 @@ function AllHubInstructors() {
     // Fetch tutors when the component mounts
     async function fetchTutors() {
       try {
-        const response = await axios.get('http://localhost:5000/api/auth/hub_instructor');
+        const response = await axios.get('http://localhost:5000/api/auth/hub_instructor/location',{
+          headers:{
+            office : officeParams
+          }
+        });
         setTutors(response.data.staff);
       } catch (error) {
         setError('Error retrieving tutors');
@@ -33,7 +40,7 @@ function AllHubInstructors() {
     }
 
     fetchTutors();
-  }, []);
+  }, [officeParams]);
 
   return (
     <div>

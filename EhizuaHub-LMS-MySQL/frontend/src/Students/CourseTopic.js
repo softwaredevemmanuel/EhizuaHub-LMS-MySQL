@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import StudentDashboard from './StudentDashboard';
+import { useParams } from 'react-router-dom';
 
 
 function CourseTopic() {
   const [loginStudent, setLoginStudent] = useState(false); // Initialize with false
   const [error, setError] = useState(null);
   const [content, setContent] = useState([]);
+
+  const {course: courseParams} = useParams()
   
 
 
@@ -30,6 +33,7 @@ function CourseTopic() {
           const response = await axios.get('http://localhost:5000/api/students/student-course-content', {
             headers: {
               authHeader: login.authHeader,
+              courses : courseParams
             },
           });
           setLoginStudent(true);
@@ -41,7 +45,7 @@ function CourseTopic() {
 
       fetchCourseContent();
       
-  }, []);
+  }, [courseParams]);
 
   const uniqueMainTopics = [...new Set(content.map((item) => item.mainTopic))];
 
@@ -63,7 +67,7 @@ function CourseTopic() {
       .filter((item) => item.mainTopic === mainTopic)
       .map((subContent, subIndex) => (
         <div key={subIndex}>
-          <a href={`/details/${subContent.id}`}>
+          <a href={`/${courseParams}/details/${subContent.id}`}>
             <p>{subContent.subTopic}</p>
           </a>
         </div>

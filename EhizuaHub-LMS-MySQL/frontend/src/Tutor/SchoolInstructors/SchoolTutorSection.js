@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
+import {Link } from 'react-router-dom';
 
 
 
 
 function SchoolTutorSection() {
   const [course, setCourse] = useState('');
+  const [email, setEmail] = useState('');
 
 
   useEffect(() => {
     const storedLoginData = JSON.parse(localStorage.getItem('Stafflogin'));
     if (storedLoginData && storedLoginData.login && storedLoginData.token && storedLoginData.staff_authorization) {
       setCourse(storedLoginData.schoolCourse)
+      setEmail(storedLoginData.email)
 
     }
   }, []);
@@ -46,9 +48,13 @@ function SchoolTutorSection() {
                   <Link to={`/view_school_course_curriculum/${course}`}>View Curriculum</Link>
                   <br />
                   <br />
-                  <Link to={`/view_school_student_by_course/${course}`}>View Students</Link>
-
-            
+                  <Link to={`/select-school-of-student/${email}/${course}`}>View Students</Link>
+                  <br/>
+                  <br/>
+                  <Link to={`/create_subject_question/${course}`}>Create Question</Link>
+                  <br />
+                  <br />
+                  
                 </div>
               </div>
             ))}

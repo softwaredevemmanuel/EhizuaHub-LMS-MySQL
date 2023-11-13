@@ -12,10 +12,9 @@ function CreateStaff() {
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
     const [dateOfBirth, setDateOfBirth] = useState('');
-    const [hubCourse, setHubCourse] = useState('');
-    const [schoolCourse, setSchoolCourse] = useState('');
     const [allHubCourses, setHubAllCourse] = useState([""]);
     const [allSchoolCourses, setAllSchoolCourse] = useState([""]);
+    const [allSchools, setAllSchools] = useState([""]);
     const [phone, setPhone] = useState('');
     const [position, setPosition] = useState('');
     const [offices, setOffices] = useState([]);
@@ -47,7 +46,6 @@ function CreateStaff() {
                 prevCheckedHubCourses.filter((course) => course !== value)
             );
             setHubInstrutor(false)
-            setHubCourse('')
             setSelectedHubCourses([])
 
         }
@@ -63,11 +61,12 @@ function CreateStaff() {
                 prevCheckedSchoolCourses.filter((course) => course !== value)
             );
             setSchoolInstrutor(false)
-            setSchoolCourse('')
             setSelectedSchoolCourses([])
 
         }
     };
+
+
 
     useEffect(() => {
         let login = JSON.parse(localStorage.getItem('Adminlogin'));
@@ -123,6 +122,27 @@ function CreateStaff() {
         }, []);
 
 
+        // Fetch School Courses
+        useEffect(() => {
+            async function fetchSchools() {
+        
+              try {
+        
+                const response = await axios.get('http://localhost:5000/api/auth/partner-schools', {
+        
+                });
+                setAllSchools(response.data.message)
+        
+              } catch (error) {
+                setError('Error fetching schools data');
+              }
+            }
+        
+            fetchSchools();
+        
+          }, []);
+
+
     const createStaff = () => {
         if (
             firstName && 
@@ -144,6 +164,7 @@ function CreateStaff() {
                 schoolInstructor : schoolInstructor,
                 hubCourse: selectedHubCourses,
                 schoolCourse: selectedSchoolCourses,
+                school: selectedSchools,
                 phone: phone,
                 office: selectedOffice,
                 sick_leave: sickLeave,
@@ -162,7 +183,6 @@ function CreateStaff() {
                     setFirstName('');
                     setLastName('');
                     setEmail('');
-                    setHubCourse('');
                     setPhone('');
                     setSickLeave('');
                     setAccountNumber('');
@@ -194,6 +214,7 @@ function CreateStaff() {
 
     const [selectedHubCourses, setSelectedHubCourses] = useState([]);
     const [selectedSchoolCourses, setSelectedSchoolCourses] = useState([]);
+    const [selectedSchools, setSelectedSchools] = useState([]);
 
     const handleHubCheckboxChange = (course) => {
     if (selectedHubCourses.includes(course)) {
@@ -211,6 +232,14 @@ function CreateStaff() {
             setSelectedSchoolCourses([...selectedSchoolCourses, course]);
         }
         };
+
+        const handleSchoolCheckbox = (school) => {
+            if (selectedSchools.includes(school)) {
+                setSelectedSchools(selectedSchools.filter((selectedSchools) => selectedSchools !== school));
+            } else {
+                setSelectedSchools([...selectedSchools, school]);
+            }
+            };
 
         // console.log(schoolInstructor)
         // console.log(hubInstructor)
@@ -351,6 +380,32 @@ function CreateStaff() {
                                  </div>
                              ))}
                          </div>
+                        )}
+                        <br/>
+
+                        {schoolInstructor && (
+                            <div>
+
+                             <div>
+                             <label>Assign School to instructor:</label>
+
+                             {allSchools.map((school, index) => (
+                                 <div key={index}>
+                                 <input
+                                     type='checkbox'
+                                     id={`schoolCourse-${index}`}
+                                     value={school.schoolName}
+                                     checked={selectedSchools.includes(school.schoolName)}
+                                     onChange={() => handleSchoolCheckbox(school.schoolName)}
+                                 />
+                                 <label htmlFor={`schoolCourse-${index}`}>{school.schoolName}</label>
+                                 </div>
+                             ))}
+                         </div>
+
+                            </div>
+
+             
                         )}
 
 

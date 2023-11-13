@@ -4,7 +4,8 @@ import secureLocalStorage from "react-secure-storage";
 import CourseTopic from './CourseTopic';
 import Question from './Question';
 import DetailsPage from './DetailsPage';
-import { BrowserRouter as Router, Route, Switch, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import HubStudentHomePage from './HubStudentHomePage';
 
 
 
@@ -39,7 +40,8 @@ function StudentDashboard() {
             user: response.data.user,
             authHeader: response.data.authHeader,
             email : email,
-            course : response.data.course
+            course : response.data.course,
+            location : response.data.location
 
           }));
           setLoginStudent(true);
@@ -79,7 +81,7 @@ function StudentDashboard() {
 
         <div>
           <p>Welcome {student}</p>
-          <CourseTopic />
+          <HubStudentHomePage />
         </div>
       )}
     </div>

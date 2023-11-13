@@ -196,7 +196,83 @@ app.post('/api/auth/login', async (req, res) => {
   });
 });
 
+// ............................. ADMIN REGISTER OFFICE ................................
+app.post('/api/auth/register-office', async (req, res) => {
+  const { officeName, officePhoneNumber, officeEmail, state, officeAddress } = req.body;
 
+  const createTableQuery = `
+  CREATE TABLE IF NOT EXISTS Offices (
+    _id INT AUTO_INCREMENT PRIMARY KEY,
+    officeName VARCHAR(255) NOT NULL,
+    officePhone VARCHAR(255) NOT NULL,
+    officeEmail VARCHAR(255) NOT NULL,
+    officeAddress VARCHAR(255) NOT NULL
+  );
+`;
+
+  db.query(createTableQuery, (err) => {
+    if (err) {
+      console.error(err);
+      throw new Error('Error creating table');
+    }
+  });
+  // Check if the Office with the same Name already exists
+  db.query(`SELECT * FROM Offices WHERE officeName = ?`, [officeName], async (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    if (result.length !== 0) {
+      return res.status(400).json({ message: 'Office with Name already exists' });
+    }
+
+
+    const sql = `
+      INSERT INTO Offices (officeName, officePhone, officeEmail, officeAddress)
+      VALUES (?, ?, ?, ?)
+    `;
+
+    const newOfficeLoaction = `${officeName} ${state}`
+
+    db.query(sql, [newOfficeLoaction, officePhoneNumber, officeEmail, officeAddress], async (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send('Internal Server Error');
+      }
+
+      return res.json({ message: 'Office Registered successfully' });
+    });
+  });
+});
+
+// ............................. ADMIN GET LIST OF OFFICES ................................
+app.get('/api/auth/all_offices', async (req, res) => {
+  const createTableQuery = `
+  CREATE TABLE IF NOT EXISTS Offices (
+    _id INT AUTO_INCREMENT PRIMARY KEY,
+    officeName VARCHAR(255) NOT NULL,
+    officePhone VARCHAR(255) NOT NULL,
+    officeEmail VARCHAR(255) NOT NULL,
+    state VARCHAR(255) NOT NULL,
+    officeAddress VARCHAR(255) NOT NULL
+  );
+`;
+
+  db.query(createTableQuery, (err) => {
+    if (err) {
+      console.error(err);
+      throw new Error('Error creating table');
+    }
+  });
+
+  db.query('SELECT * FROM Offices', async (err, result) => {
+    return res.json({ message: result });
+
+  })
+})
+
+// ============= SCHOOL
 
 // ............................. ADMIN REGISTER SCHOOL ................................
 app.post('/api/auth/create-school', async (req, res) => {
@@ -262,7 +338,6 @@ app.post('/api/auth/create-school', async (req, res) => {
   });
 });
 
-
 // ............................. ADMIN GET LIST OF SCHOOLS ................................
 app.get('/api/auth/partner-schools', async (req, res) => {
 
@@ -271,7 +346,6 @@ app.get('/api/auth/partner-schools', async (req, res) => {
 
   })
 })
-
 
 // ............................. ADMIN GET PARTNER SCHOOLS REGISTERED COURSES................................
 app.get('/api/auth/partner-schools-course', async (req, res) => {
@@ -286,7 +360,6 @@ app.get('/api/auth/partner-schools-course', async (req, res) => {
     }
   });
 });
-
 
 // ............................. ADMIN REGISTER SCHOOL STUDENT ................................
 app.post('/api/auth/register-school-student', async (req, res) => {
@@ -306,6 +379,7 @@ app.post('/api/auth/register-school-student', async (req, res) => {
     courses VARCHAR(255) NOT NULL,
     year VARCHAR(255) NOT NULL,
     term VARCHAR(255) NOT NULL,
+    courseCode VARCHAR(255) NOT NULL DEFAULT '',
     guardiansPhone VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL,
@@ -381,7 +455,6 @@ app.post('/api/auth/register-school-student', async (req, res) => {
   });
 });
 
-
 // ............................. ADMIN GET LIST OF SCHOOL STUDENT ................................
 app.get('/api/auth/partner-school-students', async (req, res) => {
 
@@ -397,9 +470,445 @@ app.get('/api/auth/partner-school-students', async (req, res) => {
   })
 })
 
+// ............................ADMIN CREATE A NEW SCHOOL COURSE ............................
+app.post('/api/auth/create-subject', async (req, res) => {
+  const { course } = req.body;
+
+  const createTableQuery = `
+  CREATE TABLE IF NOT EXISTS Courses (
+    _id INT AUTO_INCREMENT PRIMARY KEY,
+    course VARCHAR(255) NOT NULL,
+    courseCode VARCHAR(255) NOT NULL
+    
+  );
+`;
+
+  sch.query(createTableQuery, (err) => {
+    if (err) {
+      console.error(err);
+      throw new Error('Error creating table');
+    }
+  });
+
+  // Check if the Course with the same name already exists
+
+  sch.query('SELECT * FROM Courses WHERE course = ?', [course], async (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    if (result.length !== 0) {
+      return res.status(400).json({ message: 'Course with name already exists' });
+    }
+
+    const resultArray = [];
+
+    for (let i = 1; i <= 10; i++) {
+      const paddedNumber = i.toString().padStart(3, '0');
+      const result = course.slice(0, 3) + paddedNumber;
+      resultArray.push(result);
+    }
+
+    const resultString = resultArray.join(', ');
 
 
-// ............................. ADMIN REGISTER EHIZUA STUDENT ................................
+
+
+    const sql = `
+        INSERT INTO Courses (course, courseCode)
+        VALUES (?, ?)
+      `;
+
+
+    sch.query(sql, [course, resultString], async (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send('Internal Server Error');
+      }
+
+      return res.json({ message: `${course} created successfully` });
+    });
+  });
+
+});
+
+
+//============ ADMIN EHIZUA STUDENTS
+
+// ............................ADMIN CREATE A NEW UPSKILL COURSE ............................
+app.post('/api/auth/create-course', async (req, res) => {
+  const { course, price, duration } = req.body;
+
+  const createTableQuery = `
+  CREATE TABLE IF NOT EXISTS Courses (
+    _id INT AUTO_INCREMENT PRIMARY KEY,
+    course VARCHAR(255) NOT NULL,
+    price INT(30) NOT NULL,
+    durationInWeeks INT(255) NOT NULL
+  );
+`;
+
+  db.query(createTableQuery, (err) => {
+    if (err) {
+      console.error(err);
+      throw new Error('Error creating table');
+    }
+  });
+
+  // Check if the Course with the same name already exists
+
+  db.query('SELECT * FROM Courses WHERE course = ?', [course], async (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    if (result.length !== 0) {
+      return res.status(400).json({ message: 'Course with name already exists' });
+    }
+
+
+    const sql = `
+        INSERT INTO Courses (course, price, durationInWeeks)
+        VALUES (?, ?, ?)
+      `;
+
+
+    db.query(sql, [course, price, duration], async (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send('Internal Server Error');
+      }
+
+      return res.json({ message: `${course} created successfully` });
+    });
+  });
+
+});
+
+// ...........done.................ADMIN CREATE DISCOUNT UPSKILL COURSE ............................
+app.post('/api/auth/create-discount-course', async (req, res) => {
+
+  const createTableQuery = `
+  CREATE TABLE IF NOT EXISTS CourseDiscount (
+    _id INT AUTO_INCREMENT PRIMARY KEY,
+    course VARCHAR(255) NOT NULL,
+    courseAmount VARCHAR(255) NOT NULL,
+    percent VARCHAR(30) NOT NULL,
+    discountRemoved VARCHAR(30) NOT NULL,
+    discountPrice VARCHAR(30) NOT NULL,
+    durationInWeeks VARCHAR(255) NOT NULL,
+    office VARCHAR(255) NOT NULL,
+    description VARCHAR(255) NOT NULL
+  );
+`;
+
+  db.query(createTableQuery, (err) => {
+    if (err) {
+      console.error(err);
+      throw new Error('Error creating table');
+    }
+  });
+
+  const { course, duration, courseAmount, percent, discountRemoved, discountPrice, description, office } = req.body;
+
+  // Check if the Course with the same name already exists
+
+  db.query('SELECT * FROM CourseDiscount WHERE course = ? AND office = ?', [course, office], async (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    if (result.length !== 0) {
+      return res.status(400).json({ message: 'Course with name already exists' });
+    }
+
+
+    const sql = `
+        INSERT INTO CourseDiscount (course, courseAmount, percent, discountRemoved, discountPrice, durationInWeeks, description, office)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+
+
+    db.query(sql, [course, courseAmount, percent, discountRemoved, discountPrice, duration, description, office], async (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send('Internal Server Error');
+      }
+
+      return res.json({ message: `${course} discount created successfully` });
+    });
+  });
+
+});
+
+// ...........done.................ADMIN UPDATE DISCOUNT UPSKILL COURSE ............................
+app.put('/api/auth/create-discount-course/:idParam', async (req, res) => {
+
+  const courseId = req.params.idParam; // Get the course ID from the route parameter
+  const { office, percentage, discountRemoved, promoPrice, description, percent, percentageDiscount, discountPrice } = req.body;
+  if (percent) {
+    // Update the student's information in the database
+    const sql = `
+     UPDATE CourseDiscount
+     SET
+       office = ?,
+       percent = ?,
+       discountRemoved = ?,
+       discountPrice = ?,
+       description = ?
+    
+     WHERE _id = ?
+   `;
+   
+    db.query(
+      sql,
+      [office, percent, percentageDiscount, discountPrice, description, courseId],
+      async (err, result) => {
+        if (err) {
+          console.error(err);
+          return res.status(500).send('Internal Server Error');
+        }
+
+        // Check if the student was found and updated
+        if (result.affectedRows === 0) {
+          return res.status(404).json({ message: 'Student not found' });
+        }
+
+        // Send a response indicating success
+        return res.json({ message: 'Course Discount updated successfully' });
+      }
+    );
+
+  }else{
+       // Update the student's information in the database
+
+        const sql = `
+        UPDATE CourseDiscount
+        SET
+          office = ?,
+          percent = ?,
+          discountRemoved = ?,
+          discountPrice = ?,
+          description = ?
+        
+        WHERE _id = ?
+      `;
+
+        db.query(
+          sql,
+          [office, percentage, discountRemoved, promoPrice, description, courseId],
+          async (err, result) => {
+            if (err) {
+              console.error(err);
+              return res.status(500).send('Internal Server Error');
+            }
+
+            // Check if the student was found and updated
+            if (result.affectedRows === 0) {
+              return res.status(404).json({ message: 'Student not found' });
+            }
+
+            // Send a response indicating success
+            return res.json({ message: 'Course Discount updated successfully' });
+          }
+        );
+  }
+
+});
+
+
+// ............................. ADMIN GET UPSKILL COURSES ................................
+app.get('/api/auth/all_upskill_courses', async (req, res) => {
+
+  try {
+    db.query('SELECT * FROM Courses', async (err, result) => {
+
+      return res.json({ message: result });
+
+    })
+
+  } catch {
+
+  }
+
+
+})
+
+// ............................. ADMIN GET DISCOUNT COURSES ................................
+app.get('/api/auth/discount-courses', async (req, res) => {
+
+  try {
+    db.query('SELECT * FROM CourseDiscount', async (err, result) => {
+
+      return res.json({ message: result });
+
+    })
+
+  } catch {
+
+  }
+
+
+})
+
+// ............................. ADMIN EDIT DISCOUNT COURSE ................................
+app.put('/api/auth/update-discount-course/:id', async (req, res) => {
+  const studentId = req.params.id; // Get the student's ID from the route parameter
+  const { firstName, lastName, email, course, phone, guardiansPhone, duration, courseFee, amountPaid, homeAddress, certificate, isVerified } = req.body;
+
+  // Update the student's information in the database
+  const sql = `
+    UPDATE Students
+    SET
+      firstName = ?,
+      lastName = ?,
+      email = ?,
+      course = ?,
+      phone = ?,
+      guardiansPhone = ?,
+      duration = ?,
+      courseFee = ?,
+      amountPaid = ?,
+      homeAddress = ?,
+      certificateApproved = ?,
+      isVerified = ?
+    WHERE _id = ?
+  `;
+
+
+  db.query(
+    sql,
+    [firstName, lastName, email, course, phone, guardiansPhone, duration, courseFee, amountPaid, homeAddress, certificate, isVerified, studentId],
+    async (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send('Internal Server Error');
+      }
+
+      // Check if the student was found and updated
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: 'Student not found' });
+      }
+
+      // Send a response indicating success
+      return res.json({ message: 'Student updated successfully' });
+    }
+  );
+});
+
+// ............Done............. ADMIN GET ALL STUDENT..........................................
+app.get('/api/auth/all-students', (req, res) => {
+
+  try {
+
+    db.query('SELECT * FROM Students', async (err, students) => {
+      if (err) {
+        console.error('Error retrieving students:', err); // Log the error
+        return res.status(500).json({ message: 'Error retrieving students' });
+      }
+      return res.json({ students });
+    });
+
+  } catch (error) {
+    console.error('Error retrieving students:', error); // Log the error
+    return res.status(500).json({ message: 'Error retrieving students' });
+  }
+});
+
+// ............Done............. ADMIN GET STUDENT DETAILS BY EMAIL..........................................
+app.get('/api/auth/students/course-email', (req, res) => {
+  const { email } = req.headers
+
+  try {
+    if (email) {
+
+      db.query('SELECT * FROM Students WHERE email = ?', [email], async (err, student) => {
+        if (err) {
+          console.error('Error retrieving students:', err); // Log the error
+          return res.status(500).json({ message: 'Error retrieving students' });
+        }
+        const students = student[0]
+        return res.json({ students });
+      });
+    } else {
+      return res.status(500).json({ message: 'Error retrieving students' });
+    }
+
+  } catch (error) {
+    console.error('Error retrieving students:', error); // Log the error
+    return res.status(500).json({ message: 'Error retrieving students' });
+  }
+});
+
+// ............Done............. ADMIN GET STUDENTS BY LOCATION ONLY..........................................
+app.get('/api/auth/sort-students/location', (req, res) => {
+  const { location } = req.headers
+
+  try {
+    if (location) {
+
+      db.query('SELECT * FROM Students WHERE location = ?', [location], async (err, students) => {
+        if (err) {
+          console.error('Error retrieving students:', err); // Log the error
+          return res.status(500).json({ message: 'Error retrieving students' });
+        }
+        return res.json({ students });
+      });
+    } else {
+      return res.status(500).json({ message: 'Error retrieving students' });
+    }
+
+  } catch (error) {
+    console.error('Error retrieving students:', error); // Log the error
+    return res.status(500).json({ message: 'Error retrieving students' });
+  }
+});
+
+
+// ............Done............. ADMIN GET STUDENTS BY LOCATION AND COURSE..........................................
+app.get('/api/auth/sort-students/location-course', (req, res) => {
+  const { location, course } = req.headers
+
+  try {
+    if (location && course) {
+
+      db.query('SELECT * FROM Students WHERE location = ? AND course REGEXP ?', [location, `\\b${course}\\b`], async (err, students) => {
+        if (err) {
+          console.error('Error retrieving students:', err); // Log the error
+          return res.status(500).json({ message: 'Error retrieving students' });
+        }
+        return res.json({ students });
+      });
+    } else {
+      return res.status(500).json({ message: 'Error retrieving students' });
+    }
+
+  } catch (error) {
+    console.error('Error retrieving students:', error); // Log the error
+    return res.status(500).json({ message: 'Error retrieving students' });
+  }
+});
+
+// .......................... ADMIN GET UPSKILL CURRICULUM ..........................................
+app.get('/api/auth/upskill-course-curriculum', async (req, res) => {
+
+  const course = req.headers.course;
+
+  db.query('SELECT * FROM Curriculum WHERE course = ?', [course], async (err, content) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Error fetching course content' });
+    }
+    return res.json({ content });
+  });
+
+
+});
+
+// .............Done........... ADMIN REGISTER EHIZUA STUDENT ................................
 app.post('/api/auth/create-student', async (req, res) => {
   const createTableQuery = `
   CREATE TABLE IF NOT EXISTS Students (
@@ -410,6 +919,7 @@ app.post('/api/auth/create-student', async (req, res) => {
     id VARCHAR(255) NOT NULL,
     course VARCHAR(255) NOT NULL,
     phone VARCHAR(255) NOT NULL,
+    location VARCHAR(255) NOT NULL,
     profilePicture VARCHAR(255) NOT NULL DEFAULT 0,
     guardiansPhone VARCHAR(255) NOT NULL,
     duration VARCHAR(255) NOT NULL,
@@ -431,7 +941,7 @@ app.post('/api/auth/create-student', async (req, res) => {
     }
   });
 
-  const { firstName, lastName, email, course, phone, guardiansPhone, duration, courseFee, amountPaid, homeAddress } = req.body;
+  const { selectedValue, firstName, lastName, email, course, phone, location, guardiansPhone, duration, courseFee, amountPaid, homeAddress } = req.body;
 
 
   // Check if the student with the same email already exists
@@ -455,11 +965,11 @@ app.post('/api/auth/create-student', async (req, res) => {
     let emailToken = crypto.randomBytes(64).toString("hex");
 
     const sql = `
-      INSERT INTO Students (firstName, lastName, email, course, phone, guardiansPhone, duration, courseFee, amountPaid, balance, homeAddress, id, emailToken)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO Students (firstName, lastName, email, course, phone, location, guardiansPhone, duration, courseFee, amountPaid, balance, homeAddress, id, emailToken, isVerified)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
-    db.query(sql, [firstName, lastName, email, course, phone, guardiansPhone, duration, courseFee, amountPaid, balance, homeAddress, hashedPass, emailToken], async (err, result) => {
+    db.query(sql, [firstName, lastName, email, course, phone, location, guardiansPhone, duration, courseFee, amountPaid, balance, homeAddress, hashedPass, emailToken, selectedValue], async (err, result) => {
       if (err) {
         console.error(err);
         return res.status(500).send('Internal Server Error');
@@ -499,51 +1009,6 @@ app.post('/api/auth/create-student', async (req, res) => {
       return res.json({ message: 'Student created successfully', user: { id, firstName, lastName, email, course, phone, guardiansPhone, duration, courseFee, amountPaid, balance, homeAddress, emailToken } });
     });
   });
-});
-
-// .............................. ADMIN GET ALL EHIZUA STUDENTS ..........................................
-app.get('/api/auth/students', (req, res) => {
-  const createTableQuery = `
-  CREATE TABLE IF NOT EXISTS Students (
-    _id INT AUTO_INCREMENT PRIMARY KEY,
-    firstName VARCHAR(255) NOT NULL,
-    lastName VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL,
-    id VARCHAR(255) NOT NULL,
-    course VARCHAR(255) NOT NULL,
-    phone VARCHAR(255) NOT NULL,
-    profilePicture VARCHAR(255) NOT NULL DEFAULT 0,
-    guardiansPhone VARCHAR(255) NOT NULL,
-    duration VARCHAR(255) NOT NULL,
-    courseFee VARCHAR(255) NOT NULL,
-    amountPaid VARCHAR(255) NOT NULL,
-    balance VARCHAR(255) NOT NULL,
-    certificateApproved BOOLEAN NOT NULL DEFAULT 0,
-    homeAddress VARCHAR(255) NOT NULL,
-    isVerified BOOLEAN NOT NULL DEFAULT 0,
-    emailToken VARCHAR(255) NOT NULL,
-    createdAt TIMESTAMP NOT NULL
-  );
-  `;
-
-  db.query(createTableQuery, (err) => {
-    if (err) {
-      console.error(err);
-      throw new Error('Error creating table');
-    }
-  });
-  try {
-    db.query('SELECT _id, firstName, lastName, email, course, phone, guardiansPhone, duration, courseFee, amountPaid, balance, homeAddress, certificateApproved, isVerified, createdAt FROM Students', async (err, students) => {
-      if (err) {
-        console.error('Error retrieving students:', err); // Log the error
-        return res.status(500).json({ message: 'Error retrieving students' });
-      }
-      return res.json({ students });
-    });
-  } catch (error) {
-    console.error('Error retrieving students:', error); // Log the error
-    return res.status(500).json({ message: 'Error retrieving students' });
-  }
 });
 
 // ............................. ADMIN EDIT EHIZUA STUDENT ................................
@@ -591,7 +1056,65 @@ app.put('/api/auth/update-student/:id', async (req, res) => {
   );
 });
 
+// ............................. ADMIN APPROVE CERTIFICATE ................................
+app.put('/api/auth/approve-certificate/:id', async (req, res) => {
+  const studentId = req.params.id; // Get the student's ID from the route parameter
 
+  // Update the student's information in the database
+  const sql = `
+    UPDATE Students
+    SET
+    certificateApproved = ?
+    WHERE _id = ?
+  `;
+
+  db.query(
+    sql, ['1', studentId],
+    async (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send('Internal Server Error');
+      }
+
+      // Check if the student was found and updated
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: 'Student not found' });
+      }
+
+      // Send a response indicating success
+      return res.json({ message: 'Students Certificate successfully Released' });
+    }
+  );
+});
+
+// ............................. ADMIN GET COURSE CONTENT ................................
+app.get('/api/auth/student-course-content', async (req, res) => {
+  const course = req.headers.course
+
+  try {
+
+    db.query('SELECT * FROM Contents WHERE course = ?', [course], async (err, content) => {
+      return res.status(200).json({ content });
+    })
+
+  } catch (error) {
+    console.error('Error retrieving course content:', error);
+    return res.status(500).json({ message: 'An error occurred while retrieving course content' });
+  }
+});
+
+// ............................. ADMIN GET COURSE SCORE ................................
+app.get('/api/auth/student-score', async (req, res) => {
+  const course = req.headers.course;
+  const email = req.headers.email;
+
+  db.query('SELECT * FROM Percentage WHERE course = ? AND email = ?', [course, email], async (err, score) => {
+    return res.json({ message: score });
+  })
+
+})
+
+// ============== STAFF
 // ..........done..................ADMIN CREATE STAFF ............................
 app.post('/api/auth/create-staff', async (req, res) => {
 
@@ -672,7 +1195,7 @@ CREATE TABLE IF NOT EXISTS SchoolInstructors (
   });
 
 
-  const { first_name, last_name, email, dateOfBirth, office, position, hubInstructor, schoolInstructor, phone, accountNumber, bankName, sick_leave, homeAddress, nextOfKinNumber, nextOfKinAddress, hubCourse, schoolCourse } = req.body;
+  const { first_name, last_name, email, dateOfBirth, office, position, hubInstructor, schoolInstructor, school, phone, accountNumber, bankName, sick_leave, homeAddress, nextOfKinNumber, nextOfKinAddress, hubCourse, schoolCourse } = req.body;
 
   // Check if the Staff with the same email already exists
 
@@ -708,6 +1231,9 @@ CREATE TABLE IF NOT EXISTS SchoolInstructors (
       const hubCourseInString = hubCourse.join(', ');
       const schoolCourseInString = schoolCourse.join(', ');
 
+      // Convert checkedSchool array to a string
+      const schoolString = school.join(', ');
+
       if (hubInstructor) {
         db.query('SELECT * FROM HubInstructors WHERE email = ?', [email], async (err, result) => {
           const hubInstructor = `
@@ -736,8 +1262,8 @@ CREATE TABLE IF NOT EXISTS SchoolInstructors (
       if (schoolInstructor) {
         db.query('SELECT * FROM SchoolInstructors WHERE email = ?', [email], async (err, result) => {
           const SchoolInstructor = `
-        INSERT INTO SchoolInstructors (first_name, last_name, email, courses, office, phone)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO SchoolInstructors (first_name, last_name, email, courses, office, phone, school)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
       `;
 
           let schoolCousreStatus
@@ -746,7 +1272,14 @@ CREATE TABLE IF NOT EXISTS SchoolInstructors (
           } else {
             schoolCousreStatus = schoolCourseInString
           }
-          db.query(SchoolInstructor, [first_name, last_name, email, schoolCousreStatus, office, phone], async (err, result) => {
+
+          let schoolStatus
+          if (school.length == 0) {
+            schoolStatus = ""
+          } else {
+            schoolStatus = schoolString
+          }
+          db.query(SchoolInstructor, [first_name, last_name, email, schoolCousreStatus, office, phone, schoolStatus], async (err, result) => {
             if (err) {
               console.error(err);
               return res.status(500).send('Internal Server Error');
@@ -795,7 +1328,6 @@ CREATE TABLE IF NOT EXISTS SchoolInstructors (
 });
 
 // ..........done.................... ADMIN GET ALL STAFF DETAILS ..........................................
-
 app.get('/api/auth/staff', (req, res) => {
 
   const createTableQuery = `
@@ -845,85 +1377,6 @@ app.get('/api/auth/staff', (req, res) => {
   }
 });
 
-
-// .............................. ADMIN GET ALL HUB INSTRUCTOR DETAILS ..........................................
-
-app.get('/api/auth/hub_instructor', (req, res) => {
-
-  const createHubInstructorTable = `
-    CREATE TABLE IF NOT EXISTS HubInstructors (
-      _id INT AUTO_INCREMENT PRIMARY KEY,
-      first_name VARCHAR(255) NOT NULL,
-      last_name VARCHAR(255) NOT NULL,
-      courses VARCHAR(255) NOT NULL,
-      email VARCHAR(255) NOT NULL,
-      office VARCHAR(255) NOT NULL,
-      phone VARCHAR(255) NOT NULL,
-      isAdmin VARCHAR(255) NOT NULL DEFAULT 0
-    );
-    `;
-  db.query(createHubInstructorTable, (err) => {
-    if (err) {
-      console.error(err);
-      throw new Error('Error creating table');
-    }
-  });
-
-  try {
-    db.query('SELECT * FROM HubInstructors', async (err, staff) => {
-      if (err) {
-        console.error('Error retrieving Hub Instructors:', err); // Log the error
-        return res.status(500).json({ message: 'Error retrieving Hub Instructors' });
-      }
-
-      return res.json({ staff });
-    });
-  } catch (error) {
-    console.error('Error retrieving Hub Instructors:', error); // Log the error
-    return res.status(500).json({ message: 'Error retrieving Hub Instructors' });
-  }
-});
-
-
-// .............................. ADMIN GET ALL SCHOOL INSTRUCTOR DETAILS ..........................................
-
-app.get('/api/auth/school_instructor', (req, res) => {
-
-  const createSchoolInstructorTable = `
-    CREATE TABLE IF NOT EXISTS HubInstructors (
-      _id INT AUTO_INCREMENT PRIMARY KEY,
-      first_name VARCHAR(255) NOT NULL,
-      last_name VARCHAR(255) NOT NULL,
-      courses VARCHAR(255) NOT NULL,
-      email VARCHAR(255) NOT NULL,
-      office VARCHAR(255) NOT NULL,
-      phone VARCHAR(255) NOT NULL,
-      school VARCHAR(255) NOT NULL DEFAULT "",
-      isAdmin VARCHAR(255) NOT NULL DEFAULT 0
-    );
-    `;
-  db.query(createSchoolInstructorTable, (err) => {
-    if (err) {
-      console.error(err);
-      throw new Error('Error creating table');
-    }
-  });
-
-  try {
-    db.query('SELECT * FROM SchoolInstructors', async (err, staff) => {
-      if (err) {
-        console.error('Error retrieving School Instructors:', err); // Log the error
-        return res.status(500).json({ message: 'Error retrieving School Instructors' });
-      }
-
-      return res.json({ staff });
-    });
-  } catch (error) {
-    console.error('Error retrieving Hub Instructors:', error); // Log the error
-    return res.status(500).json({ message: 'Error retrieving School Instructors' });
-  }
-});
-
 // ............................. ADMIN EDIT STAFF ................................
 app.put('/api/auth/update-staff/:id', async (req, res) => {
   const tutorId = req.params.id; // Get the student's ID from the route parameter
@@ -952,7 +1405,6 @@ app.put('/api/auth/update-staff/:id', async (req, res) => {
   `;
 
 
-
   db.query(
     sql,
     [firstName, lastName, email, dateOfBirth, office, position, hubInstructor, schoolInstructor, phone, accountNumber, bank, sickLeave, HMO, homeAddress, isVerified, tutorId],
@@ -972,355 +1424,6 @@ app.put('/api/auth/update-staff/:id', async (req, res) => {
     }
   );
 });
-
-
-// ............................ADMIN CREATE A NEW UPSKILL COURSE ............................
-
-app.post('/api/auth/create-course', async (req, res) => {
-  const { course } = req.body;
-
-  const createTableQuery = `
-  CREATE TABLE IF NOT EXISTS Courses (
-    _id INT AUTO_INCREMENT PRIMARY KEY,
-    course VARCHAR(255) NOT NULL
-  );
-`;
-
-  db.query(createTableQuery, (err) => {
-    if (err) {
-      console.error(err);
-      throw new Error('Error creating table');
-    }
-  });
-
-  // Check if the Course with the same name already exists
-
-  db.query('SELECT * FROM Courses WHERE course = ?', [course], async (err, result) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).send('Internal Server Error');
-    }
-
-    if (result.length !== 0) {
-      return res.status(400).json({ message: 'Course with name already exists' });
-    }
-
-
-    const sql = `
-        INSERT INTO Courses (course)
-        VALUES (?)
-      `;
-
-
-    db.query(sql, [course], async (err, result) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).send('Internal Server Error');
-      }
-
-      return res.json({ message: `${course} created successfully` });
-    });
-  });
-
-});
-
-// ............................ADMIN CREATE A NEW SCHOOL COURSE ............................
-
-app.post('/api/auth/create-subject', async (req, res) => {
-  const { course } = req.body;
-
-  const createTableQuery = `
-  CREATE TABLE IF NOT EXISTS Courses (
-    _id INT AUTO_INCREMENT PRIMARY KEY,
-    course VARCHAR(255) NOT NULL,
-    courseCode VARCHAR(255) NOT NULL
-    
-  );
-`;
-
-  sch.query(createTableQuery, (err) => {
-    if (err) {
-      console.error(err);
-      throw new Error('Error creating table');
-    }
-  });
-
-  // Check if the Course with the same name already exists
-
-  sch.query('SELECT * FROM Courses WHERE course = ?', [course], async (err, result) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).send('Internal Server Error');
-    }
-
-    if (result.length !== 0) {
-      return res.status(400).json({ message: 'Course with name already exists' });
-    }
-
-    const resultArray = [];
-
-    for (let i = 1; i <= 10; i++) {
-      const paddedNumber = i.toString().padStart(3, '0');
-      const result = course.slice(0, 3) + paddedNumber;
-      resultArray.push(result);
-    }
-
-    const resultString = resultArray.join(', ');
-
-
-
-
-    const sql = `
-        INSERT INTO Courses (course, courseCode)
-        VALUES (?, ?)
-      `;
-
-
-    sch.query(sql, [course, resultString], async (err, result) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).send('Internal Server Error');
-      }
-
-      return res.json({ message: `${course} created successfully` });
-    });
-  });
-
-});
-
-// ............................. ADMIN GET UPSKILL COURSES ................................
-app.get('/api/auth/all_upskill_courses', async (req, res) => {
-
-  const createTableQuery = `
-  CREATE TABLE IF NOT EXISTS Courses (
-    _id INT AUTO_INCREMENT PRIMARY KEY,
-    course VARCHAR(255) NOT NULL
-  );
-`;
-
-  db.query(createTableQuery, (err) => {
-    if (err) {
-      console.error(err);
-      throw new Error('Error creating table');
-    }
-  });
-
-  db.query('SELECT * FROM Courses', async (err, result) => {
-
-    return res.json({ message: result });
-
-  })
-})
-
-
-// .......................... ADMIN GET UPSKILL CURRICULUM ..........................................
-app.get('/api/auth/upskill-course-curriculum', async (req, res) => {
-
-  const course = req.headers.course;
-
-  db.query('SELECT * FROM Curriculum WHERE course = ?', [course], async (err, content) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ error: 'Error fetching course content' });
-    }
-    return res.json({ content });
-  });
-
-
-});
-
-
-// ............................. ADMIN GET LIST OF SCHOOL COURSE ................................
-app.get('/api/auth/all_school_subject', async (req, res) => {
-
-  sch.query('SELECT * FROM Courses', async (err, result) => {
-
-    return res.json({ message: result });
-
-  })
-})
-
-
-// ........work on it.................. ADMIN GET SCHOOL COURSE CURRICULUM ..........................................
-// app.get('/api/auth/school-course-curriculum', async (req, res) => {
-//   const authHeader = req.headers.authheader;
-//   const course = req.headers.course;
-
-
-
-//   try {
-//     db.query('SELECT * FROM Staff WHERE id = ?', [authHeader], async (err, result) => {
-//       if (err) {
-//         console.error(err);
-//         return res.status(500).json({ error: 'Internal Server Error' });
-//       }
-
-//       if (result.length === 0) {
-//         return res.status(401).json({ error: 'Unauthorised to view this page. Please Login' });
-//       }
-
-//       if (result[0].isVerified === 0) {
-//         return res.status(400).json({ error: 'Please verify your account or contact Ehizua Hub Admin for assistance' });
-//       }
-
-//       if (result[0].emailToken === null && result[0].isVerified === 0) {
-//         return res.status(404).json({ error: 'Your account has been suspended. Please contact Ehizua Hub Admin.' });
-//       }
-
-//       sch.query('SELECT * FROM Curriculum WHERE course = ?', [course], async (err, content) => {
-//         if (err) {
-//           console.error(err);
-//           return res.status(500).json({ error: 'Error fetching course content' });
-//         }
-//         return res.json({ content });
-//       });
-
-//     });
-
-//   } catch (error) {
-//     console.error(error);
-//     return res.status(500).json({ error: 'Unauthorized!! Please login to view courses' });
-//   }
-// });
-
-
-
-// ............................. ADMIN APPROVE CERTIFICATE ................................
-app.put('/api/auth/approve-certificate/:id', async (req, res) => {
-  const studentId = req.params.id; // Get the student's ID from the route parameter
-
-  // Update the student's information in the database
-  const sql = `
-    UPDATE Students
-    SET
-    certificateApproved = ?
-    WHERE _id = ?
-  `;
-
-  db.query(
-    sql, ['1', studentId],
-    async (err, result) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).send('Internal Server Error');
-      }
-
-      // Check if the student was found and updated
-      if (result.affectedRows === 0) {
-        return res.status(404).json({ message: 'Student not found' });
-      }
-
-      // Send a response indicating success
-      return res.json({ message: 'Students Certificate successfully Released' });
-    }
-  );
-});
-
-// ............................. ADMIN GET COURSE CONTENT ................................
-app.get('/api/auth/student-course-content', async (req, res) => {
-  const course = req.headers.course
-
-  try {
-
-    db.query('SELECT * FROM Contents WHERE course = ?', [course], async (err, content) => {
-      return res.status(200).json({ content });
-    })
-
-  } catch (error) {
-    console.error('Error retrieving course content:', error);
-    return res.status(500).json({ message: 'An error occurred while retrieving course content' });
-  }
-});
-
-// ............................. ADMIN GET COURSE SCORE ................................
-app.get('/api/auth/student-score', async (req, res) => {
-  const course = req.headers.course;
-  const email = req.headers.email;
-
-
-  db.query('SELECT * FROM Percentage WHERE course = ? AND email = ?', [course, email], async (err, score) => {
-    return res.json({ message: score });
-  })
-})
-
-
-// ............................. ADMIN REGISTER OFFICE ................................
-app.post('/api/auth/register-office', async (req, res) => {
-  const { officeName, officePhoneNumber, officeEmail, state, officeAddress } = req.body;
-
-  const createTableQuery = `
-  CREATE TABLE IF NOT EXISTS Offices (
-    _id INT AUTO_INCREMENT PRIMARY KEY,
-    officeName VARCHAR(255) NOT NULL,
-    officePhone VARCHAR(255) NOT NULL,
-    officeEmail VARCHAR(255) NOT NULL,
-    officeAddress VARCHAR(255) NOT NULL
-  );
-`;
-
-  db.query(createTableQuery, (err) => {
-    if (err) {
-      console.error(err);
-      throw new Error('Error creating table');
-    }
-  });
-  // Check if the Office with the same Name already exists
-  db.query(`SELECT * FROM Offices WHERE officeName = ?`, [officeName], async (err, result) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).send('Internal Server Error');
-    }
-
-    if (result.length !== 0) {
-      return res.status(400).json({ message: 'Office with Name already exists' });
-    }
-
-
-    const sql = `
-      INSERT INTO Offices (officeName, officePhone, officeEmail, officeAddress)
-      VALUES (?, ?, ?, ?)
-    `;
-
-    const newOfficeLoaction = `${officeName} ${state}`
-
-    db.query(sql, [newOfficeLoaction, officePhoneNumber, officeEmail, officeAddress], async (err, result) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).send('Internal Server Error');
-      }
-
-      return res.json({ message: 'Office Registered successfully' });
-    });
-  });
-});
-
-
-// ............................. ADMIN GET LIST OF OFFICES ................................
-app.get('/api/auth/all_offices', async (req, res) => {
-  const createTableQuery = `
-  CREATE TABLE IF NOT EXISTS Offices (
-    _id INT AUTO_INCREMENT PRIMARY KEY,
-    officeName VARCHAR(255) NOT NULL,
-    officePhone VARCHAR(255) NOT NULL,
-    officeEmail VARCHAR(255) NOT NULL,
-    state VARCHAR(255) NOT NULL,
-    officeAddress VARCHAR(255) NOT NULL
-  );
-`;
-
-  db.query(createTableQuery, (err) => {
-    if (err) {
-      console.error(err);
-      throw new Error('Error creating table');
-    }
-  });
-
-  db.query('SELECT * FROM Offices', async (err, result) => {
-    return res.json({ message: result });
-
-  })
-})
-
 
 // .............done................ ADMIN REJECT LEAVE REQUEST ................................
 app.put('/api/auth/reject-leave-request/:id', async (req, res) => {
@@ -1470,6 +1573,217 @@ app.get('/api/auth/staff-leave-request', (req, res) => {
 });
 
 
+// ============== HUB INSTRUCTORS
+// .............................. ADMIN GET ALL HUB INSTRUCTOR BY LOCATION ..........................................
+app.get('/api/auth/hub_instructor/location', (req, res) => {
+
+  const createHubInstructorTable = `
+    CREATE TABLE IF NOT EXISTS HubInstructors (
+      _id INT AUTO_INCREMENT PRIMARY KEY,
+      first_name VARCHAR(255) NOT NULL,
+      last_name VARCHAR(255) NOT NULL,
+      courses VARCHAR(255) NOT NULL,
+      email VARCHAR(255) NOT NULL,
+      office VARCHAR(255) NOT NULL,
+      phone VARCHAR(255) NOT NULL,
+      isAdmin VARCHAR(255) NOT NULL DEFAULT 0
+    );
+    `;
+  db.query(createHubInstructorTable, (err) => {
+    if (err) {
+      console.error(err);
+      throw new Error('Error creating table');
+    }
+  });
+
+  const office = req.headers.office
+
+  try {
+    db.query('SELECT * FROM HubInstructors WHERE office = ?', [office], async (err, staff) => {
+      if (err) {
+        console.error('Error retrieving Hub Instructors:', err); // Log the error
+        return res.status(500).json({ message: 'Error retrieving Hub Instructors' });
+      }
+
+      return res.json({ staff });
+    });
+  } catch (error) {
+    console.error('Error retrieving Hub Instructors:', error); // Log the error
+    return res.status(500).json({ message: 'Error retrieving Hub Instructors' });
+  }
+});
+
+// .............................. ADMIN GET ALL HUB INSTRUCTOR  ..........................................
+app.get('/api/auth/hub_instructor', (req, res) => {
+
+  const createHubInstructorTable = `
+    CREATE TABLE IF NOT EXISTS HubInstructors (
+      _id INT AUTO_INCREMENT PRIMARY KEY,
+      first_name VARCHAR(255) NOT NULL,
+      last_name VARCHAR(255) NOT NULL,
+      courses VARCHAR(255) NOT NULL,
+      email VARCHAR(255) NOT NULL,
+      office VARCHAR(255) NOT NULL,
+      phone VARCHAR(255) NOT NULL,
+      isAdmin VARCHAR(255) NOT NULL DEFAULT 0
+    );
+    `;
+  db.query(createHubInstructorTable, (err) => {
+    if (err) {
+      console.error(err);
+      throw new Error('Error creating table');
+    }
+  });
+
+
+  try {
+    db.query('SELECT * FROM HubInstructors', async (err, staff) => {
+      if (err) {
+        console.error('Error retrieving Hub Instructors:', err); // Log the error
+        return res.status(500).json({ message: 'Error retrieving Hub Instructors' });
+      }
+
+      return res.json({ staff });
+    });
+  } catch (error) {
+    console.error('Error retrieving Hub Instructors:', error); // Log the error
+    return res.status(500).json({ message: 'Error retrieving Hub Instructors' });
+  }
+});
+
+// ============== SCHOOL INSTRUCTORS
+// .............................. ADMIN GET ALL SCHOOL INSTRUCTOR BY LOCATION ..........................................
+app.get('/api/auth/school_instructor/location', (req, res) => {
+
+  const createSchoolInstructorTable = `
+    CREATE TABLE IF NOT EXISTS HubInstructors (
+      _id INT AUTO_INCREMENT PRIMARY KEY,
+      first_name VARCHAR(255) NOT NULL,
+      last_name VARCHAR(255) NOT NULL,
+      courses VARCHAR(255) NOT NULL,
+      email VARCHAR(255) NOT NULL,
+      office VARCHAR(255) NOT NULL,
+      phone VARCHAR(255) NOT NULL,
+      school VARCHAR(255) NOT NULL DEFAULT "",
+      isAdmin VARCHAR(255) NOT NULL DEFAULT 0
+    );
+    `;
+  db.query(createSchoolInstructorTable, (err) => {
+    if (err) {
+      console.error(err);
+      throw new Error('Error creating table');
+    }
+  });
+  const office = req.headers.office
+
+  try {
+    db.query('SELECT * FROM SchoolInstructors WHERE office = ?', [office], async (err, staff) => {
+      if (err) {
+        console.error('Error retrieving School Instructors:', err); // Log the error
+        return res.status(500).json({ message: 'Error retrieving School Instructors' });
+      }
+
+      return res.json({ staff });
+    });
+  } catch (error) {
+    console.error('Error retrieving Hub Instructors:', error); // Log the error
+    return res.status(500).json({ message: 'Error retrieving School Instructors' });
+  }
+});
+
+// .............................. ADMIN GET ALL SCHOOL INSTRUCTOR ..........................................
+app.get('/api/auth/school_instructor', (req, res) => {
+
+  const createSchoolInstructorTable = `
+    CREATE TABLE IF NOT EXISTS HubInstructors (
+      _id INT AUTO_INCREMENT PRIMARY KEY,
+      first_name VARCHAR(255) NOT NULL,
+      last_name VARCHAR(255) NOT NULL,
+      courses VARCHAR(255) NOT NULL,
+      email VARCHAR(255) NOT NULL,
+      office VARCHAR(255) NOT NULL,
+      phone VARCHAR(255) NOT NULL,
+      school VARCHAR(255) NOT NULL DEFAULT "",
+      isAdmin VARCHAR(255) NOT NULL DEFAULT 0
+    );
+    `;
+  db.query(createSchoolInstructorTable, (err) => {
+    if (err) {
+      console.error(err);
+      throw new Error('Error creating table');
+    }
+  });
+  const office = req.headers.office
+
+  try {
+    db.query('SELECT * FROM SchoolInstructors', async (err, staff) => {
+      if (err) {
+        console.error('Error retrieving School Instructors:', err); // Log the error
+        return res.status(500).json({ message: 'Error retrieving School Instructors' });
+      }
+
+      return res.json({ staff });
+    });
+  } catch (error) {
+    console.error('Error retrieving Hub Instructors:', error); // Log the error
+    return res.status(500).json({ message: 'Error retrieving School Instructors' });
+  }
+});
+
+// ...........done............... ADMIN EDIT SCHOOL INSTRUCTOR ................................
+app.put('/api/auth/update-school-instructor/:id', async (req, res) => {
+  const tutorId = req.params.id; // Get the student's ID from the route parameter
+  const { firstName, lastName, email, office, selectedSchools, phone } = req.body;
+
+  // Convert checkedSchool array to a string
+  const schoolString = selectedSchools.join(', ');
+
+  // Update the Staff's information in the database
+  const sql = `
+    UPDATE SchoolInstructors
+    SET
+      first_name = ?,
+      last_name = ?,
+      email = ?,
+      office = ?,
+      phone = ?,
+      school = ?
+    WHERE _id = ?
+  `;
+
+
+
+  db.query(
+    sql,
+    [firstName, lastName, email, office, phone, schoolString, tutorId],
+    async (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send('Internal Server Error');
+      }
+
+
+      // Check if the student was found and updated
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: 'Staff not found' });
+      }
+
+      // Send a response indicating success
+      return res.json({ message: 'Staff updated successfully' });
+    }
+  );
+});
+
+// ............................. ADMIN GET LIST OF SCHOOL COURSE ................................
+app.get('/api/auth/all_school_subject', async (req, res) => {
+
+  sch.query('SELECT * FROM Courses', async (err, result) => {
+
+    return res.json({ message: result });
+
+  })
+})
+
 
 
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< STAFF >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -1542,7 +1856,6 @@ app.post('/api/staff/leave-application', async (req, res) => {
   }
 
 })
-
 
 // ..........................STAFF  VERIFICATION EMAIL ..................................
 app.post('/api/staff/verify-tutor-email', async (req, res) => {
@@ -1672,7 +1985,6 @@ app.post('/api/staff/login', async (req, res) => {
   });
 });
 
-
 // ...........................STAFF FORGET PASSWORD ..........................
 app.post('/api/staff/forgot_password', async (req, res) => {
   const { email } = req.body;
@@ -1781,7 +2093,6 @@ app.get('/api/staff/details', (req, res) => {
   }
 });
 
-
 // ........................... STAFF FILTER ALL LEAVE REQUEST ..........................................
 app.get('/api/staff/leave-request', (req, res) => {
 
@@ -1828,7 +2139,8 @@ app.get('/api/staff/leave-request', (req, res) => {
 
 
 
-// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<STUDENT>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< EHIZUA STUDENT >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 // .......................... STUDENT VERIFICATION EMAIL ..................................
 app.post('/api/students/verify-student-email', async (req, res) => {
@@ -1881,7 +2193,6 @@ app.post('/api/students/verify-student-email', async (req, res) => {
   }
 });
 
-
 // ................................. STUDENT LOGIN ...........................................
 app.post('/api/students/student-login', async (req, res) => {
   const { email, id } = req.body;
@@ -1917,7 +2228,7 @@ app.post('/api/students/student-login', async (req, res) => {
     const course = (result[0].course);
     const payload = { id: result[0]._id };
     const token = createToken(payload);
-    res.json({ token: token, user: name, authHeader: result[0].id, course: course });
+    res.json({ token: token, user: name, authHeader: result[0].id, course: course, location: result[0].location});
 
   });
 });
@@ -2003,13 +2314,33 @@ app.post('/api/auth/student_forgot_password', async (req, res) => {
 
 })
 
-// .................................... STUDENT COURSE CONTENT ...............................
-app.get('/api/students/student-course-content', async (req, res) => {
-
-  const authHeader = req.headers.authheader;
+// ............................ STUDENT DISCOUNT COURSE SECTION ...............................
+app.get('/api/students/course-advert', async (req, res) => {
+  const location = req.headers.location
 
   try {
-    db.query('SELECT * FROM Students WHERE id = ?', [authHeader], async (err, response) => {
+    db.query('SELECT * FROM CourseDiscount WHERE office = ?', [location], async (err, content) => {
+      if (err) {
+        return res.status(500).send('Internal Server Error');
+      }
+
+      return res.status(200).json({ content });
+
+    })
+
+  } catch (error) {
+    console.error('Error retrieving course content:', error);
+    return res.status(500).json({ message: 'An error occurred while retrieving course content' });
+  }
+});
+
+// ............................ STUDENT COURSE CONTENT ...............................
+app.get('/api/students/student-course-content', async (req, res) => {
+
+  const { authheader, courses } = req.headers;
+
+  try {
+    db.query('SELECT * FROM Students WHERE id = ?', [authheader], async (err, response) => {
       if (err) {
         return res.status(500).send('Internal Server Error');
       }
@@ -2018,8 +2349,9 @@ app.get('/api/students/student-course-content', async (req, res) => {
         return res.status(404).json("Your account has been suspended. Please contact Ehizua Hub Admin.");
       }
 
-      const course = response[0].course;
-      db.query('SELECT * FROM Contents WHERE course = ?', [course], async (err, content) => {
+
+
+      db.query('SELECT * FROM Contents WHERE course = ?', [courses], async (err, content) => {
         return res.status(200).json({ content });
       })
     })
@@ -2031,17 +2363,18 @@ app.get('/api/students/student-course-content', async (req, res) => {
 });
 
 
-// .................................... GET QUESTIONS ..........................................
+// ................................. GET QUESTIONS ..........................................
 app.get('/api/students/questions', async (req, res) => {
   const authHeader = req.headers.authheader;
   const subTopic = req.headers.sub_topic;
   const course = req.headers.course;
   const email = req.headers.email;
-  const yes = req.headers.yes;
 
 
   // Check if there is a valid authHeader, topic, course, and email
   if (!authHeader || !subTopic || !course || !email) {
+
+
     return res.status(400).json({ message: 'Missing required headers' });
   }
 
@@ -2059,6 +2392,7 @@ app.get('/api/students/questions', async (req, res) => {
       return res.status(500).json({ retake: `You exceeded the pass mark but you can do better` });
 
     }
+
     if (response.length === 1) {
       const currentTime = Date.now();
       const submissionTime = response[0].updatedAt;
@@ -2072,6 +2406,7 @@ app.get('/api/students/questions', async (req, res) => {
             console.error('Error executing SQL query for student:', err);
             return res.status(500).json({ message: 'Internal server error' });
           }
+
           // Section to authenticate a student
 
           db.query('SELECT * FROM Questions WHERE subTopic = ? AND course = ?', [subTopic, course], async (err, questionsResponse) => {
@@ -2082,7 +2417,7 @@ app.get('/api/students/questions', async (req, res) => {
 
             const questions = JSON.parse(JSON.stringify(questionsResponse));
 
-            return res.json({ message: `${subTopic} Questions`, questions });
+            return res.json({ message: `${subTopic} Questions`, questions});
           });
         });
       } else {
@@ -2101,6 +2436,8 @@ app.get('/api/students/questions', async (req, res) => {
 
       }
 
+
+
     } else {
       db.query('SELECT * FROM Students WHERE id = ?', [authHeader], async (err, studentResponse) => {
         if (err) {
@@ -2116,16 +2453,17 @@ app.get('/api/students/questions', async (req, res) => {
           }
 
           const questions = JSON.parse(JSON.stringify(questionsResponse));
+          const totalQuestions = questionsResponse.length
 
-          return res.json({ message: `${subTopic} Questions`, questions });
+
+          return res.json({ message: `${subTopic} Questions`, questions, totalQuestions: totalQuestions });
         });
       });
     }
   });
 });
 
-
-// .......................... RETAKE YES BUTTON ......................
+// ................................ RETAKE YES BUTTON ......................
 app.get('/api/students/retake', async (req, res) => {
   const subTopic = req.headers.sub_topic;
   const course = req.headers.course;
@@ -2148,6 +2486,7 @@ app.get('/api/students/retake', async (req, res) => {
 // ....................SubmitedQuestion Students Question..........................................
 app.post('/api/students/submit_questions', async (req, res) => {
   const questionsArray = req.body; // Array of question objects
+
 
   try {
     const submittedQuestions = [];
@@ -2211,6 +2550,8 @@ app.get('/api/students/check_test_score', async (req, res) => {
   const subTopic = req.headers.sub_topic;
   const course = req.headers.course;
   const email = req.headers.email;
+  const totalQuestions = req.headers.totalquestions
+
 
   try {
     db.query('SELECT * FROM SubmittedQuestions WHERE subTopic = ? AND course = ? AND email = ?', [subTopic, course, email], async (err, authTopic) => {
@@ -2240,10 +2581,11 @@ app.get('/api/students/check_test_score', async (req, res) => {
           }
         } // Loop ends
 
-
-        const cal = (score / authTopic.length) * 100;
+        console.log(totalQuestions)
+        const cal = (score / parseInt(totalQuestions)) * 100;
         const percentageScore = cal.toFixed(1);
         let myPercent = parseFloat(percentageScore) >= 70;
+        
 
         db.query('SELECT * FROM Percentage WHERE subTopic = ? AND course = ? AND email = ?', [subTopic, course, email], async (err, percentage) => {
           if (percentage.length > 0) {
@@ -2301,15 +2643,26 @@ app.get('/api/students/check_test_score', async (req, res) => {
 
           } else {
             // Insert a new submission
-            db.query(
-              'INSERT INTO Percentage (subTopic, course, email, score, isPassed) VALUES (?, ?, ?, ?, ?)',
-              [subTopic, course, email, percentageScore, myPercent ? 1 : 0],
-              async (err, insertResponse) => {
-
-                // add a condition if need be
-
+        db.query(
+            'INSERT INTO Percentage (subTopic, course, email, score, isPassed) VALUES (?, ?, ?, ?, ?)',
+            [subTopic, course, email, percentageScore, myPercent ? 1 : 0],
+            async (err, insertResponse) => {
+              if (err) {
+                console.error(err);
+                return res.status(500).send('Internal Server Error');
               }
-            );
+
+              // Check if the insertion was successful
+              if (insertResponse.affectedRows === 1) {
+                // The record was successfully inserted
+                return res.json({ message: 'Record inserted successfully' });
+              } else {
+                // The record was not inserted
+                return res.status(500).send('Failed to insert record');
+              }
+            }
+          );
+
           }
         });
 
@@ -2324,7 +2677,6 @@ app.get('/api/students/check_test_score', async (req, res) => {
   }
 });
 
-
 // ............................ GET TEST SCORE .....................
 app.get('/api/students/student-score', async (req, res) => {
   const subTopic = req.headers.sub_topic;
@@ -2332,22 +2684,24 @@ app.get('/api/students/student-score', async (req, res) => {
   const email = req.headers.email;
 
 
+
   db.query('SELECT * FROM Percentage WHERE course = ? AND email = ? AND subTopic = ?', [course, email, subTopic], async (err, score) => {
     if (score.length > 0) {
       return res.json({ message: `${score[0].score}` });
 
     } else {
+
       return res.json({ message: `0` });
 
     }
   })
 })
 
-// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TUTOR>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< HUB TUTOR >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-// ...........................HUB TUTOR CREATE CURRICULUM .................................
+// ........................... HUB TUTOR CREATE CURRICULUM .................................
 app.post('/api/hub-tutor/create-curriculum', (req, res) => {
   const createTableQuery = `
     CREATE TABLE IF NOT EXISTS Curriculum (
@@ -2365,6 +2719,8 @@ app.post('/api/hub-tutor/create-curriculum', (req, res) => {
       throw new Error('Error creating table');
     }
   });
+
+
 
   const { authHeader, course, mainTopic, subTopic } = req.body;
 
@@ -2416,158 +2772,10 @@ app.post('/api/hub-tutor/create-curriculum', (req, res) => {
 
 });
 
-// ...........................SCHOOL TUTOR CREATE CURRICULUM .................................
-app.post('/api/school-tutor/create-curriculum', (req, res) => {
-  const createTableQuery = `
-    CREATE TABLE IF NOT EXISTS Curriculum (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      course VARCHAR(255) NOT NULL,
-      mainTopic VARCHAR(255) NOT NULL,
-      subTopic VARCHAR(255) NOT NULL,
-      courseCode VARCHAR(255) NOT NULL,
-      createdAt TIMESTAMP NOT NULL
-    );
-  `;
-
-  sch.query(createTableQuery, (err) => {
-    if (err) {
-      console.error(err);
-      throw new Error('Error creating table');
-    }
-  });
-
-  const { authHeader, course, mainTopic, subTopic, courseCode } = req.body;
-
-  db.query('SELECT * FROM Staff WHERE id = ?', [authHeader], async (err, result) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ error: 'Internal Server Error' });
-    }
-
-    if (result.length === 0) {
-      return res.status(401).json({ error: 'Unauthorised to view this page. Please Login' });
-    }
-
-    if (result[0].emailToken === null && result[0].isVerified === 0) {
-      return res.status(404).json({ error: 'Your account has been suspended. Please contact Ehizua Hub Admin.' });
-    }
-
-    if (result[0].isVerified === 0) {
-      return res.status(400).json({ error: 'Please verify your account or contact Ehizua Hub Admin for assistance' });
-    }
-
-
-
-    sch.query('SELECT * FROM Curriculum WHERE mainTopic = ? AND course = ?', [mainTopic, course], async (err, curriculum) => {
-      if (curriculum.length > 0) {
-        return res.status(401).json({ message: `${mainTopic} Topic already exists` });
-
-      } else {
-
-        // Now, you can insert data into the Curriculum table
-        const insertDataQuery = `
-              INSERT INTO Curriculum (course, mainTopic, subTopic, courseCode)
-              VALUES (?, ?, ?, ?);
-            `;
-
-        const values = [course, mainTopic, subTopic, courseCode];
-
-        sch.query(insertDataQuery, values, (err) => {
-          if (err) {
-            console.error(err);
-            throw new Error('Error inserting data');
-          }
-          return res.json({ message: `${mainTopic} curriculum created successfully` });
-        });
-      }
-    })
-  })
-
-
-});
-
-
-// ........................ TUTOR CREATE SCHOOL COURSE CONTENT .................................
-app.post('/api/tutor/create-school-content', async (req, res) => {
-  const createTableQuery = `
-  CREATE TABLE IF NOT EXISTS Contents (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    mainTopic VARCHAR(255) NOT NULL,
-    subTopic VARCHAR(255) NOT NULL,
-    content VARCHAR(255) NOT NULL,
-    course VARCHAR(255) NOT NULL,
-    createdAt TIMESTAMP NOT NULL
-  );
-`;
-
-  sch.query(createTableQuery, (err) => {
-    if (err) {
-      console.error(err);
-      throw new Error('Error creating table');
-    }
-  });
-  const { authHeader, main_topic, content, course, sub_topic } = req.body;
-
-  try {
-    db.query('SELECT * FROM Staff WHERE id = ?', [authHeader], async (err, result) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ error: 'Internal Server Error' });
-      }
-      if (result.length == 0) {
-        return res.status(401).json({ error: 'Unauthorised to view this page. Please Login' });
-      }
-
-      if (result[0].emailToken === null && result[0].isVerified === 0) {
-        return res.status(404).json({ error: 'Your account has been suspended. Please contact Ehizua Hub Admin.' });
-      }
-
-      if (result[0].isVerified == 0) {
-        return res.status(400).json({ error: 'Please verify your account or contact Ehizua Hub Admin for assistance' });
-      }
-
-
-
-      // Check if the Content with the same Main Topic and Sub Topic already exists
-      sch.query('SELECT * FROM Contents WHERE mainTopic = ? AND subTopic = ?', [main_topic, sub_topic], async (err, result) => {
-        if (err) {
-          console.error(err);
-          return res.status(500).send('Internal Server Error');
-        }
-
-        if (result.length !== 0) {
-          return res.status(400).json({ error: 'Topic already exists' });
-        }
-
-
-        const sql = `
-        INSERT INTO Contents (mainTopic, content, course, subTopic)
-        VALUES (?, ?, ?, ?)
-      `;
-
-        sch.query(sql, [main_topic, content, course, sub_topic], async (err, result) => {
-          if (err) {
-            console.error(err);
-            return res.status(500).send('Internal Server Error');
-          }
-
-          return res.json({ message: 'Content created successfully', content: result });
-        });
-      });
-
-    })
-
-  } catch (error) {
-    return res.status(500).json({ message: 'Error creating content' });
-  }
-
-
-});
-
-
 // ............................. GET HUB CURRICULUM MAINTOPIC.................................
 app.get('/api/tutor/hub-maintopic', (req, res) => {
   const course = req.headers.course;
+  console.log(course)
 
   db.query('SELECT * FROM Curriculum WHERE course = ?', [course], async (err, curriculum) => {
     if (err) {
@@ -2602,48 +2810,7 @@ app.get('/api/tutor/hub-subtopic', (req, res) => {
   });
 });
 
-
-// ............................. GET SCHOOL CURRICULUM MAINTOPIC.................................
-app.get('/api/tutor/school-maintopic', (req, res) => {
-  const course = req.headers.course;
-
-  sch.query('SELECT * FROM Curriculum WHERE course = ?', [course], async (err, curriculum) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ message: 'Error fetching curriculum data' });
-    }
-
-
-    // Extract MainTopic values from the curriculum data
-    const main_topics = JSON.parse(JSON.stringify(curriculum));
-
-    res.json({ message: main_topics });
-  });
-});
-
-// ............................. GET SCHOOL CURRICULUM SUBTOPIC.................................
-app.get('/api/tutor/school-subtopic', (req, res) => {
-  const course = req.headers.course;
-  const mainTopic = req.headers.main_topic;
-
-  sch.query('SELECT * FROM Curriculum WHERE course = ? AND mainTopic = ?', [course, mainTopic], async (err, curriculum) => {
-    if (err) {
-      return res.status(500).json({ message: 'Error fetching curriculum data' });
-    }
-
-
-
-    // Extract subTopic values from the curriculum data
-    const topics = JSON.parse(JSON.stringify(curriculum));
-    subTopic = topics[0].subTopic
-    const arrayOfItems = subTopic.split(', ');
-
-    res.json({ subTopics: arrayOfItems });
-  });
-});
-
-
-// ........................ TUTOR CREATE HUB COURSE CONTENT .................................
+// .........Done...............  HUB TUTOR CREATE COURSE CONTENT .................................
 app.post('/api/tutor/create-hub-content', async (req, res) => {
   const createTableQuery = `
   CREATE TABLE IF NOT EXISTS Contents (
@@ -2720,7 +2887,6 @@ app.post('/api/tutor/create-hub-content', async (req, res) => {
 
 });
 
-
 // .......................... TUTOR GET HUB COURSE CONTENT ..........................................
 app.get('/api/tutor/hub-course-content', async (req, res) => {
   const authHeader = req.headers.authheader;
@@ -2760,6 +2926,364 @@ app.get('/api/tutor/hub-course-content', async (req, res) => {
     console.error(error);
     return res.status(500).json({ error: 'Unauthorized!! Please login to view courses' });
   }
+});
+
+// .......................... TUTOR GET HUB COURSE CURRICULUM ..........................................
+app.get('/api/tutor/hub-course-curriculum', async (req, res) => {
+  const authHeader = req.headers.authheader;
+  const course = req.headers.course;
+
+
+  try {
+    db.query('SELECT * FROM Staff WHERE id = ?', [authHeader], async (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Internal Server Error' });
+      }
+
+      if (result.length === 0) {
+        return res.status(401).json({ error: 'Unauthorised to view this page. Please Login' });
+      }
+
+      if (result[0].isVerified === 0) {
+        return res.status(400).json({ error: 'Please verify your account or contact Ehizua Hub Admin for assistance' });
+      }
+
+      if (result[0].emailToken === null && result[0].isVerified === 0) {
+        return res.status(404).json({ error: 'Your account has been suspended. Please contact Ehizua Hub Admin.' });
+      }
+
+      db.query('SELECT * FROM Curriculum WHERE course = ?', [course], async (err, content) => {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ error: 'Error fetching course content' });
+        }
+        return res.json({ content });
+      });
+
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Unauthorized!! Please login to view courses' });
+  }
+});
+
+// ............................. GET TUTOR STUDENTS ..........................................
+app.get('/api/tutor/students', async (req, res) => {
+  const authHeader = req.headers.authheader;
+  const course = req.headers.course;
+
+  try {
+    db.query('SELECT * FROM Tutors WHERE id = ?', [authHeader], async (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Internal Server Error' });
+      }
+
+      if (result.length === 0) {
+        return res.status(401).json({ error: 'Unauthorised to view this page. Please Login' });
+      }
+
+      if (result[0].emailToken === null && result[0].isVerified === 0) {
+        return res.status(404).json({ error: 'Your account has been suspended. Please contact Ehizua Hub Admin.' });
+      }
+
+      if (result[0].isVerified === 0) {
+        return res.status(400).json({ error: 'Please verify your account or contact Ehizua Hub Admin for assistance' });
+      }
+
+
+
+      db.query('SELECT * FROM Students WHERE course = ?', [course], async (err, students) => {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ error: 'Error fetching course content' });
+        }
+        return res.json({ students });
+      });
+
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Unauthorized!! Please login to view courses' });
+  }
+});
+
+// ...............................HUB TUTOR CREATE QUESTION..........................................
+app.post('/api/tutor/hub-create-questions', async (req, res) => {
+  const createTableQuery = `
+  CREATE TABLE IF NOT EXISTS Questions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    course VARCHAR(255) NOT NULL,
+    mainTopic VARCHAR(255) NOT NULL,
+    subTopic VARCHAR(255) NOT NULL,
+    question VARCHAR(255) NOT NULL,
+    ans1 VARCHAR(255) NOT NULL,
+    ans2 VARCHAR(255) NOT NULL,
+    ans3 VARCHAR(255) NOT NULL,
+    ans4 VARCHAR(255) NOT NULL,
+    correctAns VARCHAR(255) NOT NULL,
+    createdAt TIMESTAMP NOT NULL
+  );
+`;
+
+  db.query(createTableQuery, (err) => {
+    if (err) {
+      console.error(err);
+      throw new Error('Error creating table');
+    }
+  });
+  const { email, course, mainTopic, subTopic, question, ans1, ans2, ans3, ans4, correctAns, } = req.body;
+
+  try {
+    db.query('SELECT * FROM HubInstructors WHERE email = ?', [email], async (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Internal Server Error' });
+      }
+      if (result.length == 0) {
+        return res.status(401).json({ error: 'Unauthorised to view this page. Please Login' });
+      }
+
+      if (result[0].emailToken === null && result[0].isVerified === 0) {
+        return res.status(404).json({ error: 'Your account has been suspended. Please contact Ehizua Hub Admin.' });
+      }
+
+      if (result[0].isVerified == 0) {
+        return res.status(400).json({ error: 'Please verify your account or contact Ehizua Hub Admin for assistance' });
+      }
+
+
+      db.query('SELECT * FROM Questions WHERE question = ? AND mainTopic = ?', [question, mainTopic, subTopic], async (err, result) => {
+        if (result.length > 0) {
+          return res.status(400).json({ error: 'Question already exists! Set another' });
+
+        } else {
+          // Create a new content with the tutor's course
+          const sql = `INSERT INTO Questions (course, mainTopic, subTopic, question, ans1, ans2, ans3, ans4, correctAns)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+          db.query(sql, [course, mainTopic, subTopic, question, ans1, ans2, ans3, ans4, correctAns], async (err, newContent) => {
+            if (err) {
+              console.error(err);
+              return res.status(500).send('Internal Server Error');
+            }
+            return res.json({ message: 'Question created successfully', question: newContent });
+
+          })
+        }
+
+
+      })
+
+    })
+
+  } catch (error) {
+    return res.status(500).json({ message: 'Error creating content' });
+  }
+});
+
+// ....................... TUTOR GET LIST OF SCHOOL COURSE CODE ................................
+app.get('/api/auth/all-school-subject', async (req, res) => {
+  const course = req.headers.course
+
+  sch.query('SELECT * FROM Courses WHERE course = ?', [course], async (err, result) => {
+
+    return res.json({ message: result });
+
+  })
+})
+
+
+
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< SCHOOL TUTOR >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+// .........Done..............SCHOOL TUTOR CREATE CURRICULUM .................................
+app.post('/api/school-tutor/create-curriculum', (req, res) => {
+  const createTableQuery = `
+    CREATE TABLE IF NOT EXISTS Curriculum (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      course VARCHAR(255) NOT NULL,
+      mainTopic VARCHAR(255) NOT NULL,
+      subTopic VARCHAR(255) NOT NULL,
+      courseCode VARCHAR(255) NOT NULL,
+      createdAt TIMESTAMP NOT NULL
+    );
+  `;
+
+  sch.query(createTableQuery, (err) => {
+    if (err) {
+      console.error(err);
+      throw new Error('Error creating table');
+    }
+  });
+
+  const { authHeader, course, mainTopic, subTopic, courseCode } = req.body;
+
+  db.query('SELECT * FROM Staff WHERE id = ?', [authHeader], async (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+
+    if (result.length === 0) {
+      return res.status(401).json({ error: 'Unauthorised to view this page. Please Login' });
+    }
+
+    if (result[0].emailToken === null && result[0].isVerified === 0) {
+      return res.status(404).json({ error: 'Your account has been suspended. Please contact Ehizua Hub Admin.' });
+    }
+
+    if (result[0].isVerified === 0) {
+      return res.status(400).json({ error: 'Please verify your account or contact Ehizua Hub Admin for assistance' });
+    }
+
+
+
+    sch.query('SELECT * FROM Curriculum WHERE mainTopic = ? AND course = ?', [mainTopic, course], async (err, curriculum) => {
+      if (curriculum.length > 0) {
+        return res.status(401).json({ message: `${mainTopic} Topic already exists` });
+
+      } else {
+
+        // Now, you can insert data into the Curriculum table
+        const insertDataQuery = `
+              INSERT INTO Curriculum (course, mainTopic, subTopic, courseCode)
+              VALUES (?, ?, ?, ?);
+            `;
+
+        const values = [course, mainTopic, subTopic, courseCode];
+
+        sch.query(insertDataQuery, values, (err) => {
+          if (err) {
+            console.error(err);
+            throw new Error('Error inserting data');
+          }
+          return res.json({ message: `${mainTopic} curriculum created successfully` });
+        });
+      }
+    })
+  })
+
+
+});
+
+// .........Done........... TUTOR CREATE SCHOOL COURSE CONTENT .................................
+app.post('/api/tutor/create-school-content', async (req, res) => {
+  const createTableQuery = `
+  CREATE TABLE IF NOT EXISTS Contents (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    mainTopic VARCHAR(255) NOT NULL,
+    subTopic VARCHAR(255) NOT NULL,
+    content VARCHAR(255) NOT NULL,
+    course VARCHAR(255) NOT NULL,
+    createdAt TIMESTAMP NOT NULL
+  );
+`;
+
+  sch.query(createTableQuery, (err) => {
+    if (err) {
+      console.error(err);
+      throw new Error('Error creating table');
+    }
+  });
+  const { authHeader, main_topic, content, course, sub_topic } = req.body;
+
+  try {
+    db.query('SELECT * FROM Staff WHERE id = ?', [authHeader], async (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Internal Server Error' });
+      }
+      if (result.length == 0) {
+        return res.status(401).json({ error: 'Unauthorised to view this page. Please Login' });
+      }
+
+      if (result[0].emailToken === null && result[0].isVerified === 0) {
+        return res.status(404).json({ error: 'Your account has been suspended. Please contact Ehizua Hub Admin.' });
+      }
+
+      if (result[0].isVerified == 0) {
+        return res.status(400).json({ error: 'Please verify your account or contact Ehizua Hub Admin for assistance' });
+      }
+
+
+
+      // Check if the Content with the same Main Topic and Sub Topic already exists
+      sch.query('SELECT * FROM Contents WHERE mainTopic = ? AND subTopic = ?', [main_topic, sub_topic], async (err, result) => {
+        if (err) {
+          console.error(err);
+          return res.status(500).send('Internal Server Error');
+        }
+
+        if (result.length !== 0) {
+          return res.status(400).json({ error: 'Topic already exists' });
+        }
+
+
+        const sql = `
+        INSERT INTO Contents (mainTopic, content, course, subTopic)
+        VALUES (?, ?, ?, ?)
+      `;
+
+        sch.query(sql, [main_topic, content, course, sub_topic], async (err, result) => {
+          if (err) {
+            console.error(err);
+            return res.status(500).send('Internal Server Error');
+          }
+
+          return res.json({ message: 'Content created successfully', content: result });
+        });
+      });
+
+    })
+
+  } catch (error) {
+    return res.status(500).json({ message: 'Error creating content' });
+  }
+
+
+});
+
+// ..........Done................ GET SCHOOL CURRICULUM MAINTOPIC.................................
+app.get('/api/tutor/school-maintopic', (req, res) => {
+  const course = req.headers.course;
+
+  sch.query('SELECT * FROM Curriculum WHERE course = ?', [course], async (err, curriculum) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: 'Error fetching curriculum data' });
+    }
+
+
+    // Extract MainTopic values from the curriculum data
+    const main_topics = JSON.parse(JSON.stringify(curriculum));
+
+    res.json({ message: main_topics });
+  });
+});
+
+// ...........Done.............. GET SCHOOL CURRICULUM SUBTOPIC.................................
+app.get('/api/tutor/school-subtopic', (req, res) => {
+  const course = req.headers.course;
+  const mainTopic = req.headers.main_topic;
+
+  sch.query('SELECT * FROM Curriculum WHERE course = ? AND mainTopic = ?', [course, mainTopic], async (err, curriculum) => {
+    if (err) {
+      return res.status(500).json({ message: 'Error fetching curriculum data' });
+    }
+
+
+
+    // Extract subTopic values from the curriculum data
+    const topics = JSON.parse(JSON.stringify(curriculum));
+    subTopic = topics[0].subTopic
+    const arrayOfItems = subTopic.split(', ');
+
+    res.json({ subTopics: arrayOfItems });
+  });
 });
 
 // .......done............... TUTOR GET SCHOOL COURSE CONTENT LIST ..........................................
@@ -2845,48 +3369,7 @@ app.get('/api/tutor/school-course-content', async (req, res) => {
   }
 });
 
-// .......................... TUTOR GET HUB COURSE CURRICULUM ..........................................
-app.get('/api/tutor/hub-course-curriculum', async (req, res) => {
-  const authHeader = req.headers.authheader;
-  const course = req.headers.course;
-
-
-  try {
-    db.query('SELECT * FROM Staff WHERE id = ?', [authHeader], async (err, result) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ error: 'Internal Server Error' });
-      }
-
-      if (result.length === 0) {
-        return res.status(401).json({ error: 'Unauthorised to view this page. Please Login' });
-      }
-
-      if (result[0].isVerified === 0) {
-        return res.status(400).json({ error: 'Please verify your account or contact Ehizua Hub Admin for assistance' });
-      }
-
-      if (result[0].emailToken === null && result[0].isVerified === 0) {
-        return res.status(404).json({ error: 'Your account has been suspended. Please contact Ehizua Hub Admin.' });
-      }
-
-      db.query('SELECT * FROM Curriculum WHERE course = ?', [course], async (err, content) => {
-        if (err) {
-          console.error(err);
-          return res.status(500).json({ error: 'Error fetching course content' });
-        }
-        return res.json({ content });
-      });
-
-    });
-
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: 'Unauthorized!! Please login to view courses' });
-  }
-});
-
-// .......................... TUTOR GET SCHOOL COURSE CURRICULUM ..........................................
+// .......Done................ TUTOR GET SCHOOL COURSE CURRICULUM ..........................................
 app.get('/api/tutor/school-course-curriculum', async (req, res) => {
   const authHeader = req.headers.authheader;
   const course = req.headers.course;
@@ -2928,137 +3411,137 @@ app.get('/api/tutor/school-course-curriculum', async (req, res) => {
   }
 });
 
-
-
-// .................................... GET TUTOR STUDENTS ..........................................
-app.get('/api/tutor/students', async (req, res) => {
-  const authHeader = req.headers.authheader;
-  const course = req.headers.course;
+// .......Done................... GET INSTRUCTOR SCHOOLS ..........................................
+app.get('/api/tutor/assigned-school', (req, res) => {
+  const email = req.headers.email
 
   try {
-    db.query('SELECT * FROM Tutors WHERE id = ?', [authHeader], async (err, result) => {
+    db.query('SELECT * FROM SchoolInstructors WHERE email = ?', [email], async (err, staff) => {
       if (err) {
-        console.error(err);
-        return res.status(500).json({ error: 'Internal Server Error' });
+        console.error('Error retrieving School Instructors:', err);
+        return res.status(500).json({ message: 'Error retrieving School Instructors' });
       }
+      const schools = staff[0].school
 
-      if (result.length === 0) {
-        return res.status(401).json({ error: 'Unauthorised to view this page. Please Login' });
-      }
+      return res.json({ schools });
+    });
+  } catch (error) {
+    console.error('Error retrieving Hub Instructors Details:', error);
+    return res.status(500).json({ message: 'Error retrieving School Instructors' });
+  }
+});
 
-      if (result[0].emailToken === null && result[0].isVerified === 0) {
-        return res.status(404).json({ error: 'Your account has been suspended. Please contact Ehizua Hub Admin.' });
-      }
+// ........Done.................. GET ALL CLASSES LIST (EG Primary 1)..........................................
+app.get('/api/tutor/fetch-school-classes', (req, res) => {
+  const { school, course } = req.headers
+  const words = school.split(' ')
 
-      if (result[0].isVerified === 0) {
-        return res.status(400).json({ error: 'Please verify your account or contact Ehizua Hub Admin for assistance' });
-      }
+  // Remove Spaces from the School
+  const schools = words.map((word) => word).join('');
 
+  if (schools == '') {
+    return res.json({ student: [] });
 
+  } else {
 
-      db.query('SELECT * FROM Students WHERE course = ?', [course], async (err, students) => {
+    try {
+      sch.query(`SELECT * FROM ${schools} WHERE isVerified = ? AND courses REGEXP ?`, [1, `\\b${course}\\b`], async (err, student) => {
         if (err) {
-          console.error(err);
-          return res.status(500).json({ error: 'Error fetching course content' });
+
+          return res.status(500).json({ message: 'Error retrieving Students' });
         }
-        return res.json({ students });
+
+        return res.json({ student });
       });
 
+    } catch (error) {
+      return res.status(500).json({ message: 'Error retrieving Students' });
+    }
+  }
+
+});
+
+// ........Done.................. GET INSTRUCTOR  CLASS STUDENT..........................................
+app.get('/api/tutor/fetch-students-by-classes', (req, res) => {
+  const { studentclass, school, course } = req.headers
+
+  const words = school.split(' ')
+
+  // Remove Spaces from the School
+  const schools = words.map((word) => word).join('');
+
+  if (schools && studentclass) {
+    try {
+      sch.query(`SELECT * FROM ${schools} WHERE level = ? AND isVerified = ?  AND courses REGEXP ?`, [studentclass, 1, `\\b${course}\\b`], async (err, student) => {
+        if (err) {
+
+          return res.status(500).json({ message: 'Error retrieving Students' });
+        }
+
+        return res.json({ student });
+      });
+
+    } catch (error) {
+      return res.status(500).json({ message: 'Error retrieving Students' });
+    }
+
+  } else {
+    return res.json({ student: [] });
+
+  }
+
+});
+
+// .........Done................. INSTRUCTOR GET SCHOOL COURSE CODE ..........................................
+app.get('/api/tutor/fetch-course_code', (req, res) => {
+  const course = req.headers.course
+
+  try {
+    sch.query(`SELECT * FROM Courses WHERE course = ?`, [course], async (err, courseCode) => {
+      if (err) {
+
+        return res.status(500).json({ message: 'Error retrieving Course Code' });
+      }
+      const courseCodeString = courseCode[0].courseCode
+
+      return res.json({ courseCodeString });
     });
 
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: 'Unauthorized!! Please login to view courses' });
+    return res.status(500).json({ message: 'Error retrieving Course Code' });
   }
+
+
 });
 
+// ..........Done................ INSTRUCTOR UPDATE STUDENT COURSE CODE ..........................................
+app.get('/api/tutor/update-course-code', (req, res) => {
+  const { studentids, coursecode, selectedschool } = req.headers;
+  const studentIdArray = studentids.split(',').map(id => parseInt(id, 10));
 
-// ....................................TUTOR CREATE QUESTION..........................................
-app.post('/api/tutor/create-questions', async (req, res) => {
-  const createTableQuery = `
-  CREATE TABLE IF NOT EXISTS Questions (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    course VARCHAR(255) NOT NULL,
-    mainTopic VARCHAR(255) NOT NULL,
-    subTopic VARCHAR(255) NOT NULL,
-    question VARCHAR(255) NOT NULL,
-    ans1 VARCHAR(255) NOT NULL,
-    ans2 VARCHAR(255) NOT NULL,
-    ans3 VARCHAR(255) NOT NULL,
-    ans4 VARCHAR(255) NOT NULL,
-    correctAns VARCHAR(255) NOT NULL,
-    createdAt TIMESTAMP NOT NULL
-  );
-`;
+  const school = selectedschool.replace(/\s+/g, '');
 
-  db.query(createTableQuery, (err) => {
+  const updateQuery = `
+    UPDATE ${school}
+    SET courseCode = CONCAT(courseCode, ', ', ?)
+    
+    WHERE id IN (?) AND NOT EXISTS (
+      SELECT 1 FROM ${school} AS subquery
+      WHERE subquery.id = ${school}.id AND subquery.courseCode LIKE ?
+    )
+  `;
+
+
+
+  sch.query(updateQuery, [coursecode, studentIdArray, `%${coursecode}%`], (err, result) => {
     if (err) {
       console.error(err);
-      throw new Error('Error creating table');
+      return res.status(500).json({ error: 'Error updating students' });
     }
+
+    return res.json({ studentIdArray: "Students course code updated successfully" });
   });
-  const { authHeader, course, mainTopic, subTopic, question, ans1, ans2, ans3, ans4, correctAns, } = req.body;
-
-  try {
-    db.query('SELECT * FROM Tutors WHERE id = ?', [authHeader], async (err, result) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ error: 'Internal Server Error' });
-      }
-      if (result.length == 0) {
-        return res.status(401).json({ error: 'Unauthorised to view this page. Please Login' });
-      }
-
-      if (result[0].emailToken === null && result[0].isVerified === 0) {
-        return res.status(404).json({ error: 'Your account has been suspended. Please contact Ehizua Hub Admin.' });
-      }
-
-      if (result[0].isVerified == 0) {
-        return res.status(400).json({ error: 'Please verify your account or contact Ehizua Hub Admin for assistance' });
-      }
-
-
-      db.query('SELECT * FROM Questions WHERE question = ? AND mainTopic = ?', [question, mainTopic, subTopic], async (err, result) => {
-        if (result.length > 0) {
-          return res.status(400).json({ error: 'Question already exists! Set another' });
-
-        } else {
-          // Create a new content with the tutor's course
-          const sql = `INSERT INTO Questions (course, mainTopic, subTopic, question, ans1, ans2, ans3, ans4, correctAns)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-
-          db.query(sql, [course, mainTopic, subTopic, question, ans1, ans2, ans3, ans4, correctAns], async (err, newContent) => {
-            if (err) {
-              console.error(err);
-              return res.status(500).send('Internal Server Error');
-            }
-            return res.json({ message: 'Question created successfully', question: newContent });
-
-          })
-        }
-
-
-      })
-
-    })
-
-  } catch (error) {
-    return res.status(500).json({ message: 'Error creating content' });
-  }
 });
-
-
-// ....................... TUTOR GET LIST OF SCHOOL COURSE CODE ................................
-app.get('/api/auth/all-school-subject', async (req, res) => {
-  const course = req.headers.course
-
-  sch.query('SELECT * FROM Courses WHERE course = ?', [course], async (err, result) => {
-
-    return res.json({ message: result });
-
-  })
-})
-
 
 
 
@@ -3224,420 +3707,20 @@ app.get('/api/school_pupils/course-content', async (req, res) => {
   const { subtopic, maintopic } = req.headers;
 
   sch.query(`SELECT * FROM Contents WHERE mainTopic = ? AND subTopic = ?`, [maintopic, subtopic], async (err, pupil) => {
-    if(pupil.length == 0){
-      return res.json({ message: [{
-        mainTopic: maintopic,
-        subTopic: subtopic,
-        content: 'SORRY!! THIS CONTENT IS NOT YET AVAILABLE AT THE MOMENT..... CONTACT YOUR INSTRUCTOR FOR FURTHER INSTRUCTIONS',
-      }] });
+    if (pupil.length == 0) {
+      return res.json({
+        message: [{
+          mainTopic: maintopic,
+          subTopic: subtopic,
+          content: 'SORRY!! THIS CONTENT IS NOT YET AVAILABLE AT THE MOMENT..... CONTACT YOUR INSTRUCTOR FOR FURTHER INSTRUCTIONS',
+        }]
+      });
 
     }
 
     return res.json({ message: pupil });
 
   })
-});
-
-
-
-
-// =================================================================================================================
-
-// ............................ADMIN CREATE INSTRUCTOR ............................
-app.post('/api/auth/create-instructor', async (req, res) => {
-  const { first_name, last_name, email, office, course, phone, sick_leave, accountNumber, bankName } = req.body;
-
-  const createTableQuery = `
-  CREATE TABLE IF NOT EXISTS Instructor (
-    _id INT AUTO_INCREMENT PRIMARY KEY,
-    first_name VARCHAR(25) NOT NULL,
-    last_name VARCHAR(25) NOT NULL,
-    email VARCHAR(25) NOT NULL,
-    office VARCHAR(55) NOT NULL,
-    course VARCHAR(255) NOT NULL,
-    phone VARCHAR(255) NOT NULL,
-    accountNumber VARCHAR(255) NOT NULL,
-    bank VARCHAR(255) NOT NULL,
-    HMO VARCHAR(255) NULL,
-    sickLeave VARCHAR(25) NOT NULL,
-    sickLeaveTaken VARCHAR(25) NOT NULL DEFAULT 0,
-    id VARCHAR(255) NOT NULL,
-    emailToken VARCHAR(255) NOT NULL,
-    isverified BOOLEAN NOT NULL DEFAULT 0,
-    createdAt TIMESTAMP NOT NULL
-  );
-`;
-
-  sch.query(createTableQuery, (err) => {
-    if (err) {
-      console.error(err);
-      throw new Error('Error creating table');
-    }
-  });
-
-  // Check if the instructor with the same email already exists
-
-  sch.query('SELECT * FROM Instructor WHERE email = ?', [email], async (err, result) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).send('Internal Server Error');
-    }
-
-    if (result.length !== 0) {
-      return res.status(400).json({ message: 'Instructor with email already exists' });
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    const id = `${email.substring(0, 2)}${shortid.generate()}${first_name.substring(0, 2)}`;
-    const hashedPass = await bcrypt.hash(id, salt);
-
-    // Generate a unique ID based on email and name
-    let emailToken = crypto.randomBytes(64).toString("hex");
-
-    const sql = `
-        INSERT INTO Instructor (first_name, last_name, email, office, course, phone, accountNumber, bank, sickLeave, id, emailToken)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `;
-
-
-    sch.query(sql, [first_name, last_name, email, office, course, phone, accountNumber, bankName, sick_leave, hashedPass, emailToken], async (err, result) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).send('Internal Server Error');
-      }
-
-
-      // Create and send an email in an async function
-      // async function sendEmail() {
-      //   const transporter = nodemailer.createTransport({
-      //     host: 'mail.softwaredevemma.ng',
-      //     port: 465,
-      //     secure: true,
-      //     auth: {
-      //       user: 'main@softwaredevemma.ng',
-      //       pass: 'bYFx.1zDu968O.'
-      //     }
-      //   });
-
-      //   const info = await transporter.sendMail({
-      //     from: 'Ehizua Hub <main@softwaredevemma.ng>',
-      //     to: email,
-      //     subject: 'Login Details',
-      //     html: `<p>Hello ${first_name} ${last_name}, verify your email by clicking on this link.. </p>
-      //       <a href='${process.env.CLIENT_URL}/verify-tutor-email?emailToken=${emailToken}&email=${email}'> Verify Your Email </a>
-      //       <h2>Your Subsequent Tutor Log in details are : </h2>
-      //       <p> Email: ${email} </p>
-      //       <p> Password: ${id} </p>`,
-      //   });
-
-      //   console.log("message sent: " + info.messageId);
-      // }
-
-      // Call the async function to send the email
-      // await sendEmail();
-      console.log(id)
-
-      return res.json({ message: 'Instructor created successfully' });
-    });
-  });
-
-});
-
-// .............................. INSTRUCTOR LOGIN ....................................
-app.post('/api/instructor/instructor-login', async (req, res) => {
-  const { email, id } = req.body;
-
-
-  sch.query('SELECT * FROM Instructor WHERE email = ?', [email], async (err, result) => {
-
-    if (err) {
-      console.error(err);
-      return res.status(500).send('Internal Server Error');
-    }
-
-
-    if (result.length === 0) {
-      return res.status(401).json({ message: 'Wrong Email or Password' });
-    }
-
-    const validated = await bcrypt.compare(id, result[0].id);
-
-    if (result[0].emailToken === null && result[0].isVerified === 0) {
-      return res.status(404).json({ message: "Your account has been suspended. Please contact Ehizua Hub Admin." });
-    }
-
-    if (result[0].isVerified === 0) {
-      return res.status(400).json({ message: 'Please verify your account.. Or contact Ehizua Hub Admin for assistance' });
-    }
-
-
-    if (!validated) {
-      return res.status(404).json({ message: "Wrong Email or Password." });
-
-    }
-    const name = (`${result[0].first_name} ${result[0].last_name}`);
-    const course = (result[0].course);
-    const payload = { id: result[0]._id };
-    const token = createToken(payload);
-
-    res.json({ token: token, instructor: name, instructor_authorization: result[0].id, course: course, office: result[0].office, email: email });
-
-  });
-});
-
-// .............................. ADMIN GET ALL INSTRUCTORS  ..........................................
-app.get('/api/auth/instructors', (req, res) => {
-  try {
-    sch.query('SELECT * FROM Instructor', async (err, instructors) => {
-      if (err) {
-        console.error('Error retrieving Instructors:', err); // Log the error
-        return res.status(500).json({ message: 'Error retrieving tutors' });
-      }
-
-      return res.json({ instructors });
-    });
-  } catch (error) {
-    console.error('Error retrieving Instructors:', error); // Log the error
-    return res.status(500).json({ message: 'Error retrieving Instructors' });
-  }
-});
-
-// ............................. INSTRUCTOR CREATE CURRICULUM .................................
-app.post('/api/instructor/create-curriculum', (req, res) => {
-  const createTableQuery = `
-    CREATE TABLE IF NOT EXISTS Curriculum (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      course VARCHAR(255) NOT NULL,
-      mainTopic VARCHAR(255) NOT NULL,
-      subTopic VARCHAR(255) NOT NULL,
-      courseCode VARCHAR(255) NOT NULL,
-      createdAt TIMESTAMP NOT NULL
-    );
-  `;
-
-  sch.query(createTableQuery, (err) => {
-    if (err) {
-      console.error(err);
-      throw new Error('Error creating table');
-    }
-  });
-
-  const { authHeader, course, mainTopic, subTopic } = req.body;
-
-  sch.query('SELECT * FROM Instructor WHERE id = ?', [authHeader], async (err, result) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ error: 'Internal Server Error' });
-    }
-
-    if (result.length === 0) {
-      return res.status(401).json({ error: 'Unauthorised to view this page. Please Login' });
-    }
-
-    if (result[0].emailToken === null && result[0].isVerified === 0) {
-      return res.status(404).json({ error: 'Your account has been suspended. Please contact Ehizua Hub Admin.' });
-    }
-
-    if (result[0].isVerified === 0) {
-      return res.status(400).json({ error: 'Please verify your account or contact Ehizua Hub Admin for assistance' });
-    }
-
-
-
-    sch.query('SELECT * FROM Curriculum WHERE mainTopic = ? AND course = ?', [mainTopic, course], async (err, curriculum) => {
-      if (curriculum.length > 0) {
-        return res.status(401).json({ message: `${mainTopic} Topic already exists` });
-
-      } else {
-
-        // Now, you can insert data into the Curriculum table
-        const insertDataQuery = `
-              INSERT INTO Curriculum (course, mainTopic, subTopic)
-              VALUES (?, ?, ?);
-            `;
-
-        const values = [course, mainTopic, subTopic];
-
-        sch.query(insertDataQuery, values, (err) => {
-          if (err) {
-            console.error(err);
-            throw new Error('Error inserting data');
-          }
-          return res.json({ message: `${mainTopic} curriculum created successfully` });
-        });
-      }
-    })
-  })
-
-
-});
-
-// .............................INSTRUCTOR GET CURRICULUM MAINTOPIC.................................
-app.get('/api/instructor/maintopic', (req, res) => {
-  const course = req.headers.course;
-
-  sch.query('SELECT * FROM Curriculum WHERE course = ?', [course], async (err, curriculum) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ message: 'Error fetching curriculum data' });
-    }
-
-
-    // Extract MainTopic values from the curriculum data
-    const main_topics = JSON.parse(JSON.stringify(curriculum));
-
-    res.json({ message: main_topics });
-  });
-});
-
-// ............................. INSTRUCTOR GET CURRICULUM SUBTOPIC.................................
-app.get('/api/instructor/subtopic', (req, res) => {
-  const course = req.headers.course;
-  const mainTopic = req.headers.main_topic;
-
-  sch.query('SELECT * FROM Curriculum WHERE course = ? AND mainTopic = ?', [course, mainTopic], async (err, curriculum) => {
-    if (err) {
-      return res.status(500).json({ message: 'Error fetching curriculum data' });
-    }
-
-
-    // Extract subTopic values from the curriculum data
-    const topics = JSON.parse(JSON.stringify(curriculum));
-    subTopic = topics[0].subTopic
-    const arrayOfItems = subTopic.split(', ');
-
-    res.json({ subTopics: arrayOfItems });
-  });
-});
-
-// ............................. INSTRUCTOR CREATE CONTENT .................................
-app.post('/api/instructor/create-content', async (req, res) => {
-  const createTableQuery = `
-  CREATE TABLE IF NOT EXISTS Contents (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    mainTopic VARCHAR(255) NOT NULL,
-    subTopic VARCHAR(255) NOT NULL,
-    content VARCHAR(255) NOT NULL,
-    course1 VARCHAR(255) NOT NULL DEFAULT '',
-    course2 VARCHAR(255) NOT NULL DEFAULT '',
-    course3 VARCHAR(255) NOT NULL DEFAULT '',
-    course4 VARCHAR(255) NOT NULL DEFAULT '',
-    course5 VARCHAR(255) NOT NULL DEFAULT '',
-    course6 VARCHAR(255) NOT NULL DEFAULT '',
-    createdAt TIMESTAMP NOT NULL
-  );
-`;
-
-  sch.query(createTableQuery, (err) => {
-    if (err) {
-      console.error(err);
-      throw new Error('Error creating table');
-    }
-  });
-
-  const { authHeader, main_topic, content, course, sub_topic } = req.body;
-
-  let course1 = '';
-  let course2 = '';
-  let course3 = '';
-  let course4 = '';
-  let course5 = '';
-  let course6 = '';
-
-  // get all the course created by the admin
-  sch.query('SELECT * FROM Courses', async (err, courses) => {
-    if (err) {
-      return res.status(500).json({ message: 'Error retrieving Courses' });
-    }
-
-    if (course == courses[0].course) {
-      course1 = course;
-    }
-
-    if (course == courses[1].course) {
-      course2 = course;
-    }
-
-    if (course == courses[2].course) {
-      course3 = course;
-    }
-
-    if (course == courses[3].course) {
-      course4 = course;
-    }
-
-    if (course == courses[4].course) {
-      course5 = course;
-    }
-
-    if (course == courses[5].course) {
-      course6 = course;
-    }
-
-    try {
-      sch.query('SELECT * FROM Instructor WHERE id = ?', [authHeader], async (err, result) => {
-        if (err) {
-          console.error(err);
-          return res.status(500).json({ error: 'Internal Server Error' });
-        }
-        if (result.length == 0) {
-          return res.status(401).json({ error: 'Unauthorised to view this page. Please Login' });
-        }
-
-        if (result[0].emailToken === null && result[0].isVerified === 0) {
-          return res.status(404).json({ error: 'Your account has been suspended. Please contact Ehizua Hub Admin.' });
-        }
-
-        if (result[0].isVerified == 0) {
-          return res.status(400).json({ error: 'Please verify your account or contact Ehizua Hub Admin for assistance' });
-        }
-
-
-
-        // Check if the Content with the same Main Topic and Sub Topic already exists
-        sch.query('SELECT * FROM Contents WHERE mainTopic = ? AND subTopic = ?', [main_topic, sub_topic], async (err, result) => {
-          if (err) {
-            console.error(err);
-            return res.status(500).send('Internal Server Error');
-          }
-
-          if (result.length !== 0) {
-            return res.status(400).json({ error: 'Topic already exists' });
-          }
-
-
-          const sql = `
-        INSERT INTO Contents (mainTopic, content, course1, course2, course3, course4, course5, course6, subTopic)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `;
-
-          sch.query(sql, [main_topic, content, course1, course2, course3, course4, course5, course6, sub_topic], async (err, result) => {
-            if (err) {
-              console.error(err);
-              return res.status(500).send('Internal Server Error');
-            }
-
-            return res.json({ message: 'Content created successfully', content: result });
-          });
-        });
-
-      })
-
-    } catch (error) {
-      return res.status(500).json({ message: 'Error creating content' });
-    }
-
-
-  });
-
-
-
-
-
-
-
-
-
 });
 
 

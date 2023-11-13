@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import secureLocalStorage from "react-secure-storage";
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
-import TutorDashboard from './TutorDashboard';
+import { Link, useParams } from 'react-router-dom';
 
 
 
-function TutorCreateQuestions() {
+
+function HubTutorCreateQuestions() {
     const [loginData, setLoginData] = useState(false);
     const [error, setError] = useState(null);
     const [tutor, setTutor] = useState(null);
@@ -18,75 +17,67 @@ function TutorCreateQuestions() {
     const [ans2, setAns2] = useState('');
     const [ans3, setAns3] = useState('');
     const [ans4, setAns4] = useState('');
+    const [email, setEmail] = useState('');
     const [correctAns, setCorrectAns] = useState('');
     const [course, setCourse] = useState('');
     const [main_topic, set_MainTopic] = useState('');
     const [sub_topic, set_SubTopic] = useState('');
     const [mainTopic, setMainTopic] = useState([]);
     const [subTopic, setSubTopic] = useState([]);
+    const {course : courseParams} = useParams()
 
 
 
     // ..................useEffect for checking localStorage and Verifying Login ..............
     useEffect(() => {
-        const storedLoginData = JSON.parse(localStorage.getItem('Tutorlogin'));
-        if (storedLoginData && storedLoginData.login && storedLoginData.token && storedLoginData.tutor_authorization) {
-            setLoginData(true);
-            setTutor(storedLoginData.tutor);
-            setCourse(storedLoginData.course);
-            setTutorAuthorization(storedLoginData.tutor_authorization)
+        const storedLoginData = JSON.parse(localStorage.getItem('Stafflogin'));
+        setEmail(storedLoginData.email)
 
-        }
     }, []);
 
     useEffect(() => {
         async function fetchMainTopic() {
-    
+
             try {
-              let login = JSON.parse(localStorage.getItem('Tutorlogin'));
-    
-              const response = await axios.get('http://localhost:5000/api/tutor/maintopic', {
-                headers: {
-                  course: login.course,
-                },
-              });
-              setMainTopic(response.data.message)
-    
-           
+                const response = await axios.get('http://localhost:5000/api/tutor/hub-maintopic', {
+                    headers: {
+                        course: courseParams,
+                    },
+                });
+                setMainTopic(response.data.message)
+
             } catch (error) {
-              setError('Error fetching curriculum data');
+                setError('Error fetching curriculum data');
             }
-          }
-    
-          fetchMainTopic();
-          
-      }, []);
-    
-    
-    
-      useEffect(() => {
-        async function fetchSubTopic() {
-          try {
-            if (main_topic !== '') { // Check if a topic is selected
-              let login = JSON.parse(localStorage.getItem('Tutorlogin'));
-    
-              const response = await axios.get('http://localhost:5000/api/tutor/subtopic', {
-                headers: {
-                  course: login.course,
-                  main_topic: main_topic
-                },
-              });
-    
-              setSubTopic(response.data.subTopics);
-            }
-          } catch (error) {
-            setError('Error fetching curriculum data');
-          }
         }
-      
+
+        fetchMainTopic();
+
+    }, [courseParams]);
+
+
+
+    useEffect(() => {
+        async function fetchSubTopic() {
+            try {
+                if (main_topic !== '') { // Check if a topic is selected
+                    const response = await axios.get('http://localhost:5000/api/tutor/hub-subtopic', {
+                        headers: {
+                            course: courseParams,
+                            main_topic: main_topic
+                        },
+                    });
+
+                    setSubTopic(response.data.subTopics);
+                }
+            } catch (error) {
+                setError('Error fetching curriculum data');
+            }
+        }
+
         fetchSubTopic();
-      }, [main_topic]); // Include 'topic' in the dependency array
-    
+    }, [main_topic]); // Include 'topic' in the dependency array
+
 
 
     // ....................... Create Question API ...................
@@ -94,9 +85,9 @@ function TutorCreateQuestions() {
         if (question && main_topic && sub_topic && ans1 && ans2 && ans3 && ans4 && correctAns) {
             setLoading(true); // Start loading indicator
 
-            axios.post("http://localhost:5000/api/tutor/create-questions", {
-                authHeader: tutor_authorization,
-                course: course,
+            axios.post("http://localhost:5000/api/tutor/hub-create-questions", {
+                email: email,
+                course: courseParams,
                 mainTopic: main_topic,
                 subTopic: sub_topic,
                 question: question,
@@ -123,12 +114,12 @@ function TutorCreateQuestions() {
                 .catch(error => {
                     console.log(error.response.data.error)
                     setError(error.response.data.error);
-                    if(error.response.data.error == "Your account has been suspended. Please contact Ehizua Hub Admin." ){
+                    if (error.response.data.error == "Your account has been suspended. Please contact Ehizua Hub Admin.") {
                         localStorage.setItem('Tutorlogin', JSON.stringify({
                             login: false,
-                          }));    
+                        }));
                     }
-                   
+
                 })
                 .finally(() => {
                     setLoading(false); // Stop loading indicator
@@ -146,12 +137,7 @@ function TutorCreateQuestions() {
 
     return (
         <div className='App'>
-            {!loginData ? (
-                <TutorDashboard />
-            ) : (
-
                 <div>
-
                     <div className='App'>
                         <h1>Create Question</h1>
 
@@ -161,49 +147,45 @@ function TutorCreateQuestions() {
                             <input
                                 type='text'
                                 id='course'
-                                value={course}
+                                value={courseParams}
                                 onChange={(event) => setCourse(event.target.value)}
                                 readOnly
                             />
                             <br /><br />
 
                             <label htmlFor='mainTopic'>Main Topic</label>
-                <br />
-                
+                            <br />
 
-                <select
-                    id='mainTopic'
-                    value={main_topic}
-                    onChange={(event) => set_MainTopic(event.target.value)}
-                  >
-                    <option value=''>Select the Main Topic</option>
-                    {mainTopic.map((mainTopic, index) => (
-                      <option key={index} value={mainTopic.mainTopic}>
-                        {mainTopic.mainTopic}
-                      </option>
-                    ))}
-                </select>
-                <br /><br />
-                <label htmlFor='firstName'>Sub Topic</label>
-                <br />
-                <select
-                    id='sub_topic'
-                    value={sub_topic}
-                    onChange={(event) => set_SubTopic(event.target.value)}
-                >
-                    <option value=''>Select a sub Topic</option>
-                    {subTopic.map((subTopic, index) => (
-                        <option key={index} value={subTopic}>  {/* Set the value attribute */}
-                            {subTopic}
-                        </option>
-                    ))}
-                </select>
 
-              
-                
-                <br /><br />
+                            <select
+                                id='mainTopic'
+                                value={main_topic}
+                                onChange={(event) => set_MainTopic(event.target.value)}
+                            >
+                                <option value=''>Select the Main Topic</option>
+                                {mainTopic.map((mainTopic, index) => (
+                                    <option key={index} value={mainTopic.mainTopic}>
+                                        {mainTopic.mainTopic}
+                                    </option>
+                                ))}
+                            </select>
+                            <br /><br />
+                            <label htmlFor='firstName'>Sub Topic</label>
+                            <br />
+                            <select
+                                id='sub_topic'
+                                value={sub_topic}
+                                onChange={(event) => set_SubTopic(event.target.value)}
+                            >
+                                <option value=''>Select a sub Topic</option>
+                                {subTopic.map((subTopic, index) => (
+                                    <option key={index} value={subTopic}>  {/* Set the value attribute */}
+                                        {subTopic}
+                                    </option>
+                                ))}
+                            </select>
 
-                          
+                            <br /><br />
 
                             <label htmlFor='question'>Question</label>
                             <textarea
@@ -279,9 +261,8 @@ function TutorCreateQuestions() {
 
 
 
-            )}
         </div>
     );
 }
 
-export default TutorCreateQuestions;
+export default HubTutorCreateQuestions;

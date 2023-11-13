@@ -73,6 +73,10 @@ const Question = () => {
     }
   }
 
+  const handleSubmit = event => {
+    event.preventDefault();
+    fetchQuestion();
+  };
 
   const handleYes = event => {
     event.preventDefault();
@@ -161,7 +165,6 @@ const [disable, setDisable] = useState(true);
 
 useEffect(() => {
 
-
   const result = subtractTimes(time1, time2);
   function timeStringToSeconds(timeString) {
     const [hours, minutes, seconds] = timeString.split(':').map(Number);
@@ -180,8 +183,6 @@ useEffect(() => {
     setSubTopic('')
     if(timeInSeconds == 0){
       submitQuestion()
-      localStorage.removeItem('TestInfo');
-
     }
     return;
 
@@ -196,7 +197,7 @@ useEffect(() => {
 
 
 const RunTimer =()=>{
-  const futureTime = new Date(currentTime.getTime() + 10 * 30000); // 1 minutes in milliseconds
+  const futureTime = new Date(currentTime.getTime() + 1 * 30000); // 1 minutes in milliseconds
   localStorage.setItem('futureTime', futureTime.toLocaleTimeString());
 
   localStorage.setItem('StartTest', JSON.stringify({
@@ -207,15 +208,10 @@ const RunTimer =()=>{
   setDisable(true)
   if(contentItem){
     setSubTopic(contentItem.subTopic)
-    localStorage.setItem('TestInfo', JSON.stringify({
-      SubTopic : contentItem.subTopic, 
-      TestCourse : course, 
-      TestEmail : email
-
-    }));
 
   }
 
+  
 }
 
 
@@ -225,7 +221,6 @@ const submitQuestion = async event => {
   setMyTime('00:00:00')
   localStorage.removeItem('StartTest');
   localStorage.removeItem('futureTime');
-  localStorage.removeItem('TestInfo');
   setDisable(false)
   setSubTopic('')
 
@@ -277,47 +272,22 @@ const submitQuestion = async event => {
   }
 };
 
-let localStorageTestInfo = JSON.parse(localStorage.getItem('TestInfo'));
-console.log(localStorageTestInfo)
 async function fetchQuestion() {
 
   try {
     let login = JSON.parse(localStorage.getItem('Studentlogin'));
-    let localStorageTestInfo = JSON.parse(localStorage.getItem('TestInfo'));
 
-    if(subTopic){
+    const response = await axios.get('http://localhost:5000/api/students/questions', {
+      headers: {
+        authHeader: login.authHeader,
+        sub_topic: subTopic,
+        course: course,
+        email: email,
+      },
 
-      const response = await axios.get('http://localhost:5000/api/students/questions', {
-    
-        headers: {
-          authHeader: login.authHeader,
-          sub_topic: subTopic,
-          course: course,
-          email: email,
-        },
-        
-    
-        });
-        setQuestions(response.data.questions);
-        setTotalQuestions(response.data.totalQuestions)
-
-    }else{
-      const response = await axios.get('http://localhost:5000/api/students/questions', {
-        headers: {
-            authHeader: login.authHeader,
-            sub_topic: localStorageTestInfo.SubTopic,
-            course: localStorageTestInfo.TestCourse,
-            email: localStorageTestInfo.TestEmail,
-          },
-       
-    
-        });
-        setQuestions(response.data.questions);
-        setTotalQuestions(response.data.totalQuestions)
-        setSubTopic(localStorageTestInfo.SubTopic)
-    }
-  
-   
+    });
+    setQuestions(response.data.questions);
+    setTotalQuestions(response.data.totalQuestions)
 
   } catch (error) {
     if(error.response.data.message){
@@ -345,9 +315,11 @@ async function fetchQuestion() {
   }
 }
 
+  
 
   return (
     <div>
+      <p>Only answers selected are counted. Work on that</p>
           <div>
         <button onClick={RunTimer} disabled={disable} >Start</button>
 

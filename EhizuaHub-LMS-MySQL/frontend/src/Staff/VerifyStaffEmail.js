@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 
 
-function VerifyTutorEmail() {
+function VerifyStaffEmail() {
     const location = useLocation();
     const searchParams = new URLSearchParams(location.search);
     const emailToken = searchParams.get('emailToken');
@@ -21,7 +21,7 @@ function VerifyTutorEmail() {
             const email = searchParams.get('email');
 
             try {
-                axios.post('http://localhost:5000/api/auth/verify-tutor-email', {
+                axios.post('http://localhost:5000/api/staff/verify-tutor-email', {
                     emailToken: emailToken,
                     email: email,
             })
@@ -60,4 +60,4 @@ function VerifyTutorEmail() {
   );
 }
 
-export default VerifyTutorEmail;
+export default VerifyStaffEmail;

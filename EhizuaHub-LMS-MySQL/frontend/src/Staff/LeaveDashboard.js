@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import secureLocalStorage from 'react-secure-storage';
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
-import TutorDashboard from '../Tutor/TutorDashboard';
 
 function LeaveDashboard() {
   const [loginData, setLoginData] = useState(false);
   const [tutor, setTutor] = useState('');
   const [office, setOffice] = useState('');
-  const [course, setCourse] = useState('');
   const [success, setSuccess] = useState('');
   const [oneDay, setOneDay] = useState(false);
   const [twoDays, setTwoDays] = useState(false);
@@ -65,7 +61,6 @@ function LeaveDashboard() {
           
           // Update state with the latest leave data
           setLeaveRequest(leaveData);
-          console.log(latestLeave.isApproved);
           setPendingLeave(latestLeave.isApproved);
         } else {
           // Handle the case when there are no leave requests
@@ -121,10 +116,8 @@ function LeaveDashboard() {
 
         })
       .then((response) => {
-        console.log(response.data.message)
         setSuccess(response.data.message)
         setOffice('')
-        setCourse('')
         setOneDay(false)
         setTwoDays(false)
         setThreeDays(false)
@@ -183,15 +176,7 @@ function LeaveDashboard() {
 
   const myLeaveRequests = leaveRequest.filter(item => item.email === email);
 
-  // const issues = async () => {
-  //   const a = await myLeaveRequests[0]?.isApproved === 0; // Use optional chaining to avoid errors if the array is empty
-  //   console.log(a);
-  //   setNoLeaveRequest(true)
-  // };
-  
-  // // Call the issues function
-  // issues();
-  // console.log(noLeaveRequest)
+
   
 
   return (
@@ -349,6 +334,7 @@ function LeaveDashboard() {
           </form>
           
           {success && <p style={{ color: 'green' }}>{success}</p>}
+          {error && <p style={{ color: 'red' }}>{error}</p>}
 
         </div>
 

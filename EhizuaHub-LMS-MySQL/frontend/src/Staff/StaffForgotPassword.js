@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 
 
 
-const TutorForgotPassword = () => {
+const StaffForgotPassword = () => {
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState('');
@@ -48,7 +48,7 @@ const TutorForgotPassword = () => {
   return (
     <div>
         <form onSubmit={handleSubmit}>
-        <h1>Tutor forgot password page </h1>
+        <h1>Staff forgot password page </h1>
 
 
             <label>Verify Your Email</label> <br/>
@@ -78,4 +78,4 @@ const TutorForgotPassword = () => {
   )
 }
 
-export default TutorForgotPassword
+export default StaffForgotPassword

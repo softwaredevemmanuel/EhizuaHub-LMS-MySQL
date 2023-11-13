@@ -14,6 +14,7 @@ function Dashboard() {
   const [leaveValue, setLeaveValue] = useState('Leave Section Off');
   const [courseCurriculum, setCourseCurriculum] = useState('Area Office Off');
   const [partnerSchool, setPartnerSchool] = useState('Partner School Off');
+  const [courseDiscount, setCourseDiscount] = useState('Course Discount Off');
 
 
   useEffect(() => {
@@ -62,6 +63,11 @@ function Dashboard() {
   const handleParnerSchool = () => {
     setPartnerSchool((prevValue) => (prevValue === 'Partner School On' ? 'Partner School Off' : 'Partner School On'));
   };
+
+  const handleCourseDiscount = () => {
+    setCourseDiscount((prevValue) => (prevValue === 'Course Discount On' ? 'Course Discount Off' : 'Course Discount On'));
+  };
+
 
   return (
     <div className='App'>
@@ -123,27 +129,17 @@ function Dashboard() {
           <br />
           <br />
           <button>
-            <Link to="/all_staff">All Staff</Link>
+            <Link to="/all_staff">All Staff / Create Staff</Link>
 
           </button>
 
           <br />
-          <Link to="/hub_instructors">View Hub Instructors</Link>
           <br />
-          <br />
-          <Link to="/school_instructors">View School Instructors</Link>
-          <br />
-
-          <br />
-
-          <Link to="/all_student_details">View Student Details</Link>
-          <br />
-          <br />
-          <Link to="/create_student">Register A new Student DONE</Link>
-
-          <br />
-          <br />
-
+          <button>
+            <Link to="/students-center">Students Section</Link>
+          </button>
+          <br/>
+          <br/>
 
           <input
             type="button"
@@ -153,14 +149,29 @@ function Dashboard() {
           {partnerSchool === "Partner School On" && (
             <div>
               <Link to="/all_schools">Partner Schools DONE</Link>
-              <br />
-              <br />
-              <Link to="/all_schools">View Subjects</Link>
-
-
+           
             </div>
           )}
+          <br/>
+          <br/>
+          <input
+            type="button"
+            value={courseDiscount}
+            onClick={handleCourseDiscount}
+          />
+          {courseDiscount === "Course Discount On" && (
+            <div>
+              <Link to="/create_course_discount">Create Course Discount</Link>
+              <br/>
+              <br/>
+              <Link to="/view_course_discount">View Course Discount</Link>
+           
+            </div>
+          )}
+          <br/>
+          <br/>
 
+            
 
         </div>
 
