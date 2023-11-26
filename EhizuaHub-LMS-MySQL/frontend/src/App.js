@@ -157,7 +157,7 @@ function App() {
 
         {/* ADMIN STUDENT SECTION */}
         <Route path='/students-center' element={<Location/>} />
-        <Route path='/hub-students/:location' element={<ListOfStudents/>} />
+        <Route path='/hub-students/:location' element={<ListOfStudents/>} />{/*  */}
 
 
 

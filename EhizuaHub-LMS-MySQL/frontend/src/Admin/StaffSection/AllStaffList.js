@@ -175,8 +175,10 @@ function AllStaffList() {
           <br />
           <br />
           <br />
-          <table>
-            <thead>
+          <div className='table-responsive'>
+
+          <table className='table table-striped'>
+            <thead className='table-active'>
               <tr>
                 <th>First Name</th>
                 <th>Last Name</th>
@@ -186,7 +188,7 @@ function AllStaffList() {
                 <th>Action</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className='table-group-divider'>
               {staff.map((tutor, index) => (
                 <tr key={index}>
                   <td>{tutor.first_name}</td>
@@ -206,6 +208,7 @@ function AllStaffList() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
       {error}

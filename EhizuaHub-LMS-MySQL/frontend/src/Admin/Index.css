@@ -9,4 +9,11 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     text-align: center;
   }
+
+  .box{
+    background-color: #134574;
+    border: 1px solid blue;
+    min-height: 50px;
+    font-size: 2rem;
+  }
   

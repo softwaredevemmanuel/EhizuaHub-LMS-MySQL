@@ -37,33 +37,33 @@ function CreateSchool() {
         }
     }, []);
 
-      // Fetch Courses
-  useEffect(() => {
-    async function fetchCourses() {
-        try {
-            const response = await axios.get('http://localhost:5000/api/auth/all_school_subject');
-            setAllCourse(response.data.message);
-        } catch (error) {
-            setError('Error retrieving Courses');
+    // Fetch Courses
+    useEffect(() => {
+        async function fetchCourses() {
+            try {
+                const response = await axios.get('http://localhost:5000/api/auth/all_school_subject');
+                setAllCourse(response.data.message);
+            } catch (error) {
+                setError('Error retrieving Courses');
+            }
         }
-    }
 
-      fetchCourses();
+        fetchCourses();
     }, []);
-    
+
 
     const handleCheckboxChange = (event) => {
         const { value, checked } = event.target;
-    
+
         if (checked) {
-          setCheckedCourses((prevCheckedCourses) => [...prevCheckedCourses, value]);
+            setCheckedCourses((prevCheckedCourses) => [...prevCheckedCourses, value]);
         } else {
-          setCheckedCourses((prevCheckedCourses) =>
-            prevCheckedCourses.filter((course) => course !== value)
-          );
+            setCheckedCourses((prevCheckedCourses) =>
+                prevCheckedCourses.filter((course) => course !== value)
+            );
         }
-      };
- 
+    };
+
 
     const createSchool = () => {
         if (schoolName) {
@@ -71,7 +71,7 @@ function CreateSchool() {
 
             axios
                 .post('http://localhost:5000/api/auth/create-school', {
-                    
+
                     schoolName,
                     checkedCourses,
                     monday,
@@ -128,156 +128,213 @@ function CreateSchool() {
             {!login && !admin ? (
                 <LoginForm />
             ) : (
-                <div className='App'>
-                    <h1>Register A New School</h1>
-                    <form onSubmit={handleSubmit}>
-                        <label htmlFor='schoolName'> Name of School</label>
-                        <input
-                            type='text'
-                            id='schoolName'
-                            value={schoolName}
-                            onChange={(event) => setSchoolName(event.target.value)}
-                        />
-                        <br /><br />
+                <div className='row'>
+                    <div className='col-3'>
+                    <div className='h-100 d-inline-block box col-12'>
+                        
+                    </div>
+                    </div>
+                
+                    <div className='col'>
+                        <div className='container'>
+                            <h1>Register A New School</h1>
+                            <form onSubmit={handleSubmit}>
+                                <label htmlFor='schoolName' className='form-label'> Name of School</label>
+                                <input
+                                    className='form-control'
+                                    type='text'
+                                    id='schoolName'
+                                    value={schoolName}
+                                    onChange={(event) => setSchoolName(event.target.value)}
+                                />
+
+
+                                <h4>Select Courses Requested</h4>
+
+                                <div className='input-group'>
+                                    {allCourses.map((course, index) => (
+                                        <div key={index}>
+                                            <label className='form-check-label'>
+                                                {course.course}
+                                                <input
+                                                    className='form-check-input'
+                                                    type="checkbox"
+                                                    value={course.course}
+                                                    checked={checkedCourses.includes(course.course)}
+                                                    onChange={handleCheckboxChange}
+                                                />
+                                            </label>
+                                        </div>
+                                    ))}
+                                </div>
+                                <p>Checked Courses: {checkedCourses.join(', ')}</p>
 
 
 
-                        <h4>Select Courses Requested</h4>
+
+
+                                <div>
+                                    <h4>Select Day/Days of Activity</h4>
+
+                                    <label> Monday </label>
+                                    <input
+                                        className='form-check-input'
+                                        type="checkbox"
+                                        name="monday"
+                                        value="monday"
+                                        onChange={(event) => setMonday(event.target.value)} />
+
+
+                                    <label>   Tuesday </label>
+                                    <input
+                                        className='form-check-input'
+                                        type="checkbox"
+                                        name="tuesday"
+                                        value="tuesday"
+                                        onChange={(event) => setTuesday(event.target.value)} />
+
+
+                                    <label>    Wednesday </label>
+                                    <input
+                                        className='form-check-input'
+                                        type="checkbox"
+                                        name="wednesday"
+                                        value='wednesday'
+                                        onChange={(event) => setWednesday(event.target.value)} />
+
+                                    <label>   Thursday </label>
+                                    <input
+                                        className='form-check-input'
+                                        type="checkbox"
+                                        name="thursday"
+                                        value='thursday'
+                                        onChange={(event) => setThursday(event.target.value)} />
+
+                                    <label>  Friday </label>
+                                    <input
+                                        className='form-check-input'
+                                        type="checkbox"
+                                        name="friday"
+                                        value='friday'
+                                        onChange={(event) => setFriday(event.target.value)} />
+
+                                    <label>  Saturday </label>
+                                    <input
+                                        className='form-check-input'
+                                        type="checkbox"
+                                        name="saturday"
+                                        value="saturday"
+                                        onChange={(event) => setSatuday(event.target.value)} />
+
+                                </div>
+                                <br/>
+
+                                <div className='container'>
+                                    <div className='row'>
+                                        <div className='col'>
+                                            <label htmlFor='phone' className='form-label'>Phone Number</label>
+                                            <input
+                                                className='form-control'
+                                                type='number'
+                                                id='phone'
+                                                value={phone}
+                                                placeholder='Optional'
+                                                onChange={(event) => setPhone(event.target.value)}
+                                            />
+                                        </div>
+                                        <div className='col'>
+                                            <label htmlFor='email' className='form-label'>Email</label>
+                                            <input
+                                                className='form-control'
+                                                type='email'
+                                                id='email'
+                                                value={email}
+                                                placeholder='Optional'
+                                                onChange={(event) => setEmail(event.target.value)}
+                                            />
+                                        </div>
+
+                                    </div>
+
+                                
+
+
+                                
+                                </div>
+
+                                <div className='container'>
+                                    <div className='row'>
+                                        <div className='col'>
+                                            <label htmlFor='duration' className='form-label'>Duration</label>
+                                            <select
+                                                className='form-select'
+                                                id='duration'
+                                                value={duration}
+                                                onChange={(event) => setDuration(event.target.value)}
+                                            >
+                                                <option value='1x A Week'>Once A Week</option>
+                                                <option value='2x A Week'>2 Times A Week</option>
+                                                <option value='3x A Week'>3 Times A Week</option>
+                                                <option value='4x A Week'>4 Times A Week</option>
+                                                <option value='5x A Week'>5 Times A Week</option>
+                                            </select>
+
+                                        </div>
+
+                                        <div className='col'>
+                                            <label htmlFor='courseFee' className='form-label'>Fee Per Child</label>
+                                            <input
+                                                className='form-control'
+                                                type='number'
+                                                id='courseFee'
+                                                value={courseFee}
+                                                onChange={(event) => setCourseFee(event.target.value)}
+                                            />
+
+                                        </div>
+                                        <div className='col'>
+                                            <label htmlFor='amountPaid'>₦ Amount Paid</label>
+
+                                                <input
+                                                    className='form-control'
+                                                    type='number'
+                                                    id='amountPaid'
+                                                    value={amountPaid}
+                                                    placeholder='Optional'
+                                                    onChange={(event) => setAmountPaid(event.target.value)}
+                                                />
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                    
+
+                                <br /><br />
+                                <label className='form-label'>School Address</label>
+                                <textarea 
+                                    className='form-control'
+                                    value={schoolAddress} 
+                                    onChange={(event) => setSchoolAddress(event.target.value)} 
+                                />
+
+                                <button type='submit' className='form-control' style={{ color: '#F13178' }}>
+                                    Create School
+                                </button>
+                            </form>
+
+                        </div>
+                        
 
                         <div>
-                            {allCourses.map((course, index) => (
-                                <div key={index}>
-                                <label>
-                                    {course.course}
-                                    <input
-                                    type="checkbox"
-                                    value={course.course}
-                                    checked={checkedCourses.includes(course.course)}
-                                    onChange={handleCheckboxChange}
-                                    />
-                                </label>
-                                </div>
-                            ))}
-                            <p>Checked Courses: {checkedCourses.join(', ')}</p>
+                            {loading && <p>Loading...</p>}
+                            {error && <p style={{ color: 'red' }}>{error}</p>}
+                            {success && <p style={{ color: 'green' }}>{success}</p>}
                         </div>
-                      
 
-
-
-                        <br/><br />
-
-
-                        <h4>Select Day/Days of Activity</h4>
-
-
-                        <label> Monday </label>
-                        <input
-                            type="checkbox"
-                            name="monday"
-                            value="monday"
-                            onChange={(event) => setMonday(event.target.value)} />
-
-
-                        <label>   Tuesday </label>
-                        <input
-                            type="checkbox"
-                            name="tuesday"
-                            value="tuesday"
-                            onChange={(event) => setTuesday(event.target.value)} />
-
-
-                        <label>    Wednesday </label>
-                        <input
-                            type="checkbox"
-                            name="wednesday"
-                            value='wednesday'
-                            onChange={(event) => setWednesday(event.target.value)} />
-
-                        <label>   Thursday </label>
-                        <input
-                            type="checkbox"
-                            name="thursday"
-                            value='thursday'
-                            onChange={(event) => setThursday(event.target.value)} />
-
-                        <label>  Friday </label>
-                        <input
-                            type="checkbox"
-                            name="friday"
-                            value='friday'
-                            onChange={(event) => setFriday(event.target.value)} />
-
-                        <label>  Saturday </label>
-                        <input
-                            type="checkbox"
-                            name="saturday"
-                            value="saturday"
-                            onChange={(event) => setSatuday(event.target.value)} />
-
-                        <br /><br />
-
-                        <label htmlFor='phone'>School Contact Phone Number</label>
-                        <input
-                            type='number'
-                            id='phone'
-                            value={phone}
-                            placeholder='Optional'
-                            onChange={(event) => setPhone(event.target.value)}
-                        />
-                        <br /><br />
-
-                        <label htmlFor='email'>Email</label>
-                        <input
-                            type='email'
-                            id='email'
-                            value={email}
-                            placeholder='Optional'
-                            onChange={(event) => setEmail(event.target.value)}
-                        />
-                        <br /><br />
-
-                        <label htmlFor='duration'>Duration</label>
-                        <select
-                            id='duration'
-                            value={duration}
-                            onChange={(event) => setDuration(event.target.value)}
-                        >
-                            <option value='1x A Week'>Once A Week</option>
-                            <option value='2x A Week'>2 Times A Week</option>
-                            <option value='3x A Week'>3 Times A Week</option>
-                            <option value='4x A Week'>4 Times A Week</option>
-                            <option value='5x A Week'>5 Times A Week</option>
-                        </select>
-                        <br /><br />
-                        <label htmlFor='courseFee'>Course Fee Per Child</label>
-                        <input
-                            type='number'
-                            id='courseFee'
-                            value={courseFee}
-                            onChange={(event) => setCourseFee(event.target.value)}
-                        />
-                        <br /><br />
-                        <label htmlFor='amountPaid'>Amount Paid</label>
-                        <input
-                            type='number'
-                            id='amountPaid'
-                            value={amountPaid}
-                            placeholder='Optional'
-                            onChange={(event) => setAmountPaid(event.target.value)}
-                        />
-                        <br /><br />
-                        <label>School Address</label>
-                        <textarea value={schoolAddress} onChange={(event) => setSchoolAddress(event.target.value)} />
-
-                        <button type='submit'>Create School</button>
-                    </form>
-
-                    <div>
-                        {loading && <p>Loading...</p>}
-                        {error && <p style={{ color: 'red' }}>{error}</p>}
-                        {success && <p style={{ color: 'green' }}>{success}</p>}
                     </div>
-
                 </div>
             )}
         </div>

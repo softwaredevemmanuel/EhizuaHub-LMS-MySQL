@@ -2388,10 +2388,8 @@ app.get('/api/students/questions', async (req, res) => {
 
     }
 
-    if (response.length === 1 && response[0].score < 100 && response[0].score >= 70) {
-      return res.status(500).json({ retake: `You exceeded the pass mark but you can do better` });
+    
 
-    }
 
     if (response.length === 1) {
       const currentTime = Date.now();
@@ -2417,7 +2415,9 @@ app.get('/api/students/questions', async (req, res) => {
 
             const questions = JSON.parse(JSON.stringify(questionsResponse));
 
-            return res.json({ message: `${subTopic} Questions`, questions});
+            const totalQuestions = questionsResponse.length
+
+            return res.json({ message: `${subTopic} Questions`, questions, totalQuestions: totalQuestions });
           });
         });
       } else {
@@ -2455,7 +2455,6 @@ app.get('/api/students/questions', async (req, res) => {
           const questions = JSON.parse(JSON.stringify(questionsResponse));
           const totalQuestions = questionsResponse.length
 
-
           return res.json({ message: `${subTopic} Questions`, questions, totalQuestions: totalQuestions });
         });
       });
@@ -2463,25 +2462,7 @@ app.get('/api/students/questions', async (req, res) => {
   });
 });
 
-// ................................ RETAKE YES BUTTON ......................
-app.get('/api/students/retake', async (req, res) => {
-  const subTopic = req.headers.sub_topic;
-  const course = req.headers.course;
 
-  db.query('SELECT * FROM Questions WHERE subTopic = ? AND course = ?', [subTopic, course], async (err, questionsResponse) => {
-    if (err) {
-      console.error('Error executing SQL query for questions:', err);
-      return res.status(500).json({ message: 'Internal server error' });
-    }
-
-    const questions = JSON.parse(JSON.stringify(questionsResponse));
-
-    return res.json({ message: `${subTopic} Questions`, questions });
-  });
-
-
-
-});
 
 // ....................SubmitedQuestion Students Question..........................................
 app.post('/api/students/submit_questions', async (req, res) => {
@@ -2493,7 +2474,7 @@ app.post('/api/students/submit_questions', async (req, res) => {
 
     for (const { sub_topic, course, question, ans, email } of questionsArray) {
       db.query(
-        'SELECT * FROM SubmittedQuestions WHERE subTopic = ? AND course = ? AND email = ? AND question = ?',
+        'SELECT * FROM SubmittedQuestions WHERE subTopic = ? AND course = ? AND email = ?',
         [sub_topic, course, email, question],
         async (err, questionsResponse) => {
           if (err) {
@@ -2503,19 +2484,32 @@ app.post('/api/students/submit_questions', async (req, res) => {
 
           if (questionsResponse.length > 0) {
 
-            // Update the existing submission's ans field
+            // Delete the existing submission's ans field
             db.query(
-              'UPDATE SubmittedQuestions SET ans = ? WHERE subTopic = ? AND course = ? AND email = ? AND question = ?',
-              [ans, sub_topic, course, email, question],
-              async (err, updateResponse) => {
+              'DELETE FROM SubmittedQuestions WHERE subTopic = ? AND course = ? AND email = ?',
+              [sub_topic, course, email],
+              async (err, result) => {
                 if (err) {
-                  console.error('Error executing UPDATE query:', err);
-                  return res.status(500).json({ message: 'Error submitting questions' });
+                  console.error('Error executing DELETE query:', err);
+                  return res.status(500).json({ message: 'Error deleting questions' });
                 }
-                submittedQuestions.push(updateResponse);
+
+                db.query(
+                  'INSERT INTO SubmittedQuestions (subTopic, course, question, ans, email) VALUES (?, ?, ?, ?, ?)',
+                  [sub_topic, course, question, ans, email],
+                  async (err, insertResponse) => {
+                    if (err) {
+                      console.error('Error executing INSERT query:', err);
+                      return res.status(500).json({ message: 'Error submitting questions' });
+                    }
+                    submittedQuestions.push(insertResponse);
+                  }
+                );
+            
+              
               }
             );
-
+            
 
           } else {
             // Insert a new submission
@@ -2583,7 +2577,9 @@ app.get('/api/students/check_test_score', async (req, res) => {
 
         console.log(totalQuestions)
         const cal = (score / parseInt(totalQuestions)) * 100;
+        console.log(cal)
         const percentageScore = cal.toFixed(1);
+        console.log(percentageScore)
         let myPercent = parseFloat(percentageScore) >= 70;
         
 
@@ -2598,10 +2594,33 @@ app.get('/api/students/check_test_score', async (req, res) => {
                   'UPDATE RetakenPercentage SET score = ?, isPassed = ?, updatedAt = CURRENT_TIMESTAMP WHERE subTopic = ? AND course = ? AND email = ?',
                   [percentageScore, myPercent ? 1 : 0, subTopic, course, email],
                   async (err, updateResponse) => {
-                    if (currentScore < prevScore) {
-                      return res.json({ message: `previous score ${prevScore}, Current Score ${percentageScore}. This score will not be updated` });
+                    if (currentScore == prevScore) {
+                      db.query(
+                        'UPDATE Percentage SET score = ?, isPassed = ?, updatedAt = CURRENT_TIMESTAMP WHERE subTopic = ? AND course = ? AND email = ?',
+                        [percentageScore, myPercent ? 1 : 0, subTopic, course, email],
+                        async (err, updateResponse) => {
 
-                    } else {
+                          // add a condition if need be
+                          return res.json({ message: `previous score ${prevScore}, Current Score ${percentageScore}. Please Try again` });
+
+                        }
+                      );
+
+
+                    }else if (currentScore < prevScore) {
+                      db.query(
+                        'UPDATE Percentage SET score = ?, isPassed = ?, updatedAt = CURRENT_TIMESTAMP WHERE subTopic = ? AND course = ? AND email = ?',
+                        [percentageScore, myPercent ? 1 : 0, subTopic, course, email],
+                        async (err, updateResponse) => {
+
+                          // add a condition if need be
+                          return res.json({ message: `previous score ${prevScore}, Current Score ${percentageScore}. This score will not be updated` });
+
+                        }
+                      );
+
+
+                    }else {
 
                       db.query(
                         'UPDATE Percentage SET score = ?, isPassed = ?, updatedAt = CURRENT_TIMESTAMP WHERE subTopic = ? AND course = ? AND email = ?',
@@ -2620,7 +2639,9 @@ app.get('/api/students/check_test_score', async (req, res) => {
                   'INSERT INTO RetakenPercentage (subTopic, course, email, score, isPassed) VALUES (?, ?, ?, ?, ?)',
                   [subTopic, course, email, percentageScore, myPercent ? 1 : 0],
                   async (err, insertResponse) => {
-                    if (prevScore < percentageScore) {
+                  
+
+                    if (prevScore > percentageScore) {
                       return res.json({ message: `previous score ${prevScore}, Current Score ${percentageScore}. This score will not be updated` });
 
                     } else {
@@ -2629,7 +2650,8 @@ app.get('/api/students/check_test_score', async (req, res) => {
                         [percentageScore, myPercent ? 1 : 0, subTopic, course, email],
                         async (err, updateResponse) => {
 
-                          // add a condition if need be
+                          return res.json({ message: `Previous score has been updated` });
+
 
                         }
                       );

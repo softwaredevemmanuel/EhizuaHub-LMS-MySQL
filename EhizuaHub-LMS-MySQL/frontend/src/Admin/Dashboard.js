@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import LoginForm from './LoginForm';
 import { Link } from 'react-router-dom';
+import './Index.css'
 
 
 
@@ -70,14 +71,15 @@ function Dashboard() {
 
 
   return (
-    <div className='App'>
+    <div className=''>
       {!login && !admin ? (
         <LoginForm />
       ) : (
 
 
-        <div className='App'>
-          <nav style={navStyle}>
+        <div className='row'>
+          <div className='col-md-3 box'>
+          <nav>
             <h5>You have {zeroApprovalCount} new Leave Request <span> <Link to="/pending_leave_request">View Request</Link></span></h5>
 
           </nav>
@@ -88,8 +90,10 @@ function Dashboard() {
             value={leaveValue}
             onClick={handleButtonClick}
           />
+         
+
           {leaveValue === "Leave Section On" && (
-            <div>
+            <div className=''>
               <Link to="/all_leave_request">View All Leave Request</Link>
               <br />
               <br />
@@ -172,7 +176,13 @@ function Dashboard() {
           <br/>
 
             
+        </div>
 
+
+        <div className='col-9'>
+          <div className='box'>
+          </div>
+        </div>
         </div>
 
       )}

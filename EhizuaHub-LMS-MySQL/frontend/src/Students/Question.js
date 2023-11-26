@@ -12,12 +12,8 @@ const Question = () => {
   const [question, setQuestions] = useState([]);
   const [success, setSuccess] = useState('');
   const [submitSuccess, setSubmitSuccess] = useState('');
-  const [yes, setYes] = useState('');
   const [retake, setRetake] = useState(true);
   const [totalQuestions, setTotalQuestions] = useState('');
- 
-
- 
 
 
 
@@ -53,41 +49,6 @@ const Question = () => {
 
   const contentItem = content.find((item) => item.id == contentParam);
 
-
-
-  async function retakeQuestion() {
-
-    try {
-
-      const response = await axios.get('http://localhost:5000/api/students/retake', {
-        headers: {
-          sub_topic: subTopic,
-          course: course,
-        },
-
-      });
-      setQuestions(response.data.questions);
-
-    } catch (error) {
-      setError(error.response.data.message);
-    }
-  }
-
-
-  const handleYes = event => {
-    event.preventDefault();
-    setYes(event.target.value);
-    retakeQuestion();
-
-  };
-
-
-
-
-  const handleNo = (event) => {
-    event.preventDefault();
-    setRetake(''); // Hide the form when "No" is clicked
-  };
 
   const [currentTime, setCurrentTime] = useState(new Date());
   const [myTime, setMyTime] = useState('')
@@ -277,8 +238,6 @@ const submitQuestion = async event => {
   }
 };
 
-let localStorageTestInfo = JSON.parse(localStorage.getItem('TestInfo'));
-console.log(localStorageTestInfo)
 async function fetchQuestion() {
 
   try {
@@ -344,7 +303,6 @@ async function fetchQuestion() {
     }
   }
 }
-
 
   return (
     <div>
@@ -431,25 +389,7 @@ async function fetchQuestion() {
               {submitSuccess && <p style={{ color: 'green' }}>{submitSuccess}</p>}
               {retake && <p style={{ color: 'green' }}>{retake}</p>}
 
-              {retake === 'You exceeded the pass mark but you can do better' && (
-                <div>
-                  {yes === 'yes' ? (
-                    ''
-                  ) : (
-                    // You can conditionally render content when the form is hidden
-                    <div>
-                      <h4>Do you want to retake the test?</h4>
-                      <button type='submit' value='yes' onClick={handleYes}>
-                        Yes
-                      </button>
-                      <br />
-                      <button type='submit' value='no' onClick={handleNo}>
-                        No
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
+        
 
             </div>
           </div>

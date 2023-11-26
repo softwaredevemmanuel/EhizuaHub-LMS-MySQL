@@ -85,11 +85,14 @@ function PupilsDashboard() {
   return (
     <div>
       {!loginPupils ? (
-        <div>
+        <div className='container'>
           <h1>School Student Login page</h1>
-          <label htmlFor='selectSchool'>Select School</label>
+          <form>
+
+          <label htmlFor='selectSchool' className='form-label'>Select School</label>
 
           <select
+            className='form-select'
             id='selectSchool'
             value={selectSchool}
             onChange={(event) => setSelectSchool(event.target.value)}
@@ -104,19 +107,23 @@ function PupilsDashboard() {
 
           <br />
           <br />
-          <label>Username</label>
+          <label className='form-label'>Username</label>
           <input type='email' id='email' autoComplete='new-password' onChange={(event) => setEmail(event.target.value)} /> <br /><br />
 
-          <label> Students ID</label>
+          <label className='form-label'> Students ID</label>
           <input type='password' autoComplete='new-password' onChange={(event) => setId(event.target.value)} /> <br /><br />
           <button onClick={login}>Login</button>
 
           <br/>
           <br/>
             <Link to="/student_forgot_password">forgot password?</Link>
+          
+          </form>
+
           <div>
             {error && <p style={{ color: 'red' }}>{error}</p>}
           </div>
+
         </div>
       ) : (
 

@@ -80,8 +80,8 @@ function CreateHubCourseCurriculum() {
 
 
     const handleSubmit = event => {
-        event.preventDefault();
-        CreateCurriculum();
+        event.preventDefault(); 
+         CreateCurriculum();
     };
 
 
