@@ -36,7 +36,7 @@ function ViewSchoolCourseList() {
 
           let storedData = JSON.parse(localStorage.getItem('Stafflogin'));
 
-          const response = await axios.get('http://localhost:5000/api/tutor/school-course-content-list', {
+          const response = await axios.get('http://localhost:5000/api/school-tutor/course-content-list', {
             headers: {
               authHeader: storedData.staff_authorization,
               course : contentCourse

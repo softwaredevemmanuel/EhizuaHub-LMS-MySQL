@@ -97,7 +97,7 @@ const StudentsProgress = () => {
     return (
 
         <div className='App'>
-            {!login && !admin ? (
+            {login && admin ? (
                 <LoginForm />
             ) : (
                 <div>

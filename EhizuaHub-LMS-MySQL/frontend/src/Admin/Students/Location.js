@@ -34,7 +34,7 @@ function Location() {
 
     return (
         <div>
-            {!login ? (
+            {login ? (
                 <LoginForm />
             ) : (
                 <div>

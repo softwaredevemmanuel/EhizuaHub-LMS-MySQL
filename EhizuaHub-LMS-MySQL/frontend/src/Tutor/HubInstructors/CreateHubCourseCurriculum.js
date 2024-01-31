@@ -138,12 +138,6 @@ function CreateHubCourseCurriculum() {
 
                         <div>
 
-                            <br />
-                            <br />
-                            <Link to="/tutor_student_details">View Student Details</Link>
-                            <br/>
-                            <br/>
-                            <Link to="/tutor_dashboard">Create Course Content</Link>
                             {loading && <p>Loading...</p>} {/* Display loading indicator */}
 
                             {error && <p style={{ color: 'red' }}>{error}</p>}

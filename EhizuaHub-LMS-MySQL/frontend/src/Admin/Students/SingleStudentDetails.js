@@ -103,7 +103,7 @@ const SingleStudentDetailsPage = () => {
   };
   return (
     <div>
-      {!login ? (
+      {login ? (
         <LoginForm />
       ) : (
 

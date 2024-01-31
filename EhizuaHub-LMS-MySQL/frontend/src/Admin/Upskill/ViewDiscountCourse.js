@@ -49,7 +49,7 @@ const ViewDiscountCourses = () => {
   
     return (
       <div>
-      {!login && !admin? (
+      {login && admin? (
         <LoginForm/>
       ) : (
          

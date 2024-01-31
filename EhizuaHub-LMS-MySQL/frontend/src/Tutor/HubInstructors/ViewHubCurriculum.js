@@ -36,7 +36,7 @@ function ViewHubCurriculum() {
 
           let storedData = JSON.parse(localStorage.getItem('Stafflogin'));
 
-          const response = await axios.get('http://localhost:5000/api/tutor/hub-course-curriculum', {
+          const response = await axios.get('http://localhost:5000/api/hub-tutor/course-curriculum', {
             headers: {
               authHeader: storedData.staff_authorization,
               course : contentCourse

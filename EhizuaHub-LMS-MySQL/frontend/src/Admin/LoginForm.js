@@ -5,6 +5,8 @@ import Dashboard from './Dashboard'
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { useNavigate } from 'react-router-dom';
+
 
 
 
@@ -13,6 +15,8 @@ function LoginForm() {
   const [password, setPassword] = useState(null);
   const [loginData, setLoginData] = useState(null);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
 
 
   useEffect(() => {
@@ -29,31 +33,47 @@ function LoginForm() {
 
 
   function login() {
-    console.log("heheheheh")
     if (email && password) {
-
-        axios.post('http://localhost:5000/api/auth/login', {
-          email: email,
-          password: password,
-        })
-        .then(response => {
+      axios.post('http://localhost:5000/api/auth/login', {
+        email: email,
+        password: password,
+      })
+      .then(response => {
+        if (response.data.user === 'Admin') {
           localStorage.setItem('Adminlogin', JSON.stringify({
             login: true,
             token: response.data.token,
             admin: true,
             admin_authorization: response.data.admin_authorization.id
           }));
-          setLoginData(true);
 
-            
-        })
-        .catch(error => {
-          setError(error.response.data.error)
+          navigate('/dashboard');
+          
 
-        });
-      }else {
-        setError('Please fill in all required fields.');
-      }
+        }
+        if (response.data.user === 'Staff') {
+          localStorage.setItem('Stafflogin', JSON.stringify({
+            login: true,
+            token: response.data.token,
+            staff: response.data.staff,
+            staff_authorization: response.data.staff_authorization,
+            hubCourse: response.data.hubCourse,
+            schoolCourse: response.data.schoolCourse,
+            office: response.data.office,
+            email: response.data.email,
+            instructor: response.data.instructor
+          }));
+          navigate('/staff_dashboard');
+
+
+        }
+      })
+      .catch(error => {
+        setError(error.response.data.error);
+      });
+    } else {
+      setError('Please fill in all required fields.');
+    }
   }
 
   const handleSubmit=(event)=>{
@@ -65,13 +85,11 @@ function LoginForm() {
 
 
   return (
-    <div>
-     {!loginData ? (
         <div>
           <Form className='container'>
               <Form.Group className="mb-3" controlId="formBasicEmail">
-                <Form.Label>Email address</Form.Label>
-                <Form.Control type="email" placeholder="Enter email" onChange={(event) => setEmail(event.target.value)}/>
+                <Form.Label>Email</Form.Label>
+                <Form.Control type="email" placeholder="Enter id" onChange={(event) => setEmail(event.target.value)}/>
                 <Form.Text className="text-muted">
                   We'll never share your email with anyone else.
                 </Form.Text>
@@ -87,18 +105,10 @@ function LoginForm() {
               </Button>
           </Form>
     
-          
-       
-
           {error && <p style={{ color: 'red' }}>{error}</p>}
 
-    </div>
-       ) : (
-
-        <Dashboard/>
-
-      )}
-    </div>
+        </div>
+  
   );
 }
 

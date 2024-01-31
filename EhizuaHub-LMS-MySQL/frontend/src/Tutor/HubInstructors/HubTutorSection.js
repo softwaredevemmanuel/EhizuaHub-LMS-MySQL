@@ -32,9 +32,7 @@ function HubTutorDashboard() {
                             <Link to={`/create_hub_course_curriculum/${course}`}>Create Curriculum</Link>
                             <br />
                             <br />
-                            <Link to="/staff_student_details">View Student Details</Link>
-                            <br />
-                            <br />
+                           
                             <Link to={`/create_hub_course_content/${course}`}>Create Content</Link>
                             <br />
                             <br />

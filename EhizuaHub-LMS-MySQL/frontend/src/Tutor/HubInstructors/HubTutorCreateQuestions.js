@@ -39,7 +39,7 @@ function HubTutorCreateQuestions() {
         async function fetchMainTopic() {
 
             try {
-                const response = await axios.get('http://localhost:5000/api/tutor/hub-maintopic', {
+                const response = await axios.get('http://localhost:5000/api/hub-tutor/maintopic', {
                     headers: {
                         course: courseParams,
                     },
@@ -61,7 +61,7 @@ function HubTutorCreateQuestions() {
         async function fetchSubTopic() {
             try {
                 if (main_topic !== '') { // Check if a topic is selected
-                    const response = await axios.get('http://localhost:5000/api/tutor/hub-subtopic', {
+                    const response = await axios.get('http://localhost:5000/api/hub-tutor/subtopic', {
                         headers: {
                             course: courseParams,
                             main_topic: main_topic
@@ -85,7 +85,7 @@ function HubTutorCreateQuestions() {
         if (question && main_topic && sub_topic && ans1 && ans2 && ans3 && ans4 && correctAns) {
             setLoading(true); // Start loading indicator
 
-            axios.post("http://localhost:5000/api/tutor/hub-create-questions", {
+            axios.post("http://localhost:5000/api/hub-tutor/create-questions", {
                 email: email,
                 course: courseParams,
                 mainTopic: main_topic,
@@ -248,9 +248,7 @@ function HubTutorCreateQuestions() {
 
                         <div>
 
-                            <br />
-                            <br />
-                            <Link to="/tutor_student_details">View Student Details</Link>
+                   
                             {loading && <p>Loading...</p>} {/* Display loading indicator */}
 
                             {error && <p style={{ color: 'red' }}>{error}</p>}

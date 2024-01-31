@@ -4,12 +4,11 @@ import StaffLogin from '../../Staff/StaffLogin';
 import { useParams } from 'react-router-dom';
 
 
-function ViewHubCourseContent() {
+function ViewHubCourseDetails() {
   const [loginData, setLoginData] = useState(null);
   const [error, setError] = useState(null);
   const [content, setContent] = useState([]);
-  const [course, setCourse] = useState('');
-  const { course: contentParam } = useParams();
+  const { id: contentParam } = useParams();
 
 
 
@@ -19,14 +18,8 @@ function ViewHubCourseContent() {
     const storedLoginData = JSON.parse(localStorage.getItem('Stafflogin'));
     if (storedLoginData && storedLoginData.login && storedLoginData.token && storedLoginData.staff_authorization) {
       setLoginData(true);
-      setCourse(storedLoginData.hubCourse);
-
     }
   }, []);
-
-  const coursesArray = course.split(', ');
-  // Locate the Curriculum based on the course parameter
-  const contentCourse = coursesArray.find((contentCourse) => contentCourse === contentParam);
 
 
 
@@ -36,10 +29,10 @@ function ViewHubCourseContent() {
 
           let storedData = JSON.parse(localStorage.getItem('Stafflogin'));
 
-          const response = await axios.get('http://localhost:5000/api/hub-tutor/course-content', {
+          const response = await axios.get('http://localhost:5000/api/hub-tutor/course-content-details', {
             headers: {
               authHeader: storedData.staff_authorization,
-              course : contentCourse
+              id : contentParam
             },
           });
 
@@ -53,7 +46,7 @@ function ViewHubCourseContent() {
 
 
       fetchCourseContent();
-  }, [contentCourse]);
+  }, [contentParam]);
 
   const uniqueMainTopics = [...new Set(content.map((item) => item.mainTopic))];
 
@@ -67,7 +60,6 @@ function ViewHubCourseContent() {
       ) : (
        
         <div>
-          
         {uniqueMainTopics.map((mainTopic, mainIndex) => (
           <div key={mainIndex}>
             <p>{mainTopic}</p>
@@ -75,9 +67,10 @@ function ViewHubCourseContent() {
               .filter((item) => item.mainTopic === mainTopic)
               .map((subContent, subIndex) => (
                 <div key={subIndex}>
-                  <a href={`/hub-course-content-details/${subContent.id}`}>
                     <p>{subContent.subTopic}</p>
-                  </a>
+                    <p>{subContent.content}</p>
+
+
                 </div>
                 
               ))}
@@ -87,10 +80,9 @@ function ViewHubCourseContent() {
 
         </div>
       )}
-      {error}
     </div>
   );
 }
 
-export default ViewHubCourseContent;
+export default ViewHubCourseDetails;
 

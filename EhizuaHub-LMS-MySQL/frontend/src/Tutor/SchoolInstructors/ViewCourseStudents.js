@@ -32,7 +32,7 @@ function ViewCourseStudent() {
   useEffect(() => {
     async function fetchClassList() {
       try {
-        const response = await axios.get('http://localhost:5000/api/tutor/fetch-school-classes', {
+        const response = await axios.get('http://localhost:5000/api/school-tutor/fetch-classes', {
           headers: {
             school: selectedSchool,
             course: courseParam
@@ -54,7 +54,7 @@ function ViewCourseStudent() {
   useEffect(() => {
     async function fetchClassStudent() {
       try {
-        const response = await axios.get('http://localhost:5000/api/tutor/fetch-students-by-classes', {
+        const response = await axios.get('http://localhost:5000/api/school-tutor/fetch-students-by-classes', {
           headers: {
             studentClass: selectClass,
             school: selectedSchool,
@@ -78,7 +78,7 @@ function ViewCourseStudent() {
     async function fetchSchools() {
       try {
 
-        const response = await axios.get('http://localhost:5000/api/tutor/assigned-school', {
+        const response = await axios.get('http://localhost:5000/api/school-tutor/assigned-school', {
           headers: {
             email: emailParam
           },
@@ -101,7 +101,7 @@ function ViewCourseStudent() {
     async function fetchCourseCode() {
       try {
 
-        const response = await axios.get('http://localhost:5000/api/tutor/fetch-course_code', {
+        const response = await axios.get('http://localhost:5000/api/school-tutor/fetch-course_code', {
           headers: {
             course: courseParam
           },
@@ -129,7 +129,7 @@ const handleAssignCourseCode =(event)=>{
 
   const studentIds = studentArray2.map(student => student.id);
 
-  axios.get("http://localhost:5000/api/tutor/update-course-code", {
+  axios.get("http://localhost:5000/api/school-tutor/update-course-code", {
     headers:{
       studentIds,
       courseCode,

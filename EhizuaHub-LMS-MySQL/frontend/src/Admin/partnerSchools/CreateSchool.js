@@ -125,7 +125,7 @@ function CreateSchool() {
 
     return (
         <div className='App'>
-            {!login && !admin ? (
+            {login && admin ? (
                 <LoginForm />
             ) : (
                 <div className='row'>

@@ -66,7 +66,7 @@ function CreateLocation() {
 
     return (
         <div className='App'>
-            {!login && !admin ? (
+            {login && admin ? (
                 <LoginForm />
             ) : (
                 <div className='App'>
@@ -153,7 +153,10 @@ function CreateLocation() {
                     
                         <label>Office Address</label>
                         <br />
-                        <textarea value={officeAddress} onChange={(event) => setOfficeAddress(event.target.value)} />
+                        <textarea 
+                            value={officeAddress} 
+                            onChange={(event) => setOfficeAddress(event.target.value)} 
+                            />
                         <br /><br />
 
                         <button type='submit'>Create Office</button>

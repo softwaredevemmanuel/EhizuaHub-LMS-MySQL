@@ -60,11 +60,7 @@ function PupilsDashboard() {
             user: response.data.user,
             authHeader: response.data.authHeader,
             email : email,
-            course1 : response.data.course1,
-            course2 : response.data.course2,
-            course3 : response.data.course3,
-            course4 : response.data.course4,
-            course5 : response.data.course5,
+            course : response.data.course,
             school : selectSchool
 
           }));

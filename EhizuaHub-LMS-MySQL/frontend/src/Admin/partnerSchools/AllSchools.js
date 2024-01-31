@@ -35,7 +35,7 @@ function AllSchools() {
 
   return (
     <div>
-      {!login? (
+      {login? (
           <LoginForm/>
       ) : (
         <div>

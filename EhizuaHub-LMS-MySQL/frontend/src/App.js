@@ -70,6 +70,9 @@ import CreateCourseDiscount from './Admin/Upskill/CreateCourseDiscount';
 import ViewDiscountCourses from './Admin/Upskill/ViewDiscountCourse';
 import UpdateDiscountCourse from './Admin/Upskill/UpdateDiscountCourse';
 import RegisterDiscountCourse from './Students/RegisterDiscountCourse';
+import SideMenu from './Admin/SideMenu';
+import SideBar from './Admin/SideBar';
+import ViewHubCourseDetails from './Tutor/HubInstructors/ViewHubCourseDetails';
 
 
 
@@ -154,10 +157,13 @@ function App() {
           <Route path='/school-course-content-details/:id' element={<ViewSchoolCourseContent/>} />
           <Route path='/select-school-of-student/:email/:course' element={<ViewCourseStudent/>} />
           <Route path='/register-discount-course/:email/:_id' element={<RegisterDiscountCourse/>} />
+          <Route path='/hub-course-content-details/:id' element={<ViewHubCourseDetails/>} />
 
         {/* ADMIN STUDENT SECTION */}
         <Route path='/students-center' element={<Location/>} />
         <Route path='/hub-students/:location' element={<ListOfStudents/>} />{/*  */}
+        <Route path='/side' element={<SideMenu/>} />{/*  */}
+        <Route path='/sidebar' element={<SideBar/>} />{/*  */}
 
 
 
@@ -171,3 +177,6 @@ function App() {
 }
 
 export default App;
+
+
+

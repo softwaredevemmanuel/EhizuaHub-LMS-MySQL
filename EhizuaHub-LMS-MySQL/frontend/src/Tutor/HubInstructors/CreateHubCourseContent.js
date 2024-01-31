@@ -43,7 +43,7 @@ const contentCourse = coursesArray.find((curriculumCourse) => curriculumCourse =
     async function fetchMainTopic() {
 
         try {
-          const response = await axios.get('http://localhost:5000/api/tutor/hub-maintopic', {
+          const response = await axios.get('http://localhost:5000/api/hub-tutor/maintopic', {
             headers: {
               course: contentCourse,
             },
@@ -68,7 +68,7 @@ const contentCourse = coursesArray.find((curriculumCourse) => curriculumCourse =
       try {
         if (main_topic !== '') { // Check if a topic is selected
 
-          const response = await axios.get('http://localhost:5000/api/tutor/hub-subtopic', {
+          const response = await axios.get('http://localhost:5000/api/hub-tutor/subtopic', {
             headers: {
               course: contentCourse,
               main_topic: main_topic
@@ -93,7 +93,7 @@ const contentCourse = coursesArray.find((curriculumCourse) => curriculumCourse =
     if (main_topic && content) {
       setLoading(true); // Start loading indicator
 
-      axios.post("http://localhost:5000/api/tutor/create-hub-content", {
+      axios.post("http://localhost:5000/api/hub-tutor/create-content", {
         authHeader: staff_authorization,
         main_topic: main_topic,
         content: content,

@@ -101,7 +101,7 @@ function AllStaffList() {
 
   return (
     <div>
-      {!login && !admin ? (
+      {login && admin ? (
         <LoginForm />
       ) : (
 

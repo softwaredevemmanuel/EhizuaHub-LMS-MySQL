@@ -81,7 +81,7 @@ const SchoolDetails = () => {
 
   return (
     <div>
-      {!login ? (
+      {login ? (
         <LoginForm />
       ) : (
 

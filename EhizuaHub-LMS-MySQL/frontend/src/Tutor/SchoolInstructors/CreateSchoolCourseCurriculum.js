@@ -46,7 +46,7 @@ function CreateSchoolCourseCurriculum() {
                 try {
                     let storedData = JSON.parse(localStorage.getItem('Stafflogin'));
 
-                    const response = await axios.get('http://localhost:5000/api/auth/all-school-subject', {
+                    const response = await axios.get('http://localhost:5000/api/school-tutor/all-subject', {
                         headers: {
                             authHeader: storedData.staff_authorization,
                             course: curriculumCourse,

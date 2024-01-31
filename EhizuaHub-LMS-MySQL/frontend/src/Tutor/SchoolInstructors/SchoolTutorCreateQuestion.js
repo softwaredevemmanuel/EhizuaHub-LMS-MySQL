@@ -3,6 +3,8 @@ import axios from 'axios';
 import secureLocalStorage from "react-secure-storage";
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import StaffLogin from '../../Staff/StaffLogin';
+import { useParams } from 'react-router-dom';
+
 
 
 
@@ -25,30 +27,36 @@ function SchoolTutorCreateQuestions() {
     const [sub_topic, set_SubTopic] = useState('');
     const [mainTopic, setMainTopic] = useState([]);
     const [subTopic, setSubTopic] = useState([]);
+    const [staff_authorization, setStaffAuthorization] = useState('');
+    const { course: contentParam } = useParams();
 
 
 
-    // ..................useEffect for checking localStorage and Verifying Login ..............
-    useEffect(() => {
-        const storedLoginData = JSON.parse(localStorage.getItem('Tutorlogin'));
-        if (storedLoginData && storedLoginData.login && storedLoginData.token && storedLoginData.tutor_authorization) {
-            setLoginData(true);
-            setTutor(storedLoginData.tutor);
-            setCourse(storedLoginData.course);
-            setTutorAuthorization(storedLoginData.tutor_authorization)
+    const coursesArray = course.split(', ');
 
-        }
-    }, []);
+    // Locate the Curriculum based on the course parameter
+    const curriculumCourse = coursesArray.find((curriculumCourse) => curriculumCourse === contentParam);
+
+
+  // ..................useEffect for checking localStorage and Verifying Login ..............
+useEffect(() => {
+    const storedLoginData = JSON.parse(localStorage.getItem('Stafflogin'));
+    if (storedLoginData && storedLoginData.login && storedLoginData.token && storedLoginData.staff_authorization) {
+      setLoginData(true);
+      setCourse(storedLoginData.schoolCourse);
+      setStaffAuthorization(storedLoginData.staff_authorization)
+  
+    }
+  }, []);
 
     useEffect(() => {
         async function fetchMainTopic() {
 
             try {
-                let login = JSON.parse(localStorage.getItem('Tutorlogin'));
 
-                const response = await axios.get('http://localhost:5000/api/tutor/maintopic', {
+                const response = await axios.get('http://localhost:5000/api/school-tutor/maintopic', {
                     headers: {
-                        course: login.course,
+                        course: curriculumCourse,
                     },
                 });
                 setMainTopic(response.data.message)
@@ -61,7 +69,7 @@ function SchoolTutorCreateQuestions() {
 
         fetchMainTopic();
 
-    }, []);
+    }, [curriculumCourse]);
 
 
 
@@ -69,11 +77,10 @@ function SchoolTutorCreateQuestions() {
         async function fetchSubTopic() {
             try {
                 if (main_topic !== '') { // Check if a topic is selected
-                    let login = JSON.parse(localStorage.getItem('Tutorlogin'));
 
-                    const response = await axios.get('http://localhost:5000/api/tutor/subtopic', {
+                    const response = await axios.get('http://localhost:5000/api/school-tutor/subtopic', {
                         headers: {
-                            course: login.course,
+                            course: curriculumCourse,
                             main_topic: main_topic
                         },
                     });
@@ -95,9 +102,11 @@ function SchoolTutorCreateQuestions() {
         if (question && main_topic && sub_topic && ans1 && ans2 && ans3 && ans4 && correctAns) {
             setLoading(true); // Start loading indicator
 
-            axios.post("http://localhost:5000/api/tutor/create-questions", {
-                authHeader: tutor_authorization,
-                course: course,
+            let storedData = JSON.parse(localStorage.getItem('Stafflogin'));
+
+            axios.post("http://localhost:5000/api/school-tutor/create-questions", {
+                email: storedData.email,
+                course: curriculumCourse,
                 mainTopic: main_topic,
                 subTopic: sub_topic,
                 question: question,
@@ -157,7 +166,7 @@ function SchoolTutorCreateQuestions() {
                             <input
                                 type='text'
                                 id='course'
-                                value={course}
+                                value={curriculumCourse}
                                 onChange={(event) => setCourse(event.target.value)}
                                 readOnly
                             />

@@ -72,10 +72,6 @@ function Dashboard() {
 
   return (
     <div className=''>
-      {!login && !admin ? (
-        <LoginForm />
-      ) : (
-
 
         <div className='row'>
           <div className='col-md-3 box'>
@@ -185,7 +181,7 @@ function Dashboard() {
         </div>
         </div>
 
-      )}
+    
 {error}
     </div>
   );

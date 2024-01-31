@@ -19,7 +19,7 @@ const StudentForgotPassword = () => {
         if (email) {
           setLoading(true);
     
-          axios.post("http://localhost:5000/api/auth/student_forgot_password", {
+          axios.post("http://localhost:5000/api/students/student_forgot_password", {
             email: email,
            
           })

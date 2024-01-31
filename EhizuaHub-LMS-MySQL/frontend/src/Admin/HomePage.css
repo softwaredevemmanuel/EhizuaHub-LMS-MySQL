@@ -1,0 +1,81 @@
+.box{
+    background-color: #C8D1DA;
+    border: 1px solid #FFFFFF;
+    min-height: 50px;
+    font-size: 2rem;
+}
+.boxa{
+    background-color: #C8D1DA;
+    border: 1px solid #FFFFFF;
+    min-height: 100px;
+    font-size: 2rem;
+}
+
+.boxb{
+    background-color: #3b6084;
+    max-height: 12rem;
+    font-size: 2rem;
+    border-radius: 8px;
+    margin: 20px;
+}
+.frame1 img{
+    width: 80%;
+    height: 'auto';
+}
+.reduced-font-home {
+    font-size: 40px; /* Adjust the font size to your preference */
+  }
+
+@media screen and (max-width: 1061px) {
+.boxb .emma{
+    font-size: 36px;
+}
+
+}
+
+@media screen and (max-width: 1061px) {
+    .boxb .emma{
+        font-size: 36px;
+    }
+
+  }
+  @media screen and (max-width: 1000px) {
+    .boxb .emma{
+        font-size: 30px;
+    }
+
+  }
+  @media screen and (max-width: 900px) {
+    .boxb .emma{
+        font-size: 26px;
+    }
+
+  }
+  @media screen and (max-width: 833px) {
+    .boxb .emma{
+        font-size: 20px;
+    }
+
+  }
+  @media screen and (max-width: 601px) {
+    .boxb .emma{
+        font-size: 18px;
+
+    }
+
+
+  }
+
+.button-custom {
+    background-color: #DD137B;
+    border: none;
+}
+
+.boxc{
+    background-color: #3b6084;
+    min-height: 4rem;
+    font-size: 2rem;
+    border-radius: 8px;
+    margin: 20px;
+}
+
