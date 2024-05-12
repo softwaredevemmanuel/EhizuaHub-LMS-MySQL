@@ -12,6 +12,7 @@ app.use(bodyParser.json());
 
 
 const authRoute = require("./routes/auth");
+const authStudentRoute = require("./routes/authStudents");
 const staffRoute = require("./routes/staff");
 const studentRoute = require("./routes/student");
 const hubTutorRoute = require("./routes/hubTutor");
@@ -20,6 +21,7 @@ const schoolPupilRoute = require("./routes/schoolPupils");
 
 
 app.use("/api/auth", authRoute);
+app.use("/api/auth-student", authStudentRoute);
 app.use("/api/staff", staffRoute);
 app.use("/api/students", studentRoute);
 app.use("/api/hub-tutor", hubTutorRoute);
@@ -27,8 +29,7 @@ app.use("/api/school-tutor", schoolTutorRoute);
 app.use("/api/school_pupils", schoolPupilRoute);
 
 
-
-
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+

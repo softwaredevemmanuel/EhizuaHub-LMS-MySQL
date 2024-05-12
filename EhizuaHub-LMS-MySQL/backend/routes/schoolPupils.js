@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const jwt = require("jsonwebtoken");
+const { db } = require('../config/db'); // replace 'yourModuleName' with the actual path to the module
 
 //....... JSON WEB TOKEN ............
 const createToken = (payload) => {
@@ -66,7 +67,15 @@ router.post('/login', async (req, res) => {
     });
   });
   
-  
+// ............................. ADMIN GET LIST OF SCHOOLS ................................
+router.get('/partner-schools', async (req, res) => {
+
+  db.query('SELECT * FROM PartnerSchools', async (err, result) => {
+    return res.json({ message: result });
+
+  })
+})
+
   // .................................... PUPILS COURSE SECTION ...............................
 router.get('/course-section', async (req, res) => {
   

@@ -85,6 +85,7 @@ function CourseCurriculum() {
             ))}
     
           </div>
+          
           {error && <p style={{ color: 'red' }}>{error}</p>}
 
 

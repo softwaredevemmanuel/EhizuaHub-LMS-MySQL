@@ -69,8 +69,6 @@ function ViewHubCourseDetails() {
                 <div key={subIndex}>
                     <p>{subContent.subTopic}</p>
                     <p>{subContent.content}</p>
-
-
                 </div>
                 
               ))}

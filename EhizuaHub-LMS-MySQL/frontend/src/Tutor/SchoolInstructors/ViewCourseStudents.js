@@ -20,7 +20,6 @@ function ViewCourseStudent() {
 
 
 
-
   // ..................useEffect for checking localStorage and Verifying Login ..............
   useEffect(() => {
     const storedLoginData = JSON.parse(localStorage.getItem('Stafflogin'));

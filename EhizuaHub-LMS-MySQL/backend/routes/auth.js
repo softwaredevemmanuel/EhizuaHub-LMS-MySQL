@@ -4,7 +4,7 @@ const nodemailer = require('nodemailer');
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
-const { db, sch } = require('../config/db'); // replace 'yourModuleName' with the actual path to the module
+const { db } = require('../config/db'); // replace 'yourModuleName' with the actual path to the module
 
 // app.post('/create_database', function (req, res) {
 //   const {school} = req.body
@@ -15,6 +15,7 @@ const { db, sch } = require('../config/db'); // replace 'yourModuleName' with th
 //     res.send("Database Created......");
 //   });
 // });
+
 
 
 // app.post('/insert', (req, res) =>{
@@ -106,7 +107,7 @@ const { db, sch } = require('../config/db'); // replace 'yourModuleName' with th
 const createToken = (payload) => {
   const jwtSecretKey = process.env.JWT_SECRET_KEY;
 
-  return jwt.sign(payload, jwtSecretKey, { expiresIn: "1h" });
+  return jwt.sign(payload, jwtSecretKey, { expiresIn: "1day" });
 };
 
 
@@ -163,7 +164,6 @@ router.post('/login', async (req, res) => {
       res.status(401).json({ error: 'Incorrect email or password' });
       return;
     }
-    console.log(result[0].password)
     const validated = await bcrypt.compare(password, result[0].password);
     if (!validated) {
       return res.status(404).json({ error: "Wrong Email or Password." });
@@ -415,7 +415,7 @@ router.get('/history', authenticateToken, async (req, res) => {
 
 // ............................. ADMIN CREATE TIME TABLE ...............................
 router.post('/time-table', async (req, res) => {
-  const {adminEmail, location, startTime, endTime, mondayArray, tuesdayArray, wednesdayArray, thursdayArray, fridayArray, saturdayArray } = req.body;
+  const {adminEmail, location, startTime, endTime, mondayArray, tuesdayArray, wednesdayArray, thursdayArray, fridayArray, saturdayArray, courseBreak } = req.body;
   const monday = mondayArray.join(', ');
   const tuesday = tuesdayArray.join(', ');
   const wednesday = wednesdayArray.join(', ');
@@ -452,13 +452,15 @@ router.post('/time-table', async (req, res) => {
       return res.status(500).send('Internal Server Error');
     }
 
-      // const lastRow = (result[0][result.length -1])
+    if(result.length >= 2){
       const lastRow = result.length
       let mystarttime = result[lastRow - 1].startTime
       if(mystarttime > startTime){
         return res.status(400).json({ message: `The next Start time ${startTime} cannot be less than the previous Start Time ${mystarttime}` });
 
       }
+    }
+    
     
 
 
@@ -472,7 +474,7 @@ router.post('/time-table', async (req, res) => {
           `;
 
 
-         db.query(sql, [startTime, endTime, monday, tuesday, wednesday, thursday, friday, saturday, location], async (err, result) => {
+         db.query(sql, [startTime, endTime, monday, tuesday, wednesday, thursday, friday, saturday, location, courseBreak], async (err, result) => {
       if (err) {
         console.error(err);
         return res.status(500).send('Internal Server Error');
@@ -487,7 +489,7 @@ router.post('/time-table', async (req, res) => {
           }
           const title = `Time table was created`
           const userEmail = `${adminEmail}`
-          const fullName = `${staff[0].first_name} ${staff[0].last_name}`
+          const fullName = `${staff[0].firstName} ${staff[0].lastName}`
 
           const sql = `
               INSERT INTO History (title, userEmail, fullName)
@@ -513,7 +515,8 @@ router.post('/time-table', async (req, res) => {
 
   });
 });
-// ............................. ADMIN GET TIME TABLE ................................
+
+// ............................. ADMIN GET TIME TABLE BY LOCATION ................................
 router.get('/time-table', async (req, res) => {
   const location = req.headers.location
  
@@ -522,6 +525,189 @@ router.get('/time-table', async (req, res) => {
 
   })
 })
+
+// ............................. ADMIN EDIT TIME TABLE ................................
+router.put('/time-table/:id', async (req, res) => {
+  const timeTableId = req.params.id;
+  const {adminEmail, location, startTime, endTime, mondayArray, tuesdayArray, wednesdayArray, thursdayArray, fridayArray, saturdayArray, courseBreak } = req.body;
+  const monday = mondayArray.join(', ');
+  const tuesday = tuesdayArray.join(', ');
+  const wednesday = wednesdayArray.join(', ');
+  const thursday = thursdayArray.join(', ');
+  const friday = fridayArray.join(', ');
+  const saturday = saturdayArray.join(', ');
+
+  const createHistoryTableQuery = `
+  CREATE TABLE IF NOT EXISTS History (
+    _id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(50) NOT NULL,
+    userEmail VARCHAR(255) NOT NULL,
+    fullName VARCHAR(255) NOT NULL,
+    details VARCHAR(255) NOT NULL DEFAULT '',
+    createdAt TIMESTAMP NOT NULL
+    );
+`;
+
+ // Check if the Office with the same Name already exists
+ db.query(`SELECT * FROM TimeTable WHERE location = ?`, [location], async (err, result) => {
+  if (err) {
+    console.error(err);
+    return res.status(500).send('Internal Server Error');
+  }
+ // prevent from creating timetable with same start time or 
+  if(result.length >= 2){
+    const lastRow = result.length
+    let mystarttime = result[lastRow - 1].startTime
+    if(mystarttime > startTime){
+      return res.status(400).json({ message: `The next Start time ${startTime} cannot be less or equal to the current Start Time ${mystarttime}` });
+
+    }
+  }
+
+      db.query(createHistoryTableQuery, (err) => {
+        if (err) {
+          console.error(err);
+          throw new Error('Error creating table');
+        }
+      });
+
+      const sql = `
+      UPDATE TimeTable
+      SET
+        location = ?,
+        startTime = ?,
+        endTime = ?,
+        monday = ?,
+        tuesday = ?,
+        wednesday = ?,
+        thursday = ?,
+        friday = ?,
+        saturday = ?
+        
+      WHERE _id = ?
+    `;
+
+      db.query(
+        sql,
+        [location, startTime, endTime, monday, tuesday, wednesday, thursday, friday, saturday, timeTableId],
+        async (err, result) => {
+          if (err) {
+            console.error(err);
+            return res.status(500).send('Internal Server Error');
+          }
+
+          if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Office not found' });
+          }
+
+          db.query(`SELECT * FROM Staff WHERE email = ?`, [adminEmail], async (err, staff) => {
+            // Store this activity in the history section
+            db.query('SELECT * FROM History', async (err, history) => {
+
+              if (err) {
+                console.error(err);
+                return res.status(500).send('Internal Server Error');
+              }
+              const title = `${location} TIme Table was updated`
+              const userEmail = `${adminEmail}`
+              const fullName = `${staff[0].firstName} ${staff[0].lastName}`
+              const details = `Monday: ${monday} / Tuesday: ${tuesday} / Wednesday: ${wednesday} / Thursday: ${thursday} / Friday: ${friday} / Saturday: ${saturday}`
+
+              const sql = `
+                  INSERT INTO History (title, userEmail, fullName, details)
+                  VALUES (?, ?, ?, ?)
+                `;
+
+              db.query(sql, [title, userEmail, fullName, details], async (err, result) => {
+                if (err) {
+                  console.error(err);
+                  return res.status(500).send('Internal Server Error');
+                }
+
+                return res.json({ message: 'Time Table updated successfully' });
+              });
+
+
+            })
+          })
+        }
+      );
+ })
+
+})
+
+
+router.delete('/time-table/:id', async (req, res) => {
+  const timeTableIdString = req.params.id;
+  
+  // convert the timeTableIdString to an integer with a radix of 10 (decimal). 
+  const timeTableId = parseInt(timeTableIdString, 10);  
+  const adminEmail =req.headers.email
+
+ 
+  const createHistoryTableQuery = `
+  CREATE TABLE IF NOT EXISTS History (
+    _id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(50) NOT NULL,
+    userEmail VARCHAR(255) NOT NULL,
+    fullName VARCHAR(255) NOT NULL,
+    details VARCHAR(255) NOT NULL DEFAULT '',
+    createdAt TIMESTAMP NOT NULL
+    );
+`;
+
+      db.query(createHistoryTableQuery, (err) => {
+        if (err) {
+          console.error(err);
+          throw new Error('Error creating table');
+        }
+      });
+
+     
+      db.query(`DELETE FROM TimeTable WHERE _id = ?`, [timeTableId], async (err, result) => {
+          if (err) {
+            console.error(err);
+            return res.status(500).send('Internal Server Error');
+          }
+
+        
+
+          db.query(`SELECT * FROM Staff WHERE email = ?`, [adminEmail], async (err, staff) => {
+            // Store this activity in the history section
+            db.query('SELECT * FROM History', async (err, history) => {
+
+              if (err) {
+                console.error(err);
+                return res.status(500).send('Internal Server Error');
+              }
+              const title = `Time Table was Deleted`
+              const userEmail = `${adminEmail}`
+              const fullName = `${staff[0].firstName} ${staff[0].lastName}`
+              const details = ``
+
+              const sql = `
+                  INSERT INTO History (title, userEmail, fullName, details)
+                  VALUES (?, ?, ?, ?)
+                `;
+
+              db.query(sql, [title, userEmail, fullName, details], async (err, result) => {
+                if (err) {
+                  console.error(err);
+                  return res.status(500).send('Internal Server Error');
+                }
+
+                return res.json({ message: 'Time Table deleted successfully' });
+              });
+
+
+            })
+          })
+        }
+      );
+
+
+})
+
 
 // ............................. ADMIN GET OFFICES DETAILS................................
 router.get('/office-details', async (req, res) => {
@@ -628,7 +814,7 @@ router.post('/create-staff', async (req, res) => {
         middleName VARCHAR(20) NOT NULL DEFAULT '',
         email VARCHAR(255) NOT NULL,
         dateOfBirth VARCHAR(255) NOT NULL,
-        dateEmployed VARCHAR(255) NOT NULL,
+        dateEmployed VARCHAR(255) NOT NULL DEFAULT '',
         office VARCHAR(255) NOT NULL,
         position VARCHAR(255) NOT NULL,
         selectedJobType VARCHAR(255) NOT NULL,
@@ -707,7 +893,7 @@ router.post('/create-staff', async (req, res) => {
     email VARCHAR(50) NOT NULL,
     password VARCHAR(200) NOT NULL,
     user VARCHAR(255) NOT NULL,
-    title VARCHAR(255) NOT NULL,
+    title VARCHAR(255) NOT NULL DEFAULT '',
     firstName VARCHAR(255) NOT NULL,
     lastName VARCHAR(255) NOT NULL
   
@@ -722,8 +908,7 @@ router.post('/create-staff', async (req, res) => {
     }
   });
 
-
-  const { title, user, firstName, middleName, lastName, email, dateOfBirth, dateEmployed, office, position, selectedJobType, hubInstructor, schoolInstructor, school, phone, salary, accountNumber, bankName, sick_leave, homeAddress, nextOfKinFullName, nextOfKinNumber, nextOfKinAddress, hubCourse, schoolCourse } = req.body;
+  const { title, user, firstName, middleName, lastName, email, dateOfBirth, office, position, selectedJobType, hubInstructor, schoolInstructor, school, phone, salary, accountNumber, bankName, sick_leave, homeAddress, nextOfKinFullName, nextOfKinNumber, nextOfKinAddress, hubCourse, schoolCourse } = req.body;
 
   // Check if the Staff with the same email already exists
 
@@ -745,12 +930,11 @@ router.post('/create-staff', async (req, res) => {
     const password = `${email.substring(2, 4)}-${firstName.substring(0, 2)}-${id.substring(2, 3)}${id.substring(5, 6)}${id.substring(0, 1)}`;
     const hashedId = await bcrypt.hash(password, salt);
 
-
     const sql = `
-            INSERT INTO Staff (title, user, firstName, middleName, lastName, email, dateOfBirth, dateEmployed, office, position, selectedJobType, hubInstructor, schoolInstructor, phone, salary, accountNumber, bankName, sickLeave, id, homeAddress, nextOfKinFullName, nextOfKinPhoneNumber, nextOfKinAddress )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO Staff (title, user, firstName, middleName, lastName, email, dateOfBirth, office, position, selectedJobType, hubInstructor, schoolInstructor, phone, salary, accountNumber, bankName, sickLeave, id, homeAddress, nextOfKinFullName, nextOfKinPhoneNumber, nextOfKinAddress )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           `;
-    db.query(sql, [title, user, firstName, middleName, lastName, email, dateOfBirth, dateEmployed, office, position, selectedJobType, hubInstructor, schoolInstructor, phone, salary, accountNumber, bankName, sick_leave, hashedId, homeAddress, nextOfKinFullName, nextOfKinNumber, nextOfKinAddress], async (err, result) => {
+    db.query(sql, [title, user, firstName, middleName, lastName, email, dateOfBirth, office, position, selectedJobType, hubInstructor, schoolInstructor, phone, salary, accountNumber, bankName, sick_leave, hashedId, homeAddress, nextOfKinFullName, nextOfKinNumber, nextOfKinAddress], async (err, result) => {
 
       if (err) {
         console.error(err);
@@ -780,7 +964,7 @@ router.post('/create-staff', async (req, res) => {
             hubCousreStatus = hubCourseInString
           }
 
-          db.query(hubInstructor, [first_name, last_name, email, hubCousreStatus, office, phone], async (err, result) => {
+          db.query(hubInstructor, [firstName, lastName, email, hubCousreStatus, office, phone], async (err, result) => {
             if (err) {
               console.error(err);
               return res.status(500).send('Internal Server Error');
@@ -810,7 +994,7 @@ router.post('/create-staff', async (req, res) => {
           } else {
             schoolStatus = schoolString
           }
-          db.query(SchoolInstructor, [first_name, last_name, email, schoolCousreStatus, office, phone, schoolStatus], async (err, result) => {
+          db.query(SchoolInstructor, [firstName, lastName, email, schoolCousreStatus, office, phone, schoolStatus], async (err, result) => {
             if (err) {
               console.error(err);
               return res.status(500).send('Internal Server Error');
@@ -826,7 +1010,7 @@ router.post('/create-staff', async (req, res) => {
           VALUES (?, ?, ?, ?, ?, ?)
         `;
 
-        db.query(LoginAuthorization, [email, hashedPass, user, title, first_name, last_name], async (err, result) => {
+        db.query(LoginAuthorization, [email, hashedPass, user, title, firstName, lastName], async (err, result) => {
           if (err) {
             console.error(err);
             return res.status(500).send('Internal Server Error');
@@ -1387,269 +1571,178 @@ router.get('/on-leave', async (req, res) => {
 
 
 
-// ============= SCHOOL
 
-// ............................. ADMIN REGISTER SCHOOL ................................
-router.post('/create-school', async (req, res) => {
-  const { schoolName, checkedCourses, monday, tuesday, wednesday, thursday, friday, saturday, email, phone, course, duration, courseFee, amountPaid, schoolAddress } = req.body;
 
+
+
+//.........................  EHIZUA STUDENTS
+// ==================================================================
+
+// .............Emma........... ADMIN REGISTER EHIZUA STUDENT ................................
+router.post('/create-student', async (req, res) => {
   const createTableQuery = `
-    CREATE TABLE IF NOT EXISTS PartnerSchools (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      schoolName VARCHAR(255) NOT NULL,
-      courses VARCHAR(255) NOT NULL,
-      monday VARCHAR(255) NOT NULL,
-      tuesday VARCHAR(255) NOT NULL,
-      wednesday VARCHAR(255) NOT NULL,
-      thursday VARCHAR(255) NOT NULL,
-      friday VARCHAR(255) NOT NULL,
-      saturday VARCHAR(255) NOT NULL,
-      phone VARCHAR(255) NOT NULL,
-      email VARCHAR(255) NOT NULL,
-      duration VARCHAR(255) NOT NULL,
-      courseFee VARCHAR(255) NOT NULL,
-      amountPaid VARCHAR(255) NOT NULL,
-      schoolAddress VARCHAR(255) NOT NULL
-    );
-  `;
-
-  sch.query(createTableQuery, (err) => {
-    if (err) {
-      console.error(err);
-      throw new Error('Error creating table');
-    }
-  });
-  // Check if the school with the same name already exists
-  sch.query(`SELECT * FROM PartnerSchools WHERE schoolName = ?`, [schoolName], async (err, result) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).send('Internal Server Error');
-    }
-
-    if (result.length !== 0) {
-      return res.status(400).json({ message: 'School with Name already exists' });
-    }
-
-    const total = courseFee - amountPaid;
-    const sql = `
-        INSERT INTO PartnerSchools (schoolName, courses, monday, tuesday, wednesday, thursday, friday, saturday, email, phone, duration, courseFee, amountPaid, schoolAddress)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `;
-
-
-    // Convert checkedCourses array to a string
-    const coursesString = checkedCourses.join(', ');
-
-    sch.query(sql, [schoolName, coursesString, monday, tuesday, wednesday, thursday, friday, saturday, email, phone, duration, courseFee, amountPaid, schoolAddress], async (err, result) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).send('Internal Server Error');
-      }
-
-      return res.json({
-        message: 'School created successfully'
-      });
-    });
-  });
-});
-
-// ............................. ADMIN GET LIST OF SCHOOLS ................................
-router.get('/partner-schools', async (req, res) => {
-
-  sch.query('SELECT * FROM PartnerSchools', async (err, result) => {
-    return res.json({ message: result });
-
-  })
-})
-
-// ............................. ADMIN GET PARTNER SCHOOLS REGISTERED COURSES................................
-router.get('/partner-schools-course', async (req, res) => {
-  const school = req.headers.school;
-
-  sch.query(`SELECT * FROM PartnerSchools WHERE schoolName = ?`, [school], async (err, result) => {
-    if (result.length > 0) {
-      const coursesArray = result[0].courses.split(',').map(course => course.trim());
-      return res.json({ courses: coursesArray });
-    } else {
-      return res.status(404).json({ message: 'School not found' });
-    }
-  });
-});
-
-// ............................. ADMIN REGISTER SCHOOL STUDENT ................................
-router.post('/register-school-student', async (req, res) => {
-  const { selectSchool, firstName, lastName, level, checkedCourses, year, term, guardiansPhone } = req.body;
-  const words = selectSchool.split(' ');
-
-  // Capitalize the first letter of each word and join them without spaces
-  const school = words.map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join('');
-
-  const createTableQuery = `
-    CREATE TABLE IF NOT EXISTS ${school} (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      school VARCHAR(255) NOT NULL,
+    CREATE TABLE IF NOT EXISTS Students (
+      _id INT AUTO_INCREMENT PRIMARY KEY,
       firstName VARCHAR(255) NOT NULL,
       lastName VARCHAR(255) NOT NULL,
-      level VARCHAR(255) NOT NULL,
-      courses VARCHAR(255) NOT NULL,
-      year VARCHAR(255) NOT NULL,
-      term VARCHAR(255) NOT NULL,
-      courseCode VARCHAR(255) NOT NULL DEFAULT '',
-      guardiansPhone VARCHAR(255) NOT NULL,
       email VARCHAR(255) NOT NULL,
-      password VARCHAR(255) NOT NULL,
-      emailToken VARCHAR(255) NOT NULL,
-      isVerified BOOLEAN NOT NULL DEFAULT false
-  
-      );
-  `;
+      id VARCHAR(255) NOT NULL,
+      phone VARCHAR(255) NOT NULL,
+      location VARCHAR(255) NOT NULL,
+      homeAddress VARCHAR(255) NOT NULL,
+      guardiansFullname VARCHAR(255) NOT NULL,
+      guardiansPhoneNumber VARCHAR(255) NOT NULL,
+      guardiansAddress VARCHAR(255) NOT NULL,
+      createdAt TIMESTAMP NOT NULL
+    );
+    `;
 
-  sch.query(createTableQuery, (err) => {
+  db.query(createTableQuery, (err) => {
     if (err) {
       console.error(err);
       throw new Error('Error creating table');
     }
   });
 
-  // Check if the student with the same email already exists
-  sch.query(`SELECT * FROM ${school} WHERE firstName = ? AND lastName = ? AND level = ?`, [firstName, lastName, level], async (err, result) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).send('Internal Server Error');
-    }
-
-    if (result.length !== 0) {
-      return res.status(400).json({ message: 'Student already exists' });
-    }
-
-
-    const countQuery = `SELECT COUNT(*) AS studentCount FROM ${school}`;
-
-    sch.query(countQuery, async (err, result) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).send('Internal Server Error');
-      }
-
-      // Extract the student count from the result
-      const studentCount = result[0].studentCount + 1;
-
-
-
-      const domain = `ehizuahub.com`
-      const email = `${firstName.toLowerCase()}${lastName.toLowerCase()}${studentCount}@${domain}`
-
-      // Generate a unique ID based on email and name
-      const salt = await bcrypt.genSalt(10);
-      const password = `${email.substring(0, 2)}${shortid.generate()}${firstName.substring(0, 2)}`;
-      const hashedPass = await bcrypt.hash(password, salt);
-
-      let emailToken = crypto.randomBytes(64).toString("hex");
-
-
-      const sql = `
-        INSERT INTO ${school} (school, firstName, lastName, level, courses, year, term, guardiansPhone, email, password, emailToken)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `;
-
-      const coursesString = checkedCourses.join(', ');
-
-      sch.query(sql, [school, firstName, lastName, level, coursesString, year, term, guardiansPhone, email, password, emailToken], async (err, result) => {
-        if (err) {
-          console.error(err);
-          return res.status(500).send('Internal Server Error');
-        }
-
-
-        return res.json({ message: 'Student created successfully' });
-      });
-    })
-
-
-
-  });
-});
-
-// ............................. ADMIN GET LIST OF SCHOOL STUDENT ................................
-router.get('/partner-school-students', async (req, res) => {
-
-  const schoolName = req.headers.schoolname
-
-  const school = schoolName.replace(/\s/g, '')
-
-
-  sch.query(`SELECT * FROM ${school}`, async (err, result) => {
-    // console.log(result)
-    return res.json({ message: result });
-
-  })
-})
-
-// ............................ADMIN CREATE A NEW SCHOOL COURSE ............................
-router.post('/create-subject', async (req, res) => {
-  const { course } = req.body;
-
-  const createTableQuery = `
-    CREATE TABLE IF NOT EXISTS Courses (
+  const createLoginAuthorizationTable = `
+    CREATE TABLE IF NOT EXISTS LoginAuthorization (
       _id INT AUTO_INCREMENT PRIMARY KEY,
-      course VARCHAR(255) NOT NULL,
-      courseCode VARCHAR(255) NOT NULL
-      
+      email VARCHAR(50) NOT NULL,
+      password VARCHAR(200) NOT NULL,
+      user VARCHAR(255) NOT NULL,
+      title VARCHAR(255) NOT NULL DEFAULT '',
+      firstName VARCHAR(255) NOT NULL,
+      lastName VARCHAR(255) NOT NULL
+    
     );
   `;
 
-  sch.query(createTableQuery, (err) => {
+
+  db.query(createLoginAuthorizationTable, (err) => {
     if (err) {
       console.error(err);
       throw new Error('Error creating table');
     }
   });
 
-  // Check if the Course with the same name already exists
+  const createStudentEnrolledCourses = `
+    CREATE TABLE IF NOT EXISTS StudentEnrolledCourses (
+      _id INT AUTO_INCREMENT PRIMARY KEY,
+      email VARCHAR(50) NOT NULL,
+      course VARCHAR(200) NOT NULL,
+      location VARCHAR(200) NOT NULL,
+      firstName VARCHAR(200) NOT NULL,
+      lastName VARCHAR(200) NOT NULL
+    );
+  `;
 
-  sch.query('SELECT * FROM Courses WHERE course = ?', [course], async (err, result) => {
+
+  db.query(createStudentEnrolledCourses, (err) => {
+    if (err) {
+      console.error(err);
+      throw new Error('Error creating table');
+    }
+  });
+
+
+  const {firstName, lastName, email, courseArray, phone, location, address, guardiansFullname, guardiansPhone, guardiansAddress } = req.body;
+  //  const course  = courseArray.join(', ')
+
+  // Check if the student with the same email already exists
+  db.query('SELECT * FROM Students WHERE email = ?', [email], async (err, result) => {
     if (err) {
       console.error(err);
       return res.status(500).send('Internal Server Error');
     }
 
     if (result.length !== 0) {
-      return res.status(400).json({ message: 'Course with name already exists' });
+      return res.status(400).json({ message: 'Student with email already exists' });
     }
 
-    const resultArray = [];
 
-    for (let i = 1; i <= 10; i++) {
-      const paddedNumber = i.toString().padStart(3, '0');
-      const result = course.slice(0, 3) + paddedNumber;
-      resultArray.push(result);
-    }
+    const salt = await bcrypt.genSalt(10);
 
-    const resultString = resultArray.join(', ');
+    const password = `${email.substring(0, 2)}${shortid.generate()}${firstName.substring(0, 2)}`;
+    const id = `${email.substring(2, 4)}-${firstName.substring(0, 2)}-${password.substring(2, 3)}${password.substring(5, 6)}${password.substring(0, 1)}`;
+    
+    const hashedPass = await bcrypt.hash(password, salt);
+    const hashedId = await bcrypt.hash(id, salt);
 
-
-
+    // Generate a unique ID based on email and name
 
     const sql = `
-          INSERT INTO Courses (course, courseCode)
-          VALUES (?, ?)
-        `;
+        INSERT INTO Students (firstName, lastName, email, phone, location, homeAddress,  guardiansPhoneNumber, guardiansFullname,  guardiansAddress, id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
 
-
-    sch.query(sql, [course, resultString], async (err, result) => {
+    db.query(sql, [firstName, lastName, email, phone, location, address, guardiansPhone, guardiansFullname, guardiansAddress, hashedId], async (err, result) => {
       if (err) {
         console.error(err);
         return res.status(500).send('Internal Server Error');
       }
 
-      return res.json({ message: `${course} created successfully` });
+      const LoginAuthorization = `
+      INSERT INTO LoginAuthorization (email, password, user, firstName, lastName)
+      VALUES (?, ?, ?, ?, ?)
+    `;
+    
+    db.query(LoginAuthorization, [email, hashedPass, "Student", firstName, lastName], async (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send('Internal Server Error');
+      }
+      // Handle success if needed
+    });
+    
+
+      for (let i = 0; i < courseArray.length; i++) {
+        const course = courseArray[i];
+        db.query('INSERT INTO StudentEnrolledCourses (email, course, location, firstName, lastName) VALUES (?, ?, ?, ?, ?)', [email, course, location, firstName, lastName], async (err, result) => {
+          if (err) {
+            console.error(err);
+            return res.status(500).send('Internal Server Error');
+          }
+          // Handle success if needed
+        });
+      }
+      
+
+
+      // // Create and send an email in an async function
+      // async function sendEmail() {
+      //   const transporter = nodemailer.createTransport({
+      //     host: 'mail.softwaredevemma.ng',
+      //     port: 465,
+      //     secure: true,
+      //     auth: {
+      //       user: 'main@softwaredevemma.ng',
+      //       pass: 'bYFx.1zDu968O.'
+      //     }
+      //   });
+
+      //   const info = await transporter.sendMail({
+      //     from: 'Ehizua Hub <main@softwaredevemma.ng>',
+      //     to: email,
+      //     subject: 'Login Details',
+      //     html: `<p>Hello ${firstName} ${lastName}, verify your email by clicking on this link.. </p>
+      //     <a href='${process.env.CLIENT_URL}/verify-student-email?emailToken=${emailToken}&email=${email}'> Verify Your Email </a>
+      //     <h2>Your Subsequent Student Log in details are : </h2>
+      //     <p> Email: ${email} </p>
+      //     <p> Password: ${id} </p>`,
+      //   });
+
+      //   console.log("message sent: " + info.messageId);
+      // }
+
+      // // Call the async function to send the email
+      // await sendEmail();
+      console.log(password)
+      console.log(id)
+
+      return res.json({ message: 'Student created successfully', user: result});
     });
   });
-
 });
-
-
-//============ ADMIN EHIZUA STUDENTS
 
 // ............................ADMIN CREATE A NEW UPSKILL COURSE ............................
 router.post('/create-course', async (req, res) => {
@@ -1836,13 +1929,11 @@ router.put('/create-discount-course/:idParam', async (req, res) => {
 
 });
 
-
-// ............................. ADMIN GET UPSKILL COURSES ................................
+// ..............emma............... ADMIN GET UPSKILL COURSES ................................
 router.get('/upskill_courses', async (req, res) => {
-  const location = req.headers.location
 
   try {
-    db.query('SELECT * FROM Courses WHERE location = ?', [location], async (err, result) => {
+    db.query('SELECT * FROM Courses', async (err, result) => {
 
       return res.json({ message: result });
 
@@ -2026,108 +2117,7 @@ router.get('/upskill-course-curriculum', async (req, res) => {
 
 });
 
-// .............Done........... ADMIN REGISTER EHIZUA STUDENT ................................
-router.post('create-student', async (req, res) => {
-  const createTableQuery = `
-    CREATE TABLE IF NOT EXISTS Students (
-      _id INT AUTO_INCREMENT PRIMARY KEY,
-      firstName VARCHAR(255) NOT NULL,
-      lastName VARCHAR(255) NOT NULL,
-      email VARCHAR(255) NOT NULL,
-      id VARCHAR(255) NOT NULL,
-      course VARCHAR(255) NOT NULL,
-      phone VARCHAR(255) NOT NULL,
-      location VARCHAR(255) NOT NULL,
-      profilePicture VARCHAR(255) NOT NULL DEFAULT 0,
-      guardiansPhone VARCHAR(255) NOT NULL,
-      duration VARCHAR(255) NOT NULL,
-      courseFee VARCHAR(255) NOT NULL,
-      amountPaid VARCHAR(255) NOT NULL,
-      balance VARCHAR(255) NOT NULL,
-      certificateApproved BOOLEAN NOT NULL DEFAULT 0,
-      homeAddress VARCHAR(255) NOT NULL,
-      isVerified BOOLEAN NOT NULL DEFAULT 0,
-      emailToken VARCHAR(255) NOT NULL,
-      createdAt TIMESTAMP NOT NULL
-    );
-    `;
 
-  db.query(createTableQuery, (err) => {
-    if (err) {
-      console.error(err);
-      throw new Error('Error creating table');
-    }
-  });
-
-  const { selectedValue, firstName, lastName, email, course, phone, location, guardiansPhone, duration, courseFee, amountPaid, homeAddress } = req.body;
-
-
-  // Check if the student with the same email already exists
-  db.query('SELECT * FROM Students WHERE email = ?', [email], async (err, result) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).send('Internal Server Error');
-    }
-
-    if (result.length !== 0) {
-      return res.status(400).json({ message: 'Student with email already exists' });
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    const id = `${email.substring(0, 2)}${shortid.generate()}${firstName.substring(0, 2)}`;
-    const hashedPass = await bcrypt.hash(id, salt);
-
-    // Generate a unique ID based on email and name
-    const total = courseFee - amountPaid;
-    let balance = total;
-    let emailToken = crypto.randomBytes(64).toString("hex");
-
-    const sql = `
-        INSERT INTO Students (firstName, lastName, email, course, phone, location, guardiansPhone, duration, courseFee, amountPaid, balance, homeAddress, id, emailToken, isVerified)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `;
-
-    db.query(sql, [firstName, lastName, email, course, phone, location, guardiansPhone, duration, courseFee, amountPaid, balance, homeAddress, hashedPass, emailToken, selectedValue], async (err, result) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).send('Internal Server Error');
-      }
-
-
-      // // Create and send an email in an async function
-      // async function sendEmail() {
-      //   const transporter = nodemailer.createTransport({
-      //     host: 'mail.softwaredevemma.ng',
-      //     port: 465,
-      //     secure: true,
-      //     auth: {
-      //       user: 'main@softwaredevemma.ng',
-      //       pass: 'bYFx.1zDu968O.'
-      //     }
-      //   });
-
-      //   const info = await transporter.sendMail({
-      //     from: 'Ehizua Hub <main@softwaredevemma.ng>',
-      //     to: email,
-      //     subject: 'Login Details',
-      //     html: `<p>Hello ${firstName} ${lastName}, verify your email by clicking on this link.. </p>
-      //     <a href='${process.env.CLIENT_URL}/verify-student-email?emailToken=${emailToken}&email=${email}'> Verify Your Email </a>
-      //     <h2>Your Subsequent Student Log in details are : </h2>
-      //     <p> Email: ${email} </p>
-      //     <p> Password: ${id} </p>`,
-      //   });
-
-      //   console.log("message sent: " + info.messageId);
-      // }
-
-      // // Call the async function to send the email
-      // await sendEmail();
-      console.log(id)
-
-      return res.json({ message: 'Student created successfully', user: { id, firstName, lastName, email, course, phone, guardiansPhone, duration, courseFee, amountPaid, balance, homeAddress, emailToken } });
-    });
-  });
-});
 
 // ............................. ADMIN EDIT EHIZUA STUDENT ................................
 router.put('/update-student/:id', async (req, res) => {
@@ -2266,14 +2256,16 @@ router.put('/reject-leave-request/:id', async (req, res) => {
 });
 
 
-// ..............done............... ADMIN APPROVE LEAVE REQUEST ................................
+// ..............Emma............... ADMIN APPROVE LEAVE REQUEST ................................
 router.put('/approve-leave-request/:id', async (req, res) => {
   const id = req.params.id;
 
   db.query('SELECT * FROM LeaveApplication WHERE _id = ?', [id], async (err, leave) => {
     const numberOfDays = parseInt(leave[0].numberOfDays)
     const email = leave[0].email
+    console.log(email)
     db.query('SELECT * FROM Staff WHERE email = ?', [email], async (err, staff) => {
+      console.log(staff)
       const leaveAllocated = parseInt(staff[0].sickLeave)
       const leaveTaken = staff[0].sickLeaveTaken
       const totalDays = parseInt(leaveTaken) + parseInt(numberOfDays)
@@ -2297,12 +2289,11 @@ router.put('/approve-leave-request/:id', async (req, res) => {
           if (err) {
             return res.status(500).send('Internal Server Error');
           }
-
+ 
           // Check if the student was found and updated
           if (result.affectedRows === 0) {
             return res.status(404).json({ message: 'Tutor not found' });
           }
-
 
 
           const sql = `
@@ -2338,7 +2329,7 @@ router.put('/approve-leave-request/:id', async (req, res) => {
 
 });
 
-// ...............done............... ADMIN GET ALL LEAVE REQUEST ..........................................
+// ...............Emma............... ADMIN GET ALL LEAVE REQUEST ..........................................
 router.get('/staff-leave-request', (req, res) => {
 
 
@@ -2349,16 +2340,16 @@ router.get('/staff-leave-request', (req, res) => {
       email VARCHAR(255) NOT NULL,
       location VARCHAR(255) NOT NULL,
       position VARCHAR(255) NOT NULL,
-      numberOfDays VARCHAR(255) NOT NULL,
+      leaveType VARCHAR(255) NOT NULL,
       leaveStartDate VARCHAR(255) NOT NULL,
       leaveEndDate VARCHAR(255) NOT NULL,
-      purposeOfLeave VARCHAR(255) NOT NULL,
-      allocatedLeave VARCHAR(255) NOT NULL,
+      purposeOfLeave TEXT NOT NULL,
+      requestedLeave VARCHAR(255) NOT NULL,
       daysRemaining VARCHAR(255) NOT NULL,
+      adminComment TEXT NOT NULL DEFAULT '',
       isApproved BOOLEAN DEFAULT 0
     );
   `;
-
   db.query(createTableQuery, (err) => {
     if (err) {
       console.error(err);
@@ -2460,7 +2451,277 @@ router.get('/hub_instructor', (req, res) => {
   }
 });
 
-// ============== SCHOOL INSTRUCTORS
+
+
+// ................................... SCHOOL STUDENTS SECTION ......................
+//===============================================================================================
+
+// ................emma............. ADMIN REGISTER SCHOOL ................................
+router.post('/create-school', async (req, res) => {
+  const { schoolName, checkedCourses, monday, tuesday, wednesday, thursday, friday, saturday, email, phone, duration, courseFee, schoolAddress } = req.body;
+
+  
+  const createTableQuery = `
+    CREATE TABLE IF NOT EXISTS PartnerSchools (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      schoolName VARCHAR(255) NOT NULL,
+      courses VARCHAR(255) NOT NULL,
+      monday VARCHAR(255) NOT NULL,
+      tuesday VARCHAR(255) NOT NULL,
+      wednesday VARCHAR(255) NOT NULL,
+      thursday VARCHAR(255) NOT NULL,
+      friday VARCHAR(255) NOT NULL,
+      saturday VARCHAR(255) NOT NULL,
+      phone VARCHAR(255) NOT NULL,
+      email VARCHAR(255) NOT NULL,
+      duration VARCHAR(255) NOT NULL,
+      courseFee VARCHAR(255) NOT NULL,
+      schoolAddress VARCHAR(255) NOT NULL
+    );
+  `;
+
+  db.query(createTableQuery, (err) => {
+    if (err) {
+      console.error(err);
+      throw new Error('Error creating table');
+    }
+  });
+  // Check if the school with the same name already exists
+  db.query(`SELECT * FROM PartnerSchools WHERE schoolName = ?`, [schoolName], async (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    if (result.length !== 0) {
+      return res.status(400).json({ message: 'School with Name already exists' });
+    }
+
+    const sql = `
+        INSERT INTO PartnerSchools (schoolName, courses, monday, tuesday, wednesday, thursday, friday, saturday, email, phone, duration, courseFee, schoolAddress)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+
+
+    // Convert checkedCourses array to a string
+    const coursesString = checkedCourses.join(', ');
+
+    db.query(sql, [schoolName, coursesString, monday, tuesday, wednesday, thursday, friday, saturday, email, phone, duration, courseFee, schoolAddress], async (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send('Internal Server Error');
+      }
+
+      return res.json({
+        message: 'School created successfully'
+      });
+    });
+  });
+});
+
+// ............................. ADMIN GET LIST OF SCHOOLS ................................
+router.get('/partner-schools', async (req, res) => {
+
+  db.query('SELECT * FROM PartnerSchools', async (err, result) => {
+    return res.json({ message: result });
+
+  })
+})
+
+// .............emma........... ADMIN GET LIST OF SCHOOL COURSE ................................
+router.get('/all_school_subject', async (req, res) => {
+
+  db.query('SELECT * FROM SchoolCourses', async (err, result) => {
+
+    return res.json({ message: result });
+
+  })
+})
+
+// .............emma......... ADMIN GET PARTNER SCHOOLS REGISTERED COURSES................................
+router.get('/partner-schools-course', async (req, res) => {
+  const school = req.headers.school;
+
+  db.query(`SELECT * FROM PartnerSchools WHERE schoolName = ?`, [school], async (err, result) => {
+    if (result.length > 0) {
+      const coursesArray = result[0].courses.split(',').map(course => course.trim());
+      return res.json({ courses: coursesArray });
+    } else {
+      return res.status(404).json({ message: 'School not found' });
+    }
+  });
+});
+
+// ................emma.............  REGISTER SCHOOL STUDENT / PUPIL ................................
+router.post('/register-school-student', async (req, res) => {
+  const { selectSchool, firstName, lastName, level, checkedCourses, year, term, guardiansPhone } = req.body;
+  const words = selectSchool.split(' ');
+
+  // Capitalize the first letter of each word and join them without spaces
+  const school = words.map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join('');
+
+  const createTableQuery = `
+    CREATE TABLE IF NOT EXISTS ${school} (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      school VARCHAR(255) NOT NULL,
+      firstName VARCHAR(255) NOT NULL,
+      lastName VARCHAR(255) NOT NULL,
+      level VARCHAR(255) NOT NULL,
+      courses VARCHAR(255) NOT NULL,
+      year VARCHAR(255) NOT NULL,
+      term VARCHAR(255) NOT NULL,
+      courseCode VARCHAR(255) NOT NULL DEFAULT '',
+      guardiansPhone VARCHAR(255) NOT NULL,
+      email VARCHAR(255) NOT NULL,
+      password VARCHAR(255) NOT NULL,
+      emailToken VARCHAR(255) NOT NULL,
+      isVerified BOOLEAN NOT NULL DEFAULT true
+
+      );
+  `;
+
+  db.query(createTableQuery, (err) => {
+    if (err) {
+      console.error(err);
+      throw new Error('Error creating table');
+    }
+  });
+
+  // Check if the student with the same email already exists
+  db.query(`SELECT * FROM ${school} WHERE firstName = ? AND lastName = ? AND level = ? AND year = ? AND term = ?`, [firstName, lastName, level, year, term], async (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    if (result.length !== 0) {
+      return res.status(400).json({ message: 'Student already exists' });
+    }
+
+
+    const countQuery = `SELECT COUNT(*) AS studentCount FROM ${school}`;
+
+    db.query(countQuery, async (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send('Internal Server Error');
+      }
+
+      // Extract the student count from the result
+      const studentCount = result[0].studentCount + 1;
+
+
+
+      const domain = `ehizuahub.com`
+      const email = `${firstName.toLowerCase()}${lastName.toLowerCase()}${studentCount}@${domain}`
+
+      // Generate a unique ID based on email and name
+      const salt = await bcrypt.genSalt(10);
+      const password = `${email.substring(0, 2)}${shortid.generate()}${firstName.substring(0, 2)}`;
+      const hashedPass = await bcrypt.hash(password, salt);
+
+      let emailToken = crypto.randomBytes(64).toString("hex");
+
+
+      const sql = `
+        INSERT INTO ${school} (school, firstName, lastName, level, courses, year, term, guardiansPhone, email, password, emailToken)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+
+      const coursesString = checkedCourses.join(', ');
+
+      db.query(sql, [school, firstName, lastName, level, coursesString, year, term, guardiansPhone, email, password, emailToken], async (err, result) => {
+        if (err) {
+          console.error(err);
+          return res.status(500).send('Internal Server Error');
+        }
+
+
+        return res.json({ message: 'Student created successfully' });
+      });
+    })
+
+
+
+  });
+});
+
+// ............................. ADMIN GET LIST OF SCHOOL STUDENT ................................
+router.get('/partner-school-students', async (req, res) => {
+
+  const schoolName = req.headers.schoolname
+
+  const school = schoolName.replace(/\s/g, '')
+
+
+  db.query(`SELECT * FROM ${school}`, async (err, result) => {
+    // console.log(result)
+    return res.json({ message: result });
+
+  })
+})
+
+// ..............emma...........ADMIN CREATE A NEW SCHOOL COURSE ............................
+router.post('/create-subject', async (req, res) => {
+  const { course } = req.body;
+
+  const createTableQuery = `
+    CREATE TABLE IF NOT EXISTS SchoolCourses (
+      _id INT AUTO_INCREMENT PRIMARY KEY,
+      course VARCHAR(255) NOT NULL,
+      courseCode VARCHAR(255) NOT NULL
+      
+    );
+  `;
+
+  db.query(createTableQuery, (err) => {
+    if (err) {
+      console.error(err);
+      throw new Error('Error creating table');
+    }
+  });
+
+  // Check if the Course with the same name already exists
+
+  db.query('SELECT * FROM Courses WHERE course = ?', [course], async (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    if (result.length !== 0) {
+      return res.status(400).json({ message: 'Course with name already exists' });
+    }
+
+    const resultArray = [];
+
+    for (let i = 1; i <= 10; i++) {
+      const paddedNumber = i.toString().padStart(3, '0');
+      const result = course.slice(0, 3) + paddedNumber;
+      resultArray.push(result);
+    }
+
+    const resultString = resultArray.join(', ');
+
+    const sql = `
+          INSERT INTO SchoolCourses (course, courseCode)
+          VALUES (?, ?)
+        `;
+
+
+    db.query(sql, [course, resultString], async (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send('Internal Server Error');
+      }
+
+      return res.json({ message: `${course} created successfully` });
+    });
+  });
+
+});
+
+
 // .............................. ADMIN GET ALL SCHOOL INSTRUCTOR BY LOCATION ..........................................
 router.get('/school_instructor/location', (req, res) => {
 
@@ -2583,14 +2844,5 @@ router.put('/update-school-instructor/:id', async (req, res) => {
   );
 });
 
-// ............................. ADMIN GET LIST OF SCHOOL COURSE ................................
-router.get('/all_school_subject', async (req, res) => {
-
-  sch.query('SELECT * FROM Courses', async (err, result) => {
-
-    return res.json({ message: result });
-
-  })
-})
 
 module.exports = router;

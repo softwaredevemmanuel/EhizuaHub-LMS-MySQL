@@ -16,20 +16,5 @@ db.connect((err) => {
   console.log('Ehizua MySql Connected.....');
 });
 
-// .............. School MySQL Database Connection ............
-const sch = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'Schools'
-});
 
-sch.connect((err) => {
-  if (err) {
-    throw err;
-  }
-  console.log('School MySql Connected.....');
-});
-
-
-module.exports = { db, sch};
+module.exports = { db };

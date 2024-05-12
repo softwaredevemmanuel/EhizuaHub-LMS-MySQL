@@ -113,7 +113,8 @@ function CreateHubCourseCurriculum() {
                                 type='text'
                                 id='mainTopic'
                                 value={mainTopic}
-                                onChange={(event) => setMainTopic(event.target.value)}/>
+                                onChange={(event) => setMainTopic(event.target.value)}
+                                />
 
                             <br /><br />
 
